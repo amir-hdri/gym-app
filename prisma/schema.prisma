@@ -1,0 +1,471 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Enums replaced with String fields for SQLite support
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  phone        String   @unique
+  email        String?  @unique
+  passwordHash String?
+  role         String   @default("MEMBER")
+  avatarUrl    String?
+  isActive     Boolean  @default(true)
+  branchId     String?
+  branch       Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  memberProfile  MemberProfile?
+  staffProfile   StaffProfile?
+  notifications  Notification[]
+
+  paymentsRecorded          Payment[]           @relation("PaymentRecordedBy")
+  attendanceVerified        Attendance[]        @relation("AttendanceVerifiedBy")
+  trainerAssignmentsCreated TrainerAssignment[] @relation("TrainerAssignmentCreatedBy")
+  progressCreated           ProgressEntry[]     @relation("ProgressCreatedBy")
+  freezeRequestsReviewed    FreezeRequest[]     @relation("FreezeRequestReviewedBy")
+  auditLogs                 AuditLog[]          @relation("AuditLogActor")
+
+  accounts Account[]
+  sessions Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+  @@index([branchId])
+}
+
+model Branch {
+  id       String  @id @default(cuid())
+  name     String
+  phone    String?
+  email    String?
+  address  String?
+  city     String?
+  isActive Boolean @default(true)
+
+  users         User[]
+  staff         StaffProfile[]
+  plans         Plan[]
+  classes       ClassSession[]
+  subscriptions Subscription[]
+  attendance    Attendance[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MemberProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  membershipCode String    @unique
+  dateOfBirth    DateTime?
+  gender         String    @default("UNSPECIFIED")
+  emergencyName  String?
+  emergencyPhone String?
+  medicalNotes   String?
+  notes          String?
+  photoUrl       String?
+
+  subscriptions      Subscription[]
+  attendance         Attendance[]
+  freezeRequests     FreezeRequest[]
+  bookings           ClassBooking[]
+  progressEntries    ProgressEntry[]
+  trainerAssignments TrainerAssignment[]
+  workoutRoutines    WorkoutRoutine[]
+  workoutLogs        WorkoutLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StaffProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  employeeCode String      @unique
+  title        String?
+  status       String      @default("ACTIVE")
+  accessType   String      @default("MANUAL")
+  hiredAt      DateTime?
+  branchId     String?
+  branch       Branch?     @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  trainerAssignments TrainerAssignment[] @relation("TrainerAssignmentTrainer")
+  classes            ClassSession[]      @relation("ClassTrainer")
+  progressEntries    ProgressEntry[]     @relation("ProgressByTrainer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([branchId])
+}
+
+model Plan {
+  id       String  @id @default(cuid())
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  name              String
+  description       String?
+  price             Decimal
+  currency          String   @default("USD")
+  durationDays      Int
+  freezeDaysAllowed Int      @default(0)
+  maxVisitsPerWeek  Int?
+  highlights        String   @default("")
+  isActive          Boolean  @default(true)
+
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([branchId, isActive])
+}
+
+model Subscription {
+  id       String        @id @default(cuid())
+  memberId String
+  member   MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  status        String             @default("PENDING")
+  autoRenew     Boolean            @default(false)
+  startedAt     DateTime?
+  endsAt        DateTime?
+  nextBillingAt DateTime?
+  pausedUntil   DateTime?
+  canceledAt    DateTime?
+  pauseReason   String?
+  notes         String?
+
+  payments       Payment[]
+  freezeRequests FreezeRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([memberId, status])
+  @@index([planId])
+  @@index([endsAt])
+}
+
+model Payment {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  amount         Decimal
+  currency       String        @default("USD")
+  method         String        @default("CASH")
+  status         String        @default("PENDING")
+  provider       String?
+  transactionRef String?
+  receiptUrl     String?
+  dueAt          DateTime?
+  paidAt         DateTime?
+  note           String?
+
+  recordedByUserId String?
+  recordedBy       User?   @relation("PaymentRecordedBy", fields: [recordedByUserId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([subscriptionId, status])
+  @@index([transactionRef])
+}
+
+model Attendance {
+  id       String        @id @default(cuid())
+  memberId String
+  member   MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  checkInAt DateTime         @default(now())
+  method    String           @default("MANUAL")
+  note      String?
+
+  verifiedByUserId String?
+  verifiedBy       User?   @relation("AttendanceVerifiedBy", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([memberId, checkInAt])
+  @@index([branchId, checkInAt])
+}
+
+model FreezeRequest {
+  id       String        @id @default(cuid())
+  memberId String
+  member   MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  requestedFrom DateTime
+  requestedTo   DateTime
+  reason        String?
+  status        String              @default("PENDING")
+
+  reviewedByUserId String?
+  reviewedBy       User?     @relation("FreezeRequestReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  reviewedAt       DateTime?
+  managerNote      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([memberId, status])
+  @@index([subscriptionId, status])
+}
+
+model TrainerAssignment {
+  id       String        @id @default(cuid())
+  memberId String
+  member   MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  trainerId String
+  trainer   StaffProfile @relation("TrainerAssignmentTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
+
+  assignedByUserId String?
+  assignedBy       User?   @relation("TrainerAssignmentCreatedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  active    Boolean   @default(true)
+  note      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([memberId, active])
+  @@index([trainerId, active])
+}
+
+model ClassSession {
+  id       String  @id @default(cuid())
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  trainerId String?
+  trainer   StaffProfile? @relation("ClassTrainer", fields: [trainerId], references: [id], onDelete: SetNull)
+
+  title       String
+  description String?
+  trainerName String?
+  category    String?
+  visibility  String          @default("MEMBERS_ONLY")
+
+  startAt  DateTime
+  endAt    DateTime
+  capacity Int?
+  location String?
+  status   String   @default("scheduled")
+
+  bookings ClassBooking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([branchId, startAt])
+  @@index([trainerId, startAt])
+}
+
+model ClassBooking {
+  id             String       @id @default(cuid())
+  classSessionId String
+  classSession   ClassSession @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+
+  memberId String
+  member   MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  status      String        @default("BOOKED")
+  bookedAt    DateTime      @default(now())
+  checkedInAt DateTime?
+  canceledAt  DateTime?
+  note        String?
+
+  @@unique([classSessionId, memberId])
+  @@index([memberId, status])
+  @@index([classSessionId, status])
+}
+
+model ProgressEntry {
+  id       String        @id @default(cuid())
+  memberId String
+  member   MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  trainerId String?
+  trainer   StaffProfile? @relation("ProgressByTrainer", fields: [trainerId], references: [id], onDelete: SetNull)
+
+  createdByUserId String?
+  createdBy       User?   @relation("ProgressCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  metricType  String             @default("WEIGHT")
+  value       Decimal
+  unit        String?
+  notes       String?
+  measuredAt  DateTime           @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([memberId, measuredAt])
+  @@index([trainerId, measuredAt])
+}
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channel String              @default("IN_APP")
+  type    String
+  title   String
+  body    String
+  data    String?
+  readAt  DateTime?
+  sentAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, readAt])
+  @@index([channel, type])
+}
+
+model Coupon {
+  id             String     @id @default(cuid())
+  code           String     @unique
+  type           String     @default("PERCENTAGE")
+  value          Decimal
+  currency       String     @default("USD")
+  startsAt       DateTime?
+  endsAt         DateTime?
+  maxRedemptions Int?
+  redemptions    Int        @default(0)
+  active         Boolean    @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id          String  @id @default(cuid())
+  actorUserId String?
+  actor       User?   @relation("AuditLogActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  action     String
+  entityType String
+  entityId   String
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorUserId, createdAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model WorkoutRoutine {
+  id        String        @id @default(cuid())
+  memberId  String
+  member    MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  title     String
+  isActive  Boolean       @default(true)
+  tasks     WorkoutTask[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([memberId])
+}
+
+model WorkoutTask {
+  id          String         @id @default(cuid())
+  routineId   String
+  routine     WorkoutRoutine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  exerciseName String
+  sets        Int            @default(3)
+  reps        String         @default("12")
+  notes       String?
+  logs        WorkoutLog[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([routineId])
+}
+
+model WorkoutLog {
+  id         String      @id @default(cuid())
+  memberId   String
+  member     MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  taskId     String
+  task       WorkoutTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  dateStr    String      // YYYY-MM-DD
+  completed  Boolean     @default(true)
+  setsData   String?     // Serialized JSON for sets data (weight/reps)
+  createdAt  DateTime    @default(now())
+
+  @@unique([taskId, dateStr])
+  @@index([memberId, dateStr])
+}
+

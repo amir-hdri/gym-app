@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { addProgressEntry } from "@/server/actions/progress";
 
@@ -54,6 +55,7 @@ const metricColors: Record<string, string> = {
 };
 
 export default function ProgressClient({ initialEntries, initialWorkoutProgress, initialWorkoutSetsProgress }: ProgressClientProps) {
+  const router = useRouter();
   const [entries, setEntries] = useState<ProgressItem[]>(initialEntries);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [metricType, setMetricType] = useState("WEIGHT");
@@ -73,7 +75,7 @@ export default function ProgressClient({ initialEntries, initialWorkoutProgress,
         setValue("");
         setNotes("");
         // Reload page to reflect updated data
-        window.location.reload();
+        router.refresh();
       } catch (err: any) {
         alert(err.message || "خطا در ثبت شاخص");
       }

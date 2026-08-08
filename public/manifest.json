@@ -1,13 +1,13 @@
 {
-  "name": "GymApp",
+  "name": "جیم‌اپ — مدیریت حرفه‌ای باشگاه",
   "short_name": "GymApp",
-  "description": "Professional gym subscription and member management",
+  "description": "مدیریت اشتراک‌ها، اعضا، پرداخت‌ها و حضور و غیاب باشگاه ورزشی با تومان",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#10b981",
+  "background_color": "#120307",
+  "theme_color": "#c9184a",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

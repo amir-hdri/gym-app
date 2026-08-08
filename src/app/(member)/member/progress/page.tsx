@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { auth } from "@/lib/auth";
 import { getProgressEntries } from "@/server/actions/progress";
 import { getWorkoutProgress, getWorkoutSetsProgress } from "@/server/actions/workouts";

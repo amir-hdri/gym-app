@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { checkInByCode } from "@/server/actions/attendance";
 
 interface AttendanceClientProps {
@@ -9,6 +10,7 @@ interface AttendanceClientProps {
 }
 
 export default function AttendanceClient({ initialLogs, managerUserId }: AttendanceClientProps) {
+  const router = useRouter();
   const [logs, setLogs] = useState(initialLogs);
   const [code, setCode] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -41,8 +43,8 @@ export default function AttendanceClient({ initialLogs, managerUserId }: Attenda
           setCode("");
           setTimeout(() => {
             setSuccessMsg("");
-            window.location.reload();
-          }, 2000);
+            router.refresh();
+          }, 1500);
         } else {
           setErrorMsg(result.error || "خطا در ثبت حضور");
         }

@@ -10,7 +10,14 @@ export async function createNotification(
   data?: Record<string, unknown>
 ) {
   return prisma.notification.create({
-    data: { userId, type, title, body, data: data as any, sentAt: new Date() },
+    data: { 
+      userId, 
+      type, 
+      title, 
+      body, 
+      data: data ? JSON.stringify(data) : null, 
+      sentAt: new Date() 
+    },
   });
 }
 
@@ -18,6 +25,14 @@ export async function markAllRead(userId: string) {
   return prisma.notification.updateMany({
     where: { userId, readAt: null },
     data: { readAt: new Date() },
+  });
+}
+
+export async function listNotifications(userId: string, limit = 50) {
+  return prisma.notification.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: limit,
   });
 }
 
@@ -30,8 +45,8 @@ export async function sendExpiryReminders() {
       createNotification(
         sub.member.user.id,
         "subscription_expiry",
-        "Subscription expiring soon",
-        `Your ${sub.plan.name} plan expires on ${sub.endsAt?.toLocaleDateString()}. Renew now to keep access.`,
+        "انقضای اشتراک نزدیک است",
+        `طرح ${sub.plan.name} شما در تاریخ ${sub.endsAt?.toLocaleDateString("fa-IR")} منقضی می‌شود. لطفاً نسبت به تمدید اقدام کنید.`,
         { subscriptionId: sub.id }
       )
     )

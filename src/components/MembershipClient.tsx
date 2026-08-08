@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useTransition } from "react";
 import QRCode from "qrcode";
 import { checkoutOnline, checkoutTransfer } from "@/server/actions/checkout";
@@ -11,6 +12,7 @@ interface MembershipClientProps {
 }
 
 export default function MembershipClient({ member, plans }: MembershipClientProps) {
+  const router = useRouter();
   const profile = member?.memberProfile;
   const activeSub = profile?.subscriptions?.find((s: any) => s.status === "ACTIVE");
   const planName = activeSub?.plan?.name || "بدون طرح فعال";
@@ -105,7 +107,7 @@ export default function MembershipClient({ member, plans }: MembershipClientProp
           setSenderInfo("");
           setRefCode("");
           setSuccessMsg("");
-          window.location.reload();
+          router.refresh();
         }, 3000);
       } catch (err: any) {
         setErrorMsg(err.message || "خطایی رخ داد");
@@ -119,6 +121,35 @@ export default function MembershipClient({ member, plans }: MembershipClientProp
     if (!cardNumber || !cvv2 || !expMonth || !expYear || !otp) {
       setErrorMsg("لطفاً مشخصات کارت بانکی را به طور کامل وارد کنید");
       return;
+    }
+
+    const cleanCard = cardNumber.replace(/\s|-/g, "");
+    if (cleanCard.length < 16 || !/^\d{16}$/.test(cleanCard)) {
+      setErrorMsg("شماره کارت باید ۱۶ رقم باشد");
+      return;
+    }
+    if (!/^\d{3,4}$/.test(cvv2)) {
+      setErrorMsg("CVV2 باید ۳ یا ۴ رقم باشد");
+      return;
+    }
+    const monthNum = parseInt(expMonth);
+    const yearNum = parseInt(expYear);
+    if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+      setErrorMsg("ماه انقضا نامعتبر است (۱ تا ۱۲)");
+      return;
+    }
+    if (isNaN(yearNum) || expYear.length !== 2) {
+      setErrorMsg("سال انقضا باید ۲ رقم باشد (مثلاً ۰۵ برای ۱۴۰۵)");
+      return;
+    }
+    if (!/^\d{6}$/.test(otp)) {
+      setErrorMsg("رمز پویا باید ۶ رقم باشد (برای تست: ۱۲۳۴۵۶)");
+      return;
+    }
+    // For simulation, allow any 6-digit OTP, but show hint if not 123456
+    if (otp !== "123456" && otp !== "000000") {
+      // Allow but warn in console - in real gateway would verify
+      console.log("Simulated OTP verification, allowing", otp);
     }
 
     startTransition(async () => {
@@ -135,8 +166,8 @@ export default function MembershipClient({ member, plans }: MembershipClientProp
           setExpYear("");
           setOtp("");
           setSuccessMsg("");
-          window.location.reload();
-        }, 3000);
+          router.refresh();
+        }, 2000);
       } catch (err: any) {
         setErrorMsg(err.message || "خطایی رخ داد");
       }
@@ -153,7 +184,13 @@ export default function MembershipClient({ member, plans }: MembershipClientProp
 
     const fromDate = new Date(freezeFrom);
     const toDate = new Date(freezeTo);
+    const today = new Date();
+    today.setHours(0,0,0,0);
     
+    if (fromDate < today) {
+      setErrorMsg("تاریخ شروع نمی‌تواند در گذشته باشد");
+      return;
+    }
     if (toDate <= fromDate) {
       setErrorMsg("تاریخ پایان باید بعد از تاریخ شروع باشد");
       return;
@@ -161,8 +198,20 @@ export default function MembershipClient({ member, plans }: MembershipClientProp
 
     const diffTime = Math.abs(toDate.getTime() - fromDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) {
+      setErrorMsg("بازه تعلیق باید حداقل ۱ روز باشد");
+      return;
+    }
+    if (diffDays > 60) {
+      setErrorMsg("حداکثر تعلیق ۶۰ روز می‌باشد");
+      return;
+    }
     const allowedDays = activeSub?.plan?.freezeDaysAllowed || 0;
 
+    if (allowedDays <= 0) {
+      setErrorMsg("طرح فعلی شما امکان تعلیق ندارد");
+      return;
+    }
     if (diffDays > allowedDays) {
       setErrorMsg(`طرح فعلی شما حداکثر اجازه تعلیق ${allowedDays} روز را می‌دهد. شما ${diffDays} روز انتخاب کرده‌اید.`);
       return;
@@ -178,7 +227,7 @@ export default function MembershipClient({ member, plans }: MembershipClientProp
           setFreezeTo("");
           setFreezeReason("");
           setSuccessMsg("");
-          window.location.reload();
+          router.refresh();
         }, 3000);
       } catch (err: any) {
         setErrorMsg(err.message || "خطایی رخ داد");

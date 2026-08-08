@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createMember } from "@/server/actions/members";
 import { createOrUpdateWorkoutRoutine } from "@/server/actions/workouts";
@@ -9,6 +10,7 @@ interface MembersClientProps {
 }
 
 export default function MembersClient({ initialMembers }: MembersClientProps) {
+  const router = useRouter();
   const [membersList, setMembersList] = useState(initialMembers);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "ACTIVE" | "EXPIRED">("ALL");
@@ -76,7 +78,7 @@ export default function MembersClient({ initialMembers }: MembersClientProps) {
           setEmail("");
           setPassword("member123");
           setSuccessMsg("");
-          window.location.reload();
+          router.refresh();
         }, 2000);
       } catch (err: any) {
         setErrorMsg(err.message || "خطایی رخ داد");
@@ -111,7 +113,13 @@ export default function MembersClient({ initialMembers }: MembersClientProps) {
   };
 
   const handleWorkoutTaskChange = (idx: number, field: string, value: any) => {
-    setWorkoutTasks(prev => prev.map((t, i) => i === idx ? { ...t, [field]: value } : t));
+    let parsed: any = value;
+    if (field === "sets") {
+      parsed = parseInt(value) || 0;
+      if (parsed < 1) parsed = 1;
+      if (parsed > 20) parsed = 20;
+    }
+    setWorkoutTasks(prev => prev.map((t, i) => i === idx ? { ...t, [field]: parsed } : t));
   };
 
   const handleSaveWorkoutRoutine = (e: React.FormEvent) => {
@@ -131,7 +139,7 @@ export default function MembersClient({ initialMembers }: MembersClientProps) {
         alert("برنامه ورزشی با موفقیت ثبت شد!");
         setIsWorkoutModalOpen(false);
         setSelectedMember(null);
-        window.location.reload();
+        router.refresh();
       } catch (err: any) {
         alert(err.message || "خطا در ثبت برنامه ورزشی");
       }

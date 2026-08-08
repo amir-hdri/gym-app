@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createPlan, deactivatePlan } from "@/server/actions/plans";
 
@@ -8,6 +9,7 @@ interface PlansClientProps {
 }
 
 export default function PlansClient({ initialPlans }: PlansClientProps) {
+  const router = useRouter();
   const [plans, setPlans] = useState(initialPlans);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -51,7 +53,7 @@ export default function PlansClient({ initialPlans }: PlansClientProps) {
           setFreezeDaysAllowed("0");
           setHighlights("");
           setSuccessMsg("");
-          window.location.reload();
+          router.refresh();
         }, 2000);
       } catch (err: any) {
         setErrorMsg(err.message || "خطایی رخ داد");
@@ -64,7 +66,7 @@ export default function PlansClient({ initialPlans }: PlansClientProps) {
     startTransition(async () => {
       try {
         await deactivatePlan(id);
-        window.location.reload();
+        router.refresh();
       } catch (err: any) {
         alert(err.message || "خطا در غیرفعال‌سازی");
       }

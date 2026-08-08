@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { auth } from "@/lib/auth";
 import { listFreezeRequests } from "@/server/actions/freeze";
 import { redirect } from "next/navigation";

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toggleWorkoutTaskLog } from "@/server/actions/workouts";
 
@@ -28,6 +29,7 @@ interface SetLog {
 }
 
 export default function WorkoutTodoList({ initialRoutine, userId }: WorkoutTodoListProps) {
+  const router = useRouter();
   const [routine, setRoutine] = useState(initialRoutine);
   const [isPending, startTransition] = useTransition();
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
@@ -35,8 +37,8 @@ export default function WorkoutTodoList({ initialRoutine, userId }: WorkoutTodoL
   // Track temporary set inputs for each task
   const [tempSetData, setTempSetData] = useState<Record<string, SetLog[]>>({});
 
-  // Get local date string YYYY-MM-DD
-  const todayStr = new Date().toLocaleDateString("en-CA"); // CA returns YYYY-MM-DD format!
+  // Use UTC YYYY-MM-DD to match server logic and avoid timezone drift
+  const todayStr = new Date().toISOString().split("T")[0];
 
   const handleToggleQuick = (taskId: string, currentCompleted: boolean) => {
     const nextCompleted = !currentCompleted;
@@ -61,7 +63,7 @@ export default function WorkoutTodoList({ initialRoutine, userId }: WorkoutTodoL
         await toggleWorkoutTaskLog(taskId, userId, todayStr, nextCompleted);
       } catch (err: any) {
         alert("خطا در ذخیره‌سازی وضعیت تمرین");
-        window.location.reload();
+        router.refresh();
       }
     });
   };
@@ -96,7 +98,7 @@ export default function WorkoutTodoList({ initialRoutine, userId }: WorkoutTodoL
         setExpandedTaskId(null);
       } catch (err: any) {
         alert("خطا در ذخیره‌سازی رکوردها");
-        window.location.reload();
+        router.refresh();
       }
     });
   };

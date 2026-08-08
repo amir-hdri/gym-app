@@ -66,6 +66,8 @@ export async function recordPayment(formData: FormData) {
       endsAt,
       canceledAt: null,
       pausedUntil: null,
+      // Reset consumed sessions for session-based plans on renewal/extension
+      sessionsUsed: sub.plan.isSessionBased ? 0 : undefined,
     },
   });
 
@@ -149,6 +151,8 @@ export async function approvePayment(paymentId: string, managerUserId: string) {
         status: "ACTIVE",
         canceledAt: null,
         pausedUntil: null,
+        // Reset consumed sessions for session-based plans on renewal/extension
+        sessionsUsed: plan.isSessionBased ? 0 : undefined,
       },
     });
 

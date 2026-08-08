@@ -56,15 +56,33 @@ export async function checkInByCode(
   const memberName = profile.user?.name || "کاربر باشگاه";
 
   // Check active subscription
-  const activeSub = profile.subscriptions?.[0];
+  let activeSub = profile.subscriptions?.[0];
   if (!activeSub) {
     const pausedSub = await prisma.subscription.findFirst({
       where: { memberId: profile.id, status: "PAUSED" },
     });
     if (pausedSub) {
-      return { success: false, error: `اشتراک ${memberName} در وضعیت تعلیق (مرخصی) قرار دارد` };
+      const stillFrozen =
+        !pausedSub.pausedUntil || new Date(pausedSub.pausedUntil) > new Date();
+      if (stillFrozen) {
+        return {
+          success: false,
+          error: `اشتراک ${memberName} در وضعیت تعلیق (مرخصی) قرار دارد`,
+        };
+      }
+      // Freeze period has ended — automatically resume the subscription
+      const resumed = await prisma.subscription.update({
+        where: { id: pausedSub.id },
+        data: { status: "ACTIVE", pausedUntil: null },
+        include: { plan: true },
+      });
+      activeSub = resumed;
+    } else {
+      return {
+        success: false,
+        error: `${memberName} فاقد اشتراک فعال در باشگاه است`,
+      };
     }
-    return { success: false, error: `${memberName} فاقد اشتراک فعال در باشگاه است` };
   }
 
   // Check expiration of subscription by date

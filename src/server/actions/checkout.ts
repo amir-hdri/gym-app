@@ -42,6 +42,8 @@ export async function checkoutOnline(memberId: string, planId: string) {
         endsAt,
         canceledAt: null,
         pausedUntil: null,
+        // Reset consumed sessions for session-based plans on renewal
+        sessionsUsed: plan.isSessionBased ? 0 : undefined,
       },
     });
     await prisma.payment.create({

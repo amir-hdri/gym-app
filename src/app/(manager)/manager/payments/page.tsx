@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { auth } from "@/lib/auth";
 import { listPayments } from "@/server/actions/payments";
 import { prisma } from "@/lib/prisma";

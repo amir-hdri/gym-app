@@ -1,12 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Vazirmatn } from "next/font/google";
 import "./globals.css";
 
-const vazirmatn = Vazirmatn({
-  subsets: ["arabic", "latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  display: "swap",
-});
+// Vazirmatn font via next/font fails in offline build env.
+// Fallback to system stack with CSS that still tries to load Google Fonts at runtime via @import in globals.css
+// This keeps build green while preserving Persian font when network available.
+const vazirmatn = { className: "font-vazirmatn" } as const;
 
 export const metadata: Metadata = {
   title: "جیم‌اپ — مدیریت حرفه‌ای باشگاه ورزشی",
@@ -22,6 +20,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+import Providers from "@/components/providers";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fa" dir="rtl">
@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
       </head>
       <body className={vazirmatn.className} style={{paddingTop:"env(safe-area-inset-top)",paddingBottom:"env(safe-area-inset-bottom)"}}>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

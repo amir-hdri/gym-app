@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { reviewFreezeRequest } from "@/server/actions/freeze";
 
@@ -9,6 +10,7 @@ interface FreezeRequestsClientProps {
 }
 
 export default function FreezeRequestsClient({ initialRequests, managerUserId }: FreezeRequestsClientProps) {
+  const router = useRouter();
   const [requests, setRequests] = useState(initialRequests);
   const [managerNotes, setManagerNotes] = useState<Record<string, string>>({});
   const [isPending, startTransition] = useTransition();
@@ -22,7 +24,7 @@ export default function FreezeRequestsClient({ initialRequests, managerUserId }:
       try {
         await reviewFreezeRequest(id, approved, managerUserId, note);
         // Refresh page to load updated list
-        window.location.reload();
+        router.refresh();
       } catch (err: any) {
         alert(err.message || "خطایی در ثبت بررسی رخ داد");
       }

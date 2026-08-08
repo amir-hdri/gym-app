@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { bookClassSession, cancelClassBooking } from "@/server/actions/classes";
 
@@ -27,6 +28,7 @@ interface MemberBookingsClientProps {
 }
 
 export default function MemberBookingsClient({ initialClasses, memberProfileId }: MemberBookingsClientProps) {
+  const router = useRouter();
   const [classes, setClasses] = useState<ClassSession[]>(initialClasses);
   const [isPending, startTransition] = useTransition();
 
@@ -40,7 +42,7 @@ export default function MemberBookingsClient({ initialClasses, memberProfileId }
           await bookClassSession(classId);
           alert("کلاس با موفقیت رزرو شد");
         }
-        window.location.reload();
+        router.refresh();
       } catch (err: any) {
         alert(err.message || "خطایی رخ داد");
       }

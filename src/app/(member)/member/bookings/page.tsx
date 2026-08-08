@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { auth } from "@/lib/auth";
 import { listClassSessions } from "@/server/actions/classes";
 import { prisma } from "@/lib/prisma";

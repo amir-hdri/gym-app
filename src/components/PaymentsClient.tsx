@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { approvePayment, recordPayment } from "@/server/actions/payments";
 
@@ -10,6 +11,7 @@ interface PaymentsClientProps {
 }
 
 export default function PaymentsClient({ initialPayments, pendingSubs, managerUserId }: PaymentsClientProps) {
+  const router = useRouter();
   const [payments, setPayments] = useState(initialPayments);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -23,12 +25,14 @@ export default function PaymentsClient({ initialPayments, pendingSubs, managerUs
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Calculate stats
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  
+  // Calculate stats - use UTC date comparison for today
+  const todayStr = new Date().toISOString().split("T")[0];
   const paidToday = payments
-    .filter(p => p.status === "PAID" && new Date(p.paidAt || p.createdAt) >= today)
+    .filter(p => {
+      if (p.status !== "PAID") return false;
+      const paidDateStr = p.paidAt ? new Date(p.paidAt).toISOString().split("T")[0] : new Date(p.createdAt).toISOString().split("T")[0];
+      return paidDateStr === todayStr;
+    })
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
   const pendingAmount = payments
@@ -45,7 +49,7 @@ export default function PaymentsClient({ initialPayments, pendingSubs, managerUs
     startTransition(async () => {
       try {
         await approvePayment(paymentId, managerUserId);
-        window.location.reload();
+        router.refresh();
       } catch (err: any) {
         alert(err.message || "خطایی رخ داد");
       }
@@ -80,7 +84,7 @@ export default function PaymentsClient({ initialPayments, pendingSubs, managerUs
           setAmount("");
           setNote("");
           setSuccessMsg("");
-          window.location.reload();
+          router.refresh();
         }, 2000);
       } catch (err: any) {
         setErrorMsg(err.message || "خطا در ثبت پرداخت");
@@ -132,8 +136,8 @@ export default function PaymentsClient({ initialPayments, pendingSubs, managerUs
           <div className="col-span-2">طرح</div>
           <div className="col-span-2">مبلغ و روش</div>
           <div className="col-span-2">کد پیگیری</div>
-          <div className="col-span-1.5">وضعیت</div>
-          <div className="col-span-1.5 text-left">عملیات</div>
+          <div className="col-span-1">وضعیت</div>
+          <div className="col-span-2 text-left">عملیات</div>
         </div>
         
         <div className="divide-y divide-white/[0.04]">
@@ -162,15 +166,15 @@ export default function PaymentsClient({ initialPayments, pendingSubs, managerUs
                     <p className="font-bold text-white">{Number(p.amount).toLocaleString("fa-IR")} تومان</p>
                     <p className="text-[10px] text-white/40">{methodStr}</p>
                   </div>
-                  <div className="col-span-2 font-mono text-[10px] text-cyan-400/80" dir="ltr">{p.transactionRef || "---"}</div>
-                  <div className="col-span-1.5">
+                  <div className="col-span-2 font-mono text-[10px] text-cyan-400/80 truncate" dir="ltr">{p.transactionRef || "---"}</div>
+                  <div className="col-span-1">
                     <span className={`font-semibold px-2 py-0.5 rounded-full text-[10px] ${
                       isPaid ? "bg-emerald-500/15 text-emerald-400" : "bg-amber-500/15 text-amber-400"
                     }`}>
                       {isPaid ? "موفق" : "معلق"}
                     </span>
                   </div>
-                  <div className="col-span-1.5 text-left">
+                  <div className="col-span-2 text-left">
                     {!isPaid && (
                       <button 
                         onClick={() => handleApprove(p.id)}

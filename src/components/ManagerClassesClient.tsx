@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createClassSession } from "@/server/actions/classes";
 
@@ -31,6 +32,7 @@ interface ManagerClassesClientProps {
 }
 
 export default function ManagerClassesClient({ initialClasses }: ManagerClassesClientProps) {
+  const router = useRouter();
   const [classesList, setClassesList] = useState<ClassSession[]>(initialClasses);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -47,13 +49,28 @@ export default function ManagerClassesClient({ initialClasses }: ManagerClassesC
 
   const handleCreateClass = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !trainerName || !startDate || !startTime || !endTime) {
+    if (!title.trim() || !trainerName.trim() || !startDate || !startTime || !endTime) {
       alert("پر کردن فیلدهای ستاره‌دار الزامی است");
       return;
     }
+    if (capacity && (isNaN(Number(capacity)) || Number(capacity) <= 0)) {
+      alert("ظرفیت باید عدد مثبت باشد یا خالی بگذارید برای نامحدود");
+      return;
+    }
 
-    const startISO = new Date(`${startDate}T${startTime}`).toISOString();
-    const endISO = new Date(`${startDate}T${endTime}`).toISOString();
+    const startDateObj = new Date(`${startDate}T${startTime}`);
+    const endDateObj = new Date(`${startDate}T${endTime}`);
+    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+      alert("تاریخ یا زمان نامعتبر است");
+      return;
+    }
+    if (endDateObj <= startDateObj) {
+      alert("ساعت پایان باید بعد از ساعت شروع باشد");
+      return;
+    }
+
+    const startISO = startDateObj.toISOString();
+    const endISO = endDateObj.toISOString();
 
     startTransition(async () => {
       try {
@@ -77,7 +94,7 @@ export default function ManagerClassesClient({ initialClasses }: ManagerClassesC
         setStartDate("");
         setStartTime("");
         setEndTime("");
-        window.location.reload();
+        router.refresh();
       } catch (err: any) {
         alert(err.message || "خطا در ایجاد کلاس ورزشی");
       }
@@ -108,8 +125,8 @@ export default function ManagerClassesClient({ initialClasses }: ManagerClassesC
             const timeStr = `${start.toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" })} الی ${new Date(cls.endAt).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" })}`;
             
             const bookedCount = cls.bookings.filter(b => b.status === "BOOKED").length;
-            const cap = cls.capacity || "نامحدود";
-            const isFull = cls.capacity && bookedCount >= cls.capacity;
+            const cap = cls.capacity != null && cls.capacity > 0 ? cls.capacity : "نامحدود";
+            const isFull = cls.capacity != null && cls.capacity > 0 && bookedCount >= cls.capacity;
 
             return (
               <div key={cls.id} className="glass-card p-5 hover:bg-white/[0.015] hover:scale-[1.01] hover:shadow-xl transition-all text-right flex flex-col justify-between relative overflow-hidden">

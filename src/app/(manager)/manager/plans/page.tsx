@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { listPlans } from "@/server/actions/plans";
 import PlansClient from "@/components/PlansClient";
 

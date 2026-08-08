@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { listMembers } from "@/server/actions/members";
 import MembersClient from "@/components/MembersClient";
 

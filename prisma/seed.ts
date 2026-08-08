@@ -107,9 +107,9 @@ async function main() {
   });
 
   const plans = await prisma.plan.findMany({ where: { branchId: branch.id } });
-  const basicPlan = plans.find(p => p.name === "ماهانه پایه")!;
-  const premiumPlan = plans.find(p => p.name === "ماهانه پرمیوم")!;
-  const annualPlan = plans.find(p => p.name === "سالانه الیت")!;
+  const basicPlan = plans.find((p: any) => p.name === "ماهانه پایه")!;
+  const premiumPlan = plans.find((p: any) => p.name === "ماهانه پرمیوم")!;
+  const annualPlan = plans.find((p: any) => p.name === "سالانه الیت")!;
 
 
   // Create members

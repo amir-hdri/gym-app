@@ -88,6 +88,7 @@ model MemberProfile {
   trainerAssignments TrainerAssignment[]
   workoutRoutines    WorkoutRoutine[]
   workoutLogs        WorkoutLog[]
+  schedules          WorkoutSchedule[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,6 +130,8 @@ model Plan {
   durationDays      Int
   freezeDaysAllowed Int      @default(0)
   maxVisitsPerWeek  Int?
+  maxSessions       Int?
+  isSessionBased    Boolean  @default(false)
   highlights        String   @default("")
   isActive          Boolean  @default(true)
 
@@ -160,6 +163,8 @@ model Subscription {
   canceledAt    DateTime?
   pauseReason   String?
   notes         String?
+  sessionsUsed  Int                @default(0)
+  lastCheckInAt DateTime?
 
   payments       Payment[]
   freezeRequests FreezeRequest[]
@@ -206,9 +211,14 @@ model Attendance {
   branchId String?
   branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
-  checkInAt DateTime         @default(now())
-  method    String           @default("MANUAL")
-  note      String?
+  checkInAt       DateTime  @default(now())
+  checkOutAt      DateTime?
+  durationMinutes Int?
+  status          String    @default("CHECKED_IN")
+  sessionDate     String?
+  type            String    @default("REGULAR")
+  method          String    @default("MANUAL")
+  note            String?
 
   verifiedByUserId String?
   verifiedBy       User?   @relation("AttendanceVerifiedBy", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
@@ -217,6 +227,7 @@ model Attendance {
 
   @@index([memberId, checkInAt])
   @@index([branchId, checkInAt])
+  @@index([status])
 }
 
 model FreezeRequest {
@@ -430,45 +441,72 @@ model VerificationToken {
 }
 
 model WorkoutRoutine {
-  id        String        @id @default(cuid())
-  memberId  String
-  member    MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  title     String
-  isActive  Boolean       @default(true)
-  tasks     WorkoutTask[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id            String            @id @default(cuid())
+  memberId      String
+  member        MemberProfile     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  title         String
+  scheduledDays String?
+  scheduledTime String?
+  difficulty    String?
+  goal          String?
+  description   String?
+  trainerNote   String?
+  validFrom     DateTime?
+  validTo       DateTime?
+  isActive      Boolean           @default(true)
+  tasks         WorkoutTask[]
+  schedules     WorkoutSchedule[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
   @@index([memberId])
 }
 
 model WorkoutTask {
-  id          String         @id @default(cuid())
-  routineId   String
-  routine     WorkoutRoutine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  id           String         @id @default(cuid())
+  routineId    String
+  routine      WorkoutRoutine @relation(fields: [routineId], references: [id], onDelete: Cascade)
   exerciseName String
-  sets        Int            @default(3)
-  reps        String         @default("12")
-  notes       String?
-  logs        WorkoutLog[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  sets         Int            @default(3)
+  reps         String         @default("12")
+  notes        String?
+  logs         WorkoutLog[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@index([routineId])
 }
 
 model WorkoutLog {
-  id         String      @id @default(cuid())
-  memberId   String
-  member     MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  taskId     String
-  task       WorkoutTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  dateStr    String      // YYYY-MM-DD
-  completed  Boolean     @default(true)
-  setsData   String?     // Serialized JSON for sets data (weight/reps)
-  createdAt  DateTime    @default(now())
+  id        String        @id @default(cuid())
+  memberId  String
+  member    MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  taskId    String
+  task      WorkoutTask   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  dateStr   String        // YYYY-MM-DD
+  completed Boolean       @default(true)
+  setsData  String?       // Serialized JSON for sets data (weight/reps)
+  createdAt DateTime      @default(now())
 
   @@unique([taskId, dateStr])
   @@index([memberId, dateStr])
 }
 
+model WorkoutSchedule {
+  id        String          @id @default(cuid())
+  memberId  String
+  member    MemberProfile   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  routineId String?
+  routine   WorkoutRoutine? @relation(fields: [routineId], references: [id], onDelete: SetNull)
+  dayOfWeek Int             // 0=شنبه..6=جمعه
+  startTime String          // HH:MM
+  endTime   String          // HH:MM
+  title     String?
+  isActive  Boolean         @default(true)
+  note      String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@unique([memberId, dayOfWeek, startTime])
+  @@index([memberId, dayOfWeek])
+}

@@ -35,13 +35,16 @@ export async function createMember(formData: FormData) {
   }
 
   const passwordHash = await bcrypt.hash(data.password, 12);
-  const membershipCode = "MEM-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2,5).toUpperCase();
+  const membershipCode =
+    "MEM-" +
+    Date.now().toString(36).toUpperCase() +
+    Math.random().toString(36).substring(2, 5).toUpperCase();
 
   // Find default branch
   let branch = await prisma.branch.findFirst();
   if (!branch) {
     branch = await prisma.branch.create({
-      data: { name: "شعبه اصلی", city: "تهران" }
+      data: { name: "شعبه اصلی", city: "تهران" },
     });
   }
 
@@ -79,6 +82,11 @@ export async function listMembers() {
             where: { isActive: true },
             include: { tasks: true },
           },
+          schedules: {
+            where: { isActive: true },
+            include: { routine: true },
+            orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
+          },
         },
       },
     },
@@ -94,16 +102,24 @@ export async function getMember(id: string) {
     include: {
       memberProfile: {
         include: {
-          subscriptions: { 
+          subscriptions: {
             include: { plan: true, payments: true },
-            orderBy: { createdAt: "desc" }
+            orderBy: { createdAt: "desc" },
           },
           attendance: { orderBy: { checkInAt: "desc" }, take: 20 },
           progressEntries: { orderBy: { measuredAt: "desc" }, take: 50 },
-          trainerAssignments: { where: { active: true }, include: { trainer: { include: { user: true } } } },
+          trainerAssignments: {
+            where: { active: true },
+            include: { trainer: { include: { user: true } } },
+          },
           workoutRoutines: {
             where: { isActive: true },
-            include: { tasks: { include: { logs: true } } }
+            include: { tasks: { include: { logs: true } } },
+          },
+          schedules: {
+            where: { isActive: true },
+            include: { routine: { include: { tasks: true } } },
+            orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
           },
           freezeRequests: { orderBy: { createdAt: "desc" }, take: 10 },
         },
@@ -117,15 +133,25 @@ export async function getMember(id: string) {
       where: { id },
       include: {
         user: true,
-        subscriptions: { include: { plan: true, payments: true }, orderBy: { createdAt: "desc" } },
+        subscriptions: {
+          include: { plan: true, payments: true },
+          orderBy: { createdAt: "desc" },
+        },
         attendance: { orderBy: { checkInAt: "desc" }, take: 20 },
         progressEntries: { orderBy: { measuredAt: "desc" }, take: 50 },
-        workoutRoutines: { where: { isActive: true }, include: { tasks: { include: { logs: true } } } },
+        workoutRoutines: {
+          where: { isActive: true },
+          include: { tasks: { include: { logs: true } } },
+        },
+        schedules: {
+          where: { isActive: true },
+          include: { routine: { include: { tasks: true } } },
+          orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
+        },
         freezeRequests: { orderBy: { createdAt: "desc" } },
-      }
+      },
     });
     if (profile?.user) {
-      // reshape to match expected structure
       return {
         ...profile.user,
         memberProfile: profile,
@@ -167,7 +193,15 @@ export async function searchMembers(query: string) {
     include: {
       memberProfile: {
         include: {
-          subscriptions: { include: { plan: true }, orderBy: { createdAt: "desc" }, take: 1 },
+          subscriptions: {
+            include: { plan: true },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+          schedules: {
+            where: { isActive: true },
+            include: { routine: true },
+          },
         },
       },
     },

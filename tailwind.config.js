@@ -7,6 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Vazirmatn', 'Tahoma', 'system-ui', '-apple-system', 'sans-serif'],
+        vazirmatn: ['Vazirmatn', 'Tahoma', 'system-ui', '-apple-system', 'sans-serif'],
+      },
       colors: {
         night_bordeaux: {
           DEFAULT: '#590d22',

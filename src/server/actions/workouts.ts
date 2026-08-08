@@ -31,7 +31,7 @@ function getUTCDatesLastNDays(n: number): string[] {
 
 export async function getWorkoutRoutine(userId: string) {
   const member = await prisma.memberProfile.findFirst({
-    where: { OR: [{ userId: userId }, { id: userId }] }
+    where: { OR: [{ userId: userId }, { id: userId }] },
   });
   if (!member) return null;
 
@@ -40,18 +40,32 @@ export async function getWorkoutRoutine(userId: string) {
     include: {
       tasks: {
         include: { logs: { where: { memberId: member.id } } },
-        orderBy: { createdAt: "asc" }
-      }
+        orderBy: { createdAt: "asc" },
+      },
+      schedules: {
+        where: { isActive: true },
+        orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
+      },
     },
-    orderBy: { createdAt: "desc" }
+    orderBy: { createdAt: "desc" },
   });
   return routine;
 }
 
 export async function createOrUpdateWorkoutRoutine(
-  memberId: string, 
-  title: string, 
-  tasks: Array<{ exerciseName: string; sets: number; reps: string; notes?: string }>
+  memberId: string,
+  title: string,
+  tasks: Array<{ exerciseName: string; sets: number; reps: string; notes?: string }>,
+  options?: {
+    scheduledDays?: string;
+    scheduledTime?: string;
+    difficulty?: string;
+    goal?: string;
+    description?: string;
+    trainerNote?: string;
+    validFrom?: Date;
+    validTo?: Date;
+  }
 ) {
   const session = await auth().catch(() => null);
   const role = (session?.user as any)?.role;
@@ -60,42 +74,60 @@ export async function createOrUpdateWorkoutRoutine(
   }
   if (session && !isManager(role) && role === "MEMBER") {
     // Member can only update own routine
-    const ownProfile = await prisma.memberProfile.findFirst({ where: { userId: session.user.id } });
+    const ownProfile = await prisma.memberProfile.findFirst({
+      where: { userId: session.user.id },
+    });
     if (ownProfile?.id !== memberId) throw new Error("عدم دسترسی");
   }
 
-  const verifiedTasks = tasks.map(t => taskSchema.parse(t));
+  const verifiedTasks = tasks.map((t) => taskSchema.parse(t));
   if (!title.trim()) throw new Error("عنوان برنامه الزامی است");
   if (verifiedTasks.length === 0) throw new Error("حداقل یک حرکت باید تعریف شود");
 
   const existingRoutine = await prisma.workoutRoutine.findFirst({
-    where: { memberId, isActive: true }
+    where: { memberId, isActive: true },
   });
 
   if (existingRoutine) {
     await prisma.workoutRoutine.update({
       where: { id: existingRoutine.id },
-      data: { isActive: false, title: `${existingRoutine.title} (آرشیو ${new Date().toLocaleDateString("fa-IR")})` },
+      data: {
+        isActive: false,
+        title: `${existingRoutine.title} (آرشیو ${new Date().toLocaleDateString("fa-IR")})`,
+      },
     });
   }
 
   const routine = await prisma.workoutRoutine.create({
-    data: { memberId, title: title.trim(), isActive: true }
+    data: {
+      memberId,
+      title: title.trim(),
+      isActive: true,
+      scheduledDays: options?.scheduledDays || null,
+      scheduledTime: options?.scheduledTime || null,
+      difficulty: options?.difficulty || null,
+      goal: options?.goal || null,
+      description: options?.description || null,
+      trainerNote: options?.trainerNote || null,
+      validFrom: options?.validFrom || null,
+      validTo: options?.validTo || null,
+    },
   });
 
   await prisma.workoutTask.createMany({
-    data: verifiedTasks.map(t => ({
+    data: verifiedTasks.map((t) => ({
       routineId: routine.id,
       exerciseName: t.exerciseName.trim(),
       sets: Number(t.sets),
       reps: t.reps.trim(),
       notes: t.notes?.trim() || null,
-    }))
+    })),
   });
 
   revalidatePath("/member/dashboard");
   revalidatePath("/manager/members");
   revalidatePath("/member/progress");
+  revalidatePath("/member/schedule");
   return { success: true, routineId: routine.id };
 }
 
@@ -105,6 +137,7 @@ export async function archiveWorkoutRoutine(routineId: string) {
   await prisma.workoutRoutine.update({ where: { id: routineId }, data: { isActive: false } });
   revalidatePath("/member/dashboard");
   revalidatePath("/manager/members");
+  revalidatePath("/member/schedule");
   return { success: true };
 }
 
@@ -115,19 +148,20 @@ export async function toggleWorkoutTaskLog(
   completed: boolean,
   setsData?: string
 ) {
-  const member = await prisma.memberProfile.findFirst({ where: { userId } });
+  const member = await prisma.memberProfile.findFirst({
+    where: { OR: [{ userId }, { id: userId }] },
+  });
   if (!member) throw new Error("پروفایل عضو یافت نشد");
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
     throw new Error("فرمت تاریخ نامعتبر است، باید YYYY-MM-DD باشد");
   }
 
-  // Security: ensure task belongs to member's routine or at least exists
+  // Security: ensure task belongs to member's routine or exists
   const task = await prisma.workoutTask.findFirst({
     where: { id: taskId, routine: { memberId: member.id } },
   });
   if (!task && completed) {
-    // Allow but warn - task might be from archived routine? Check existence
     const exists = await prisma.workoutTask.findUnique({ where: { id: taskId } });
     if (!exists) throw new Error("حرکت تمرینی یافت نشد");
   }
@@ -135,11 +169,19 @@ export async function toggleWorkoutTaskLog(
   if (completed) {
     await prisma.workoutLog.upsert({
       where: { taskId_dateStr: { taskId, dateStr } },
-      create: { memberId: member.id, taskId, dateStr, completed: true, setsData: setsData || null },
+      create: {
+        memberId: member.id,
+        taskId,
+        dateStr,
+        completed: true,
+        setsData: setsData || null,
+      },
       update: { completed: true, setsData: setsData || null },
     });
   } else {
-    await prisma.workoutLog.deleteMany({ where: { taskId, dateStr, memberId: member.id } });
+    await prisma.workoutLog.deleteMany({
+      where: { taskId, dateStr, memberId: member.id },
+    });
   }
 
   revalidatePath("/member/dashboard");
@@ -148,50 +190,63 @@ export async function toggleWorkoutTaskLog(
 }
 
 export async function getWorkoutProgress(userId: string) {
-  const member = await prisma.memberProfile.findFirst({ where: { userId } });
+  const member = await prisma.memberProfile.findFirst({
+    where: { OR: [{ userId }, { id: userId }] },
+  });
   if (!member) return [];
 
   const logs = await prisma.workoutLog.findMany({
     where: { memberId: member.id, completed: true },
-    orderBy: { dateStr: "asc" }
+    orderBy: { dateStr: "asc" },
   });
 
   const last7 = getUTCDatesLastNDays(7);
   const counts: Record<string, number> = {};
-  last7.forEach(d => counts[d] = 0);
+  last7.forEach((d) => (counts[d] = 0));
 
-  logs.forEach(l => {
+  logs.forEach((l) => {
     if (counts.hasOwnProperty(l.dateStr)) {
       counts[l.dateStr] += 1;
     }
   });
 
-  return last7.map(date => ({ date, count: counts[date] || 0 }));
+  return last7.map((date) => ({ date, count: counts[date] || 0 }));
 }
 
 export async function getWorkoutSetsProgress(userId: string) {
-  const member = await prisma.memberProfile.findFirst({ where: { userId } });
+  const member = await prisma.memberProfile.findFirst({
+    where: { OR: [{ userId }, { id: userId }] },
+  });
   if (!member) return [];
 
   const logs = await prisma.workoutLog.findMany({
     where: { memberId: member.id, setsData: { not: null }, completed: true },
     include: { task: true },
-    orderBy: { dateStr: "asc" }
+    orderBy: { dateStr: "asc" },
   });
 
-  const progressData = logs.map(l => {
-    let maxWeight = 0;
-    try {
-      if (l.setsData) {
-        const sets = JSON.parse(l.setsData);
-        if (Array.isArray(sets)) {
-          const weights = sets.map((s: any) => Number(s.weight) || 0).filter((w: number) => w > 0);
-          maxWeight = weights.length ? Math.max(...weights) : 0;
+  const progressData = logs
+    .map((l) => {
+      let maxWeight = 0;
+      try {
+        if (l.setsData) {
+          const sets = JSON.parse(l.setsData);
+          if (Array.isArray(sets)) {
+            const weights = sets
+              .map((s: any) => Number(s.weight) || 0)
+              .filter((w: number) => w > 0);
+            maxWeight = weights.length ? Math.max(...weights) : 0;
+          }
         }
-      }
-    } catch {}
-    return { dateStr: l.dateStr, exerciseName: l.task.exerciseName, maxWeight, taskId: l.taskId };
-  }).filter(p => p.maxWeight > 0);
+      } catch {}
+      return {
+        dateStr: l.dateStr,
+        exerciseName: l.task.exerciseName,
+        maxWeight,
+        taskId: l.taskId,
+      };
+    })
+    .filter((p) => p.maxWeight > 0);
 
   return progressData;
 }

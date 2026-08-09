@@ -128,7 +128,7 @@ export default function MemberDashboardClient({
             </div>
 
             <Link
-              href="/member/membership"
+              href="/member/membership" aria-label="کد QR ورود و تمدید"
               className="px-3.5 py-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition-all text-center self-start sm:self-auto"
             >
               کد QR خروج 🔴
@@ -280,7 +280,7 @@ export default function MemberDashboardClient({
             </h3>
           </div>
           <Link
-            href="/member/schedule"
+            href="/member/schedule" aria-label="زمانبندی هفتگی"
             className="text-[10px] text-cyan-400 hover:text-cyan-300 font-semibold"
           >
             مشاهده تقویم هفتگی ←
@@ -325,7 +325,7 @@ export default function MemberDashboardClient({
 
       {/* Primary CTA */}
       <Link
-        href="/member/membership"
+        href="/member/membership" aria-label="کد QR ورود و تمدید"
         className="btn-primary w-full rounded-2xl py-3.5 text-xs sm:text-sm font-bold anim-glow-pulse flex items-center justify-center gap-2 shadow-lg shadow-rose-950/30"
       >
         <span>کد QR ورود و تمدید اشتراک</span>

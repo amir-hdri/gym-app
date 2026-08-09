@@ -184,7 +184,7 @@ export default function WorkoutTodoList({ initialRoutine, userId }: WorkoutTodoL
               >
                 <div className="flex items-center gap-2.5">
                   {/* Action checkbox with generous touch target */}
-                  <div
+                  <div aria-label="پایش تمرین روزانه"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleQuick(task.id, isDone);
@@ -238,7 +238,7 @@ export default function WorkoutTodoList({ initialRoutine, userId }: WorkoutTodoL
 
               {/* Accordion Content for Set Tracker */}
               {isExpanded && (
-                <div className="p-3 bg-black/25 border-t border-white/[0.04] space-y-2.5 anim-fade-in">
+                <div aria-expanded={isExpanded} aria-label="جزئیات ست‌های تمرینی" className="p-3 bg-black/25 border-t border-white/[0.04] space-y-2.5 anim-fade-in">
                   <p className="text-[9px] text-white/40 mb-1">
                     برای پایش قدرت، وزنه و تکرار هر ست را وارد کنید:
                   </p>

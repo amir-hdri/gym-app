@@ -35,7 +35,7 @@ export default function MemberLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-3.5 sm:px-4 py-4 sm:py-6 pb-28 sm:pb-32 max-w-lg mx-auto w-full">
+      <main id="main-content" className="flex-1 overflow-y-auto px-3.5 sm:px-4 py-4 sm:py-6 pb-28 sm:pb-32 max-w-lg mx-auto w-full" role="main" aria-label="محتوای اصلی">
         {children}
       </main>
 

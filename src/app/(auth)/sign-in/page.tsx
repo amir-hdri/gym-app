@@ -202,15 +202,19 @@ function SignInForm() {
             const r = ROLES[key];
             const isSelected = activeRole === key;
             return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => handleRoleSelect(key)}
-                className={`flex flex-col items-center justify-center py-3 px-1.5 rounded-xl text-xs font-bold transition-all relative group ${
-                  isSelected
-                    ? "text-white shadow-lg scale-[1.02]"
-                    : "text-white/40 hover:text-white/80 hover:bg-white/[0.03]"
-                }`}
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => handleRoleSelect(key)}
+                  aria-label={`انتخاب نقش ${r.label}`}
+                  aria-pressed={isSelected}
+                  aria-selected={isSelected}
+                  role="tab"
+                  className={`flex flex-col items-center justify-center py-3 px-1.5 rounded-xl text-xs font-bold transition-all relative group ${
+                    isSelected
+                      ? "text-white shadow-lg scale-[1.02]"
+                      : "text-white/40 hover:text-white/80 hover:bg-white/[0.03]"
+                  }`}
                 style={{
                   background: isSelected ? r.accentGradient : "transparent",
                   boxShadow: isSelected ? `0 6px 20px ${r.glowColor}` : "none",
@@ -275,6 +279,8 @@ function SignInForm() {
               required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              aria-label={currentRole.loginLabel}
+              aria-required="true"
               className="input-glass w-full rounded-xl px-3.5 py-3 text-sm text-left font-mono"
             />
           </div>

@@ -1,23 +1,81 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
+
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 86400,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+        pathname: "**",
+      },
+    ],
+  },
+
   experimental: {
-    // In production, you should restrict allowedOrigins to your actual domains
-    // For Arena preview and dev, we allow all origins to support dynamic preview hosts like https://{port}-{sandbox}.e2b.app
-    serverActions: { 
-      allowedOrigins: ["*"],
-      allowedForwardedHosts: ["*"],
+    // Restrict server actions to safe origins for production
+    // For Arena preview environments, we keep flexibility
+    serverActions: {
+      allowedOrigins: [
+        process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "localhost:3000",
+        "https://*.e2b.app",
+        "https://*.vercel.app",
+        process.env.NEXTAUTH_URL ? new URL(process.env.NEXTAUTH_URL).origin : "http://localhost:3000",
+      ].filter(Boolean),
+      allowedForwardedHosts: ["localhost:3000", "*.e2b.app", "*.vercel.app"],
     },
   },
-  // Ensure we handle Prisma properly
+
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+        ],
+      },
+    ];
+  },
+
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals = config.externals || [];
-      // Don't bundle prisma client in a way that breaks it
+    }
+    // Optimize bundle size for client
+    if (!isServer) {
+      config.resolve.fallback = { fs: false, net: false, tls: false, child_process: false };
     }
     return config;
   },
-  // Transpile packages if needed
-  transpilePackages: [],
+
+  transpilePackages: ["date-fns"],
 };
 
 module.exports = nextConfig;

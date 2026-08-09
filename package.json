@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node dev-server.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -14,12 +14,14 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.2",
+    "@libsql/client": "^0.17.4",
+    "@prisma/adapter-libsql": "^7.9.1",
     "@prisma/client": "^5.22.0",
     "@prisma/engines": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "date-fns": "^4.4.0",
     "html5-qrcode": "^2.3.8",
-    "next": "^15.0.0",
+    "next": "^14.2.23",
     "next-auth": "^5.0.0-beta.25",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
@@ -29,6 +31,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@prisma/prisma-fmt-wasm": "^4.17.0-16.27eb2449f178cd9fe1a4b892d732cc4795f75085",
+    "@prisma/prisma-schema-wasm": "^7.10.0-7.561d7b42579a2459cc8edf3788918b626c640023",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.16.11",
     "@types/qrcode": "^1.5.5",

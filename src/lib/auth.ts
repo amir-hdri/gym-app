@@ -4,30 +4,63 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+const AUTH_SECRET = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "gym-app-ultra-secure-jwt-auth-secret-key-32-chars-min";
+
 export const authConfig = {
   adapter: PrismaAdapter(prisma as any),
   session: { strategy: "jwt" as const, maxAge: 30 * 24 * 60 * 60 }, // 30 days
   pages: { signIn: "/sign-in" },
   trustHost: true,
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: AUTH_SECRET,
   providers: [
     Credentials({
-      name: "Phone login",
+      name: "Gym Login",
       credentials: {
         phone: { label: "Phone", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.phone || !credentials?.password) return null;
-        const phone = String(credentials.phone).trim();
+        const identifier = String(credentials.phone).trim();
         const password = String(credentials.password);
+
         try {
-          const user = await prisma.user.findUnique({
-            where: { phone },
+          // Find user by phone or email
+          let user = await prisma.user.findFirst({
+            where: {
+              OR: [
+                { phone: identifier },
+                { email: identifier },
+              ],
+            },
+            include: {
+              staffProfile: true,
+              memberProfile: true,
+            },
           });
+
+          // If not found by direct phone/email, check employeeCode or membershipCode
+          if (!user) {
+            const staff = await prisma.staffProfile.findUnique({
+              where: { employeeCode: identifier },
+              include: { user: true },
+            });
+            if (staff?.user) user = staff.user;
+          }
+
+          if (!user) {
+            const member = await prisma.memberProfile.findUnique({
+              where: { membershipCode: identifier },
+              include: { user: true },
+            });
+            if (member?.user) user = member.user;
+          }
+
           if (!user || !user.isActive || !user.passwordHash) return null;
+
           const ok = await bcrypt.compare(password, user.passwordHash);
           if (!ok) return null;
+
           return {
             id: user.id,
             name: user.name,

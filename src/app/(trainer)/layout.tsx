@@ -184,7 +184,7 @@ export default function TrainerLayout({ children }: { children: ReactNode }) {
         </aside>
 
         {/* Main Workspace */}
-        <main className="flex-1 overflow-y-auto pb-28 lg:pb-8 px-3.5 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto w-full">
+        <main id="main-content" className="flex-1 overflow-y-auto pb-28 lg:pb-8 px-3.5 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto w-full" role="main" aria-label="محتوای اصلی">
           {children}
         </main>
       </div>

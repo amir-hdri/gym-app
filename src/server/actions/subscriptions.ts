@@ -27,7 +27,14 @@ export async function createSubscription(memberId: string, planId: string, start
       const newEnd = addDays(new Date(active.endsAt), plan.durationDays);
       return prisma.subscription.update({
         where: { id: active.id },
-        data: { planId, endsAt: newEnd, status: "ACTIVE", canceledAt: null },
+        data: {
+          planId,
+          endsAt: newEnd,
+          status: "ACTIVE",
+          canceledAt: null,
+          // Reset consumed sessions for session-based plans on renewal/extension
+          sessionsUsed: plan.isSessionBased ? 0 : undefined,
+        },
       });
     }
   }
@@ -62,7 +69,15 @@ export async function renewSubscription(subscriptionId: string) {
 
   const updated = await prisma.subscription.update({
     where: { id: subscriptionId },
-    data: { status: "ACTIVE", startedAt: newStart, endsAt: newEnd, canceledAt: null, pausedUntil: null },
+    data: {
+      status: "ACTIVE",
+      startedAt: newStart,
+      endsAt: newEnd,
+      canceledAt: null,
+      pausedUntil: null,
+      // Reset consumed sessions for session-based plans on renewal/extension
+      sessionsUsed: sub.plan.isSessionBased ? 0 : undefined,
+    },
   });
 
   revalidatePath("/manager/members");

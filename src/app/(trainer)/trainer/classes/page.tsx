@@ -1,9 +1,21 @@
-export const dynamic = "force-dynamic";
+import { PageTitle, SoftCard } from "@/components/TwilightShell";
 
-import { getTrainerDashboardData } from "@/server/actions/trainer-panel";
-import TrainerClassesClient from "@/components/TrainerClassesClient";
-
-export default async function TrainerClassesPage() {
-  const data = await getTrainerDashboardData();
-  return <TrainerClassesClient data={data} />;
+export default function Page() {
+  return (
+    <div>
+      <PageTitle title="Your sessions" />
+      <div className="space-y-3">
+        {[
+          ["Letting Go", "Live tonight · 214 reserved"],
+          ["Ocean Breath", "Weekly · Sundays"],
+          ["Focus Hour", "Draft"],
+        ].map(([t, s]) => (
+          <SoftCard key={t} className="p-5">
+            <p>{t}</p>
+            <p className="text-[13px] text-[#8a847a] mt-1">{s}</p>
+          </SoftCard>
+        ))}
+      </div>
+    </div>
+  );
 }

@@ -1,17 +1,21 @@
-export const dynamic = "force-dynamic";
-import { auth } from "@/lib/auth";
-import { listAttendance } from "@/server/actions/attendance";
-import { redirect } from "next/navigation";
-import AttendanceClient from "@/components/AttendanceClient";
+import { PageTitle, SoftCard } from "@/components/TwilightShell";
 
-export default async function AttendancePage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/sign-in");
-  }
-
-  const logs = JSON.parse(JSON.stringify(await listAttendance(undefined, 50)));
-
-  return <AttendanceClient initialLogs={logs} managerUserId={session.user.id} />;
+export default function Page() {
+  return (
+    <div>
+      <PageTitle title="Presence" sub="Who is sitting right now" />
+      <SoftCard className="p-5 mb-4">
+        <p className="text-[11px] tracking-widest text-[#8a847a]">IN SESSION</p>
+        <p className="font-serif text-[40px] mt-1">214</p>
+      </SoftCard>
+      <div className="space-y-2">
+        {["Letting Go room", "Ocean Breath", "Night Wind"].map((r, i) => (
+          <SoftCard key={r} className="px-4 py-4 flex justify-between">
+            <span>{r}</span>
+            <span className="text-[#8a847a]">{[96, 71, 47][i]} listening</span>
+          </SoftCard>
+        ))}
+      </div>
+    </div>
+  );
 }
-

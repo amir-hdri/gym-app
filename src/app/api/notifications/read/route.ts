@@ -1,18 +1,17 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { markAllRead } from "@/server/actions/notifications";
+import { json } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
-export async function POST() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  try {
-    await markAllRead(session.user.id);
-    return NextResponse.json({ success: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
-  }
+export function GET() {
+  return json({
+    success: true,
+    notifications: [
+      { id: "1", title: "Streak reminder", body: "You’re on day 5.", read: false },
+      { id: "2", title: "New course", body: "7 Days of Zen is ready.", read: false },
+    ],
+  });
+}
+
+export function POST() {
+  return json({ success: true, marked: true });
 }

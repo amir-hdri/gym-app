@@ -1,169 +1,130 @@
-export const dynamic = "force-dynamic";
+"use client";
 
-import { auth } from "@/lib/auth";
-import { getMemberWeeklySchedule } from "@/server/actions/schedules";
-import { getTodayDayOfWeek, getDayNamePersian } from "@/lib/qr";
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { sessions } from "@/lib/catalog";
+import SessionRow from "@/components/SessionRow";
 
-export default async function MemberSchedulePage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/sign-in");
-  }
+const chips = ["All", "Meditation", "Sleep Stories", "Music"];
 
-  const weeklySchedule = await getMemberWeeklySchedule(session.user.id);
-  const currentTodayIndex = getTodayDayOfWeek();
+function ExploreInner() {
+  const params = useSearchParams();
+  const preset = params.get("cat");
+  const [q, setQ] = useState("");
+  const [chip, setChip] = useState(() => {
+    if (preset === "sleep") return "Sleep Stories";
+    if (preset === "music") return "Music";
+    if (preset === "focus" || preset === "stress") return "Meditation";
+    return "All";
+  });
+  const [showCourses, setShowCourses] = useState(false);
+
+  useEffect(() => {
+    if (preset === "sleep") setChip("Sleep Stories");
+    else if (preset === "music") setChip("Music");
+    else if (preset === "focus" || preset === "stress") setChip("Meditation");
+    else if (!preset) setChip("All");
+  }, [preset]);
+
+  const items = useMemo(() => {
+    return sessions.filter((p) => {
+      if (p.kind === "course") return false;
+      const matchQ = `${p.title} ${p.meta} ${p.blurb ?? ""}`.toLowerCase().includes(q.toLowerCase());
+      if (!matchQ) return false;
+      if (chip === "All") return true;
+      if (chip === "Sleep Stories") return p.kind === "sleep";
+      if (chip === "Music") return p.kind === "music";
+      return p.kind === "meditation";
+    });
+  }, [q, chip]);
+
+  const courses = sessions.filter((s) => s.kind === "course");
 
   return (
-    <div className="space-y-4 sm:space-y-5 text-right" dir="rtl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 anim-fade-up">
-        <div>
-          <p className="text-[10px] text-white/30 uppercase tracking-widest mb-1">
-            برنامه هفتگی مربی
-          </p>
-          <h1 className="text-xl sm:text-2xl font-bold gradient-text">زمانبندی و سانس‌های تمرین</h1>
+    <div className="space-y-6">
+      <h1 className="font-serif text-[34px] text-[#f3eee6]">Explore</h1>
+
+      <label className="card-soft h-12 rounded-full flex items-center gap-3 px-4">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a847a" strokeWidth="1.8">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.2-3.2" />
+        </svg>
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Find meditations, sounds..."
+          className="bg-transparent outline-none text-[14px] w-full placeholder:text-[#6f6a62]"
+          aria-label="Search sessions"
+        />
+      </label>
+
+      <div className="flex gap-2 overflow-x-auto no-scrollbar">
+        {chips.map((c) => (
+          <button
+            key={c}
+            onClick={() => {
+              setChip(c);
+              setShowCourses(false);
+            }}
+            className={`h-9 px-4 rounded-full text-[13px] shrink-0 border ${
+              chip === c && !showCourses
+                ? "bg-[#e8dfd2] text-[#1a1a1a] border-transparent"
+                : "bg-transparent text-[#b8b1a5] border-white/10"
+            }`}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+
+      <section>
+        <div className="flex items-end justify-between mb-3">
+          <h2 className="text-[20px] font-medium">Featured Course</h2>
+          <button
+            type="button"
+            onClick={() => setShowCourses((v) => !v)}
+            className="text-[13px] text-[#9a9388] underline underline-offset-4 decoration-white/20 h-auto min-h-0 py-1"
+          >
+            {showCourses ? "Hide" : "See all"}
+          </button>
         </div>
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-[10px] px-3 py-1.5 rounded-xl bg-cyan-500/10 text-cyan-300 font-bold border border-cyan-500/20">
-            امروز: {getDayNamePersian(currentTodayIndex)}
-          </span>
-        </div>
-      </div>
-
-      {/* Overview Card */}
-      <div className="glass-card p-3.5 sm:p-4 rounded-2xl border border-white/10 text-right anim-fade-up">
-        <p className="text-xs font-bold text-white mb-1">
-          تقویم جلسات و سانس‌های تمرینی شما
-        </p>
-        <p className="text-[10px] sm:text-[11px] text-white/50 leading-relaxed">
-          برنامه تمرینی هفتگی شما بر اساس زمانبندی تنظیم‌شده توسط مربی در زیر نمایش داده شده است.
-        </p>
-      </div>
-
-      {/* 7-Day Grouped Weekly Schedule (B6) */}
-      <div className="space-y-3.5 sm:space-y-4 anim-fade-up" style={{ animationDelay: "80ms" }}>
-        {weeklySchedule.map((dayGroup: any, idx: number) => {
-          const isCurrentToday = dayGroup.dayIndex === currentTodayIndex;
-          const hasSchedules = dayGroup.schedules && dayGroup.schedules.length > 0;
-
-          return (
-            <div
-              key={dayGroup.dayIndex}
-              className={`glass-card p-3.5 sm:p-4 rounded-2xl transition-all border ${
-                isCurrentToday
-                  ? "border-emerald-500/40 bg-emerald-950/20 shadow-lg shadow-emerald-950/20"
-                  : "border-white/[0.08]"
-              }`}
-            >
-              {/* Day Header */}
-              <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.06] mb-3">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
-                      isCurrentToday
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                        : "bg-white/[0.04] text-white/60 border border-white/10"
-                    }`}
-                  >
-                    {idx + 1}
-                  </span>
-                  <div>
-                    <h3
-                      className={`text-sm font-bold ${
-                        isCurrentToday ? "text-emerald-300" : "text-white"
-                      }`}
-                    >
-                      {dayGroup.dayName}
-                    </h3>
-                  </div>
-                </div>
-
-                {isCurrentToday && (
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 animate-pulse">
-                    امروز
-                  </span>
-                )}
-              </div>
-
-              {/* Day's Schedules */}
-              {!hasSchedules ? (
-                <div className="py-3 text-center text-xs text-white/30 bg-white/[0.015] rounded-xl border border-dashed border-white/[0.05]">
-                  استراحت یا بدون سانس مشخص
-                </div>
-              ) : (
-                <div className="space-y-2.5 sm:space-y-3">
-                  {dayGroup.schedules.map((sch: any) => (
-                    <div
-                      key={sch.id}
-                      className="p-3 sm:p-3.5 rounded-xl bg-white/[0.025] border border-white/[0.06] space-y-2 hover:border-cyan-500/30 transition-all"
-                    >
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-white">
-                            {sch.title || "سانس تمرینی"}
-                          </span>
-                          <span
-                            className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 font-mono font-bold"
-                            dir="ltr"
-                          >
-                            {sch.startTime} - {sch.endTime}
-                          </span>
-                        </div>
-
-                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/5 text-white/50">
-                          فعال
-                        </span>
-                      </div>
-
-                      {sch.note && (
-                        <p className="text-[10px] text-amber-300/80 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">
-                          نکته مربی: {sch.note}
-                        </p>
-                      )}
-
-                      {/* Connected Routine */}
-                      {sch.routine && (
-                        <div className="mt-2 pt-2 border-t border-white/[0.04]">
-                          <p className="text-[11px] font-semibold text-white/70">
-                            حرکات برنامه: {sch.routine.title}
-                          </p>
-                          {sch.routine.tasks && sch.routine.tasks.length > 0 && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-2">
-                              {sch.routine.tasks.map((t: any, tIdx: number) => (
-                                <div
-                                  key={t.id || tIdx}
-                                  className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.04] text-[10px] flex justify-between items-center"
-                                >
-                                  <span className="text-white/80 truncate">{t.exerciseName}</span>
-                                  <span className="text-cyan-400 font-mono shrink-0 mr-2" dir="ltr">
-                                    {t.sets}×{t.reps}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Back to Dashboard Link */}
-      <div className="pt-2">
-        <Link
-          href="/member/dashboard"
-          className="btn-glass w-full rounded-2xl py-3.5 text-xs font-semibold text-white/70 text-center block hover:text-white transition-all"
-        >
-          &rarr; بازگشت به داشبورد
+        <Link href="/member/bookings?session=zen" className="block relative overflow-hidden rounded-[24px] h-[210px]">
+          <img src="/course-zen.jpg" alt="Misty mountains at sunrise" className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+          <div className="absolute bottom-5 left-5 right-5 text-left">
+            <p className="text-[11px] tracking-[0.16em] text-white/75">7 DAYS OF ZEN</p>
+            <p className="font-serif text-[28px] text-white leading-tight mt-1">Mastering Stillness</p>
+          </div>
         </Link>
-      </div>
+        {showCourses && (
+          <div className="mt-3 space-y-2">
+            {courses.map((c) => (
+              <SessionRow key={c.id} item={c} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <h2 className="text-[20px] font-medium mb-3">Popular Now</h2>
+        <div className="space-y-2.5">
+          {items.map((p) => (
+            <SessionRow key={p.id} item={p} />
+          ))}
+          {items.length === 0 && (
+            <p className="text-sm text-[#8a847a] py-6 text-center">No sessions match that search.</p>
+          )}
+        </div>
+      </section>
     </div>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={<div className="pt-10 text-[#8a847a]">Loading…</div>}>
+      <ExploreInner />
+    </Suspense>
   );
 }

@@ -52,8 +52,8 @@ const nextConfig = {
             value: "strict-origin-when-cross-origin",
           },
           {
-            key: "X-Frame-Options",
-            value: "DENY",
+            key: "Content-Security-Policy",
+            value: "frame-ancestors *",
           },
           {
             key: "Permissions-Policy",

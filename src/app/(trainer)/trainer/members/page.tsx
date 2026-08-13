@@ -1,9 +1,20 @@
-export const dynamic = "force-dynamic";
+import { PageTitle, SoftCard } from "@/components/TwilightShell";
 
-import { getTrainerDashboardData } from "@/server/actions/trainer-panel";
-import TrainerMembersClient from "@/components/TrainerMembersClient";
-
-export default async function TrainerMembersPage() {
-  const data = await getTrainerDashboardData();
-  return <TrainerMembersClient data={data} />;
+export default function Page() {
+  return (
+    <div>
+      <PageTitle title="Your students" sub="People following your voice" />
+      <div className="space-y-2.5">
+        {["Sarah Chen", "Noah Patel", "Amelia Ruiz", "Leo Park"].map((n) => (
+          <SoftCard key={n} className="px-4 py-4 flex items-center gap-3">
+            <div className="w-11 h-11 rounded-full bg-[#242424]" />
+            <div>
+              <p>{n}</p>
+              <p className="text-[12px] text-[#8a847a]">Completed 3 of your sits</p>
+            </div>
+          </SoftCard>
+        ))}
+      </div>
+    </div>
+  );
 }

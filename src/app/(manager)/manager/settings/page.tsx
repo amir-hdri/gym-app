@@ -1,21 +1,24 @@
-export const dynamic = "force-dynamic";
-import { prisma } from "@/lib/prisma";
-import SettingsClient from "@/components/SettingsClient";
+import Link from "next/link";
+import { PageTitle, SoftCard } from "@/components/TwilightShell";
 
-export default async function SettingsPage() {
-  let branch: any = null;
-  try {
-    branch = await prisma.branch.findFirst();
-  } catch {}
-
-  // Fallback default branch data for display
-  const defaultBranch = branch || {
-    name: "باشگاه ورزشی من",
-    phone: "۰۲۱۱۲۳۴۵۶۷۸",
-    address: "خیابان آزادی، پلاک ۴",
-    city: "تهران",
-    email: "manager@gym.com",
-  };
-
-  return <SettingsClient initialBranch={JSON.parse(JSON.stringify(defaultBranch))} />;
+export default function Page() {
+  return (
+    <div>
+      <PageTitle title="Settings" sub="Studio preferences" />
+      <SoftCard className="divide-y divide-white/[0.06]">
+        {[
+          ["/manager/plans", "Membership plans"],
+          ["/manager/freeze-requests", "Pause requests"],
+          ["/manager/notifications", "Studio alerts"],
+          ["/manager/attendance", "Presence & rooms"],
+          ["/sign-in", "Sign out"],
+        ].map(([href, label]) => (
+          <Link key={href} href={href} className="flex items-center justify-between px-4 h-[56px] w-full text-[15px]">
+            {label}
+            <span className="text-[#6f6a62]">›</span>
+          </Link>
+        ))}
+      </SoftCard>
+    </div>
+  );
 }

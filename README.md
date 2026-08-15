@@ -1,23 +1,53 @@
-# Twilight Meditation
+# Gym App
 
-A mobile-first meditation app UI: home, explore, breathe, journey, and profile — plus studio and guide desks.
+A full-stack gym management platform: member, coach, and admin portals with membership plans, training programs, goals, check-ins (incl. staff QR check-in), payments, and dashboards.
 
-## Run
+## Structure (monorepo)
+
+```
+apps/web       Next.js 16 (React 19) frontend — member/coach/admin portals
+backend/       FastAPI + SQLAlchemy + SQLite backend — REST API under /api/v1
+packages/      shared workspace packages (reserved)
+```
+
+## Quick start
+
+### Backend
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate          # macOS/Linux
+pip install -r requirements.txt
+export SECRET_KEY="change-me"
+uvicorn app.main:app --reload --port 8000
+```
+
+API docs at http://localhost:8000/docs
+
+### Frontend
 
 ```bash
 npm install
-npm run dev
+npm run dev          # starts apps/web via turbo
 ```
 
-Open the preview and start on Home. Bottom tabs: Home, Explore, Breathe, Journey, Profile.
+Set `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:8000`) in `apps/web/.env.local`.
 
-Account settings on Profile open subscription, privacy, notifications, and the studio/guide desks.
+## Scripts
 
-## Screens
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start frontend dev server |
+| `npm run build` | Build all workspaces |
+| `npm run type-check` | TypeScript check |
+| `npm run lint` | ESLint |
+| `npm test` | Vitest (run inside `apps/web`) |
 
-- **Member** — daily recommendation, catalog, player, box breath, streaks, Sarah profile
-- **Studio** — members, sessions, billing, plans, presence, guides
-- **Guide** — rooms, students, library, growth
-- **Auth** — sign in / sign up / reset (demo, no backend required)
+## Roles
 
-Visual system: charcoal `#0c0c0c`, cream type, Cormorant headlines, Inter UI, pill cards, floating tab bar.
+- `athlete` — member portal: workouts, goals, check-in, membership, payments
+- `coach` — coach portal: athletes, exercises, programs, templates
+- `admin` / `receptionist` — admin portal: members, coaches, plans, payments, dashboard
+
+Portals are protected client-side (`RequireAuth`) and the backend enforces roles on staff endpoints.

@@ -3,6 +3,9 @@ node_modules/
 .pnp
 .pnp.js
 
+# Turbo
+.turbo/
+
 # Next.js
 .next/
 out/
@@ -10,12 +13,18 @@ build/
 *.tsbuildinfo
 next-env.d.ts
 
-# Prisma / database
-prisma/*.db
-prisma/*.db-journal
+# Python
+.venv/
+venv/
+*.pyc
+__pycache__/
+
+# Database
 *.db
 *.sqlite
 *.sqlite3
+prisma/*.db
+prisma/*.db-journal
 
 # Env
 .env
@@ -37,3 +46,10 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# IDE
+.idea/
+.vscode/
+
+# Dist
+dist/

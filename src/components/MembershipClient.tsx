@@ -44,6 +44,7 @@ export default function MembershipClient({ member, plans }: MembershipClientProp
   const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
   const [isFreezeModalOpen, setIsFreezeModalOpen] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState("");
+  const selectedPlan = plans.find(p => p.id === selectedPlanId);
   const [paymentMethod, setPaymentMethod] = useState<"NONE" | "ONLINE" | "TRANSFER">("NONE");
 
   // Card-to-card inputs
@@ -717,9 +718,7 @@ export default function MembershipClient({ member, plans }: MembershipClientProp
                     </div>
                     <div className="text-left font-mono">
                       <p className="opacity-40">مبلغ واریزی</p>
-                      <p className="font-bold text-cyan-400">
-                        {Number(plans.find((p) => p.id === selectedPlanId)?.price).toLocaleString("fa-IR")} تومان
-                      </p>
+                      <p className="font-bold text-cyan-400">{Number(selectedPlan?.price).toLocaleString("fa-IR")} تومان</p>
                     </div>
                   </div>
                 </div>
@@ -782,9 +781,7 @@ export default function MembershipClient({ member, plans }: MembershipClientProp
                   </div>
                   <div className="text-left font-mono">
                     <p className="text-white/40">مبلغ خرید</p>
-                    <p className="font-bold text-base sm:text-lg text-emerald-400">
-                      {Number(plans.find((p) => p.id === selectedPlanId)?.price).toLocaleString("fa-IR")} تومان
-                    </p>
+                    <p className="font-bold text-lg text-emerald-400">{Number(selectedPlan?.price).toLocaleString("fa-IR")} تومان</p>
                   </div>
                 </div>
 

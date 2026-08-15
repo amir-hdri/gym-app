@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Heart, Sparkles } from "lucide-react";
 import { ActivityRings } from "@/components/ui/ActivityRings";
 

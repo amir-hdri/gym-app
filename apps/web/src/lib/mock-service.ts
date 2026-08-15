@@ -6,9 +6,9 @@ import type {
   AthleteDashboardData, ApiResponse, PaginatedResponse,
 } from "./types";
 import {
-  mockUsers, mockCoaches, mockAthletes, mockBranches, mockPlans,
+  mockUsers, mockAthletes, mockBranches, mockPlans,
   mockExercises, mockMemberships, mockGoals, mockCheckIns,
-  mockPayments, mockNotifications, mockPrograms, mockDashboardStats,
+  mockPayments, mockNotifications, mockDashboardStats,
   createMockPrograms, createMockNotifications, generateId,
 } from "./mock-data";
 

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Phone, Mail, Calendar, Users, ChevronRight, Edit, Trash2, Award, Star } from "lucide-react";
+import { Phone, Mail, Calendar, ChevronRight, Edit, Trash2, Award, Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";

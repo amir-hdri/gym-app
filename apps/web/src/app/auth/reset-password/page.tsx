@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +31,10 @@ function ResetPasswordContent() {
   const token = searchParams.get("token") || "";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDone, setIsDone] = useState(false);
+
+  useEffect(() => {
+    if (!token) router.replace("/auth/forgot-password");
+  }, [token, router]);
 
   const {
     register,

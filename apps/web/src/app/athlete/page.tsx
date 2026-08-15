@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dumbbell, Clock, Flame, Calendar, CheckCircle2, Trophy, TrendingUp, Activity } from "lucide-react";
+import { Dumbbell, Clock, Calendar, CheckCircle2, Trophy, TrendingUp, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Progress } from "@/components/ui/Progress";
 import { Button } from "@/components/ui/Button";
@@ -72,7 +72,7 @@ export default function AthleteDashboard() {
           { label: "جلسات قابل استفاده", value: membership ? `${formatPersianNumber(membership.sessionsRemaining)} جلسه` : "—", sub: membership ? `از ${formatPersianNumber(membership.sessionsTotal)} جلسه` : "داده‌ای ثبت نشده", icon: Clock, accent: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400" },
           { label: "تمرین امروز", value: `${formatPersianNumber(todayExercises.length)} حرکت`, sub: dashboardData?.currentProgram?.name ?? "برنامه‌ای ثبت نشده", icon: Dumbbell, accent: "bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400" },
           { label: "کل جلسات", value: stats ? formatPersianNumber(stats.totalSessions) : "—", sub: stats ? "جلسه" : "داده‌ای ثبت نشده", icon: Trophy, accent: "bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400" },
-        ].map((stat, i) => (
+        ].map((stat) => (
           <StaggerScrollItem key={stat.label}>
             <Card glass hover className="relative overflow-hidden">
               <CardContent className="p-5">

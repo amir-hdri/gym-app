@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { FadeIn } from "@/components/animations/FadeIn";
 import { StaggerContainer, StaggerItem } from "@/components/animations/Stagger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -18,12 +17,6 @@ const categoryColors: Record<string, string> = {
   muscle_gain: "bg-activity-move",
   strength: "bg-blue-500",
   endurance: "bg-purple-500",
-};
-
-const statusConfig: Record<string, { label: string; variant: "secondary" | "success" | "warning" }> = {
-  in_progress: { label: "در حال انجام", variant: "warning" },
-  completed: { label: "تکمیل شده", variant: "success" },
-  achieved: { label: "تکمیل شده", variant: "success" },
 };
 
 const categoryLabels: Record<string, string> = {
@@ -65,8 +58,6 @@ export default function GoalsPage() {
       ) : (
         <StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {goals.map((goal) => {
-            const progress = calculateProgress(goal.currentValue, goal.targetValue);
-            const daysRemaining = calculateDaysRemaining(goal.targetDate);
             const statusVariant = goal.status === "achieved" ? ("success" as const) : ("warning" as const);
             const statusLabel = goal.status === "achieved" ? "تکمیل شده" : "در حال انجام";
 

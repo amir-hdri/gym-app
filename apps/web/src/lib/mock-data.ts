@@ -1,8 +1,7 @@
 import type {
   User, Branch, MembershipPlan, Membership, Exercise,
   TrainingProgram, ProgramExercise, Goal, CheckIn,
-  Payment, Notification, DashboardStats, AthleteDashboardData,
-  CoachDashboardData,
+  Payment, Notification, DashboardStats,
 } from "./types";
 
 export function generateId(): string {
@@ -25,7 +24,6 @@ export const mockUsers: User[] = [
   { id: "u13", email: "mousavi@gympro.ir", firstName: "فرهاد", lastName: "موسوی", phone: "09123334444", role: "athlete", status: "suspended", avatarUrl: "", branchId: "b2", branchName: "باشگاه غرب", createdAt: "2024-11-01T00:00:00Z", updatedAt: "2025-03-01T00:00:00Z" },
 ];
 
-export const mockCoaches: User[] = mockUsers.filter(u => u.role === "coach");
 export const mockAthletes: User[] = mockUsers.filter(u => u.role === "athlete");
 
 export const mockBranches: Branch[] = [
@@ -177,8 +175,6 @@ export function createMockPrograms(): TrainingProgram[] {
     },
   ];
 }
-
-export const mockPrograms: TrainingProgram[] = createMockPrograms();
 
 export const mockDashboardStats: DashboardStats = {
   totalMembers: 8,

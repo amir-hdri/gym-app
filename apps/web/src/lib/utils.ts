@@ -90,31 +90,6 @@ export function truncate(str: string, length: number): string {
   return str.slice(0, length) + "...";
 }
 
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-  return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-export function throttle<T extends (...args: unknown[]) => unknown>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle = false;
-  return (...args: Parameters<T>) => {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
-}
-
 export function calculateProgress(current: number, target: number): number {
   if (target === 0) return 0;
   const progress = (current / target) * 100;
@@ -128,7 +103,7 @@ export function calculateDaysRemaining(targetDate: string | Date): number {
   return Math.ceil(diffMs / 86400000);
 }
 
-export function getDayName(dayIndex: number, locale = "fa-IR"): string {
+export function getDayName(dayIndex: number): string {
   const days = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"];
   return days[dayIndex] || "";
 }

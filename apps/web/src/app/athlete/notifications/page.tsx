@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { FadeIn } from "@/components/animations/FadeIn";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";

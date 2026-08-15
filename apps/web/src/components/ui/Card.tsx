@@ -4,11 +4,10 @@ import { cn } from "@/lib/utils";
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   glass?: boolean;
   hover?: boolean;
-  noPadding?: boolean;
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, glass, hover, noPadding, ...props }, ref) => (
+  ({ className, glass, hover, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(

@@ -1,9 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { mockService } from "@/lib/mock-service";
 import type {
-  User, MembershipPlan, Membership, Exercise, TrainingProgram,
-  Goal, CheckIn, Payment, Notification, DashboardStats,
-  AthleteDashboardData, CoachDashboardData, Branch,
+  User, MembershipPlan, Exercise, TrainingProgram,
+  Goal, Payment,
 } from "@/lib/types";
 
 const Q = {

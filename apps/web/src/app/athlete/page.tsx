@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Dumbbell, Clock, Calendar, CheckCircle2, Trophy, TrendingUp, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Progress } from "@/components/ui/Progress";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { ScrollReveal, StaggerScroll, StaggerScrollItem } from "@/components/animations/ScrollReveal";
 import { formatPersianNumber, formatDate, calculateProgress, cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useAthleteDashboard } from "@/hooks/use-api";
+import { useAthleteDashboard, useCompleteProgramExercise } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { WorkoutExerciseRow } from "./WorkoutExerciseRow";
 import { SessionDurationChart } from "@/components/analytics/Charts";
@@ -20,6 +21,7 @@ export default function AthleteDashboard() {
 
   const [exerciseOverrides, setExerciseOverrides] = useState<Record<string, boolean>>({});
   const [checkedIn, setCheckedIn] = useState(false);
+  const completeMutation = useCompleteProgramExercise();
 
   const name = user?.firstName;
   const today = new Date();
@@ -29,6 +31,7 @@ export default function AthleteDashboard() {
   if (isError) return <ErrorDisplay message={error?.message} />;
 
   const dashboardData = data?.data;
+  const currentProgramId = (dashboardData as { currentProgram?: { id: string } } | undefined)?.currentProgram?.id;
   const todayExercises = dashboardData?.todayExercises || [];
   const stats = dashboardData?.stats;
   const recentGoals = dashboardData?.upcomingGoals || [];
@@ -68,10 +71,10 @@ export default function AthleteDashboard() {
       {/* Quick Stats - Horizontal Row */}
       <StaggerScroll className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4 gap-4" stagger={0.05}>
         {[
-          { label: "اعتبار عضویت", value: membership ? formatDate(membership.endDate) : "ثبت نشده", sub: membership?.status === "active" ? "عضویت فعال" : "عضویت فعال ندارید", icon: Calendar, accent: "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400" },
-          { label: "جلسات قابل استفاده", value: membership ? `${formatPersianNumber(membership.sessionsRemaining)} جلسه` : "—", sub: membership ? `از ${formatPersianNumber(membership.sessionsTotal)} جلسه` : "داده‌ای ثبت نشده", icon: Clock, accent: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400" },
-          { label: "تمرین امروز", value: `${formatPersianNumber(todayExercises.length)} حرکت`, sub: dashboardData?.currentProgram?.name ?? "برنامه‌ای ثبت نشده", icon: Dumbbell, accent: "bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400" },
-          { label: "کل جلسات", value: stats ? formatPersianNumber(stats.totalSessions) : "—", sub: stats ? "جلسه" : "داده‌ای ثبت نشده", icon: Trophy, accent: "bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400" },
+          { label: "اعتبار عضویت", value: membership ? formatDate(membership.endDate) : "ثبت نشده", sub: membership?.status === "active" ? "عضویت فعال" : "عضویت فعال ندارید", icon: Calendar, accent: "bg-activity-stand/10 text-activity-stand" },
+          { label: "جلسات قابل استفاده", value: membership ? `${formatPersianNumber(membership.sessionsRemaining)} جلسه` : "—", sub: membership ? `از ${formatPersianNumber(membership.sessionsTotal)} جلسه` : "داده‌ای ثبت نشده", icon: Clock, accent: "bg-success/10 text-success" },
+          { label: "تمرین امروز", value: `${formatPersianNumber(todayExercises.length)} حرکت`, sub: dashboardData?.currentProgram?.name ?? "برنامه‌ای ثبت نشده", icon: Dumbbell, accent: "bg-warning/10 text-warning" },
+          { label: "کل جلسات", value: stats ? formatPersianNumber(stats.totalSessions) : "—", sub: stats ? "جلسه" : "داده‌ای ثبت نشده", icon: Trophy, accent: "bg-primary/10 text-primary" },
         ].map((stat) => (
           <StaggerScrollItem key={stat.label}>
             <Card glass hover className="relative overflow-hidden">
@@ -127,7 +130,15 @@ export default function AthleteDashboard() {
                         key={exercise.id}
                         exercise={exercise}
                         checked={isChecked}
-                        onCheckedChange={(checked) => setExerciseOverrides((current) => ({ ...current, [exercise.id]: checked }))}
+                        onCheckedChange={(checked) => {
+                          setExerciseOverrides((current) => ({ ...current, [exercise.id]: checked }));
+                          if (checked && currentProgramId && exercise.id) {
+                            completeMutation.mutate(
+                              { programId: currentProgramId, exerciseId: exercise.id },
+                              { onError: () => toast.error("ثبت تمرین ناموفق بود") },
+                            );
+                          }
+                        }}
                       />
                     );
                   }) : (

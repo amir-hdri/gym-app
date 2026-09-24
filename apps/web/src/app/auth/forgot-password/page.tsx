@@ -63,8 +63,8 @@ export default function ForgotPasswordPage() {
 
             {isSent ? (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-4">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30">
-                  <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success/10">
+                  <CheckCircle2 className="h-7 w-7 text-success" />
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   لینک بازیابی به ایمیل شما ارسال شد. لطفاً صندوق ورودی خود را بررسی کنید.
@@ -88,6 +88,8 @@ export default function ForgotPasswordPage() {
                       placeholder="your@email.com"
                       error={errors.email?.message}
                       className="pr-10"
+                      autoComplete="email"
+                      inputMode="email"
                       {...register("email")}
                     />
                   </div>

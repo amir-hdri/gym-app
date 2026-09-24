@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { toast } from "sonner";
 import { Save } from "lucide-react";
+import { FadeIn } from "@/components/animations/FadeIn";
 
 export default function SettingsPage() {
   const [form, setForm] = useState({
@@ -29,6 +30,7 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">مدیریت تنظیمات باشگاه</p>
       </div>
 
+      <FadeIn>
       <Card glass>
         <CardHeader>
           <CardTitle>بخش باشگاه</CardTitle>
@@ -75,7 +77,9 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </FadeIn>
 
+      <FadeIn delay={0.1}>
       <Card glass>
         <CardHeader>
           <CardTitle>بخش قیمت‌گذاری</CardTitle>
@@ -103,13 +107,16 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </FadeIn>
 
+      <FadeIn delay={0.2}>
       <div className="flex justify-end">
         <Button onClick={() => toast.success("تنظیمات با موفقیت ذخیره شد")} className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg shadow-green-500/10 hover:bg-white/80">
           <Save className="ml-2 h-4 w-4" />
           ذخیره تنظیمات
         </Button>
       </div>
+      </FadeIn>
     </div>
   );
 }

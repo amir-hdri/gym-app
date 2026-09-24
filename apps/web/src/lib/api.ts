@@ -1,7 +1,31 @@
 import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from "axios";
-import type { ApiResponse } from "./types";
+import type {
+  ApiResponse,
+  PaginatedResponse,
+  User,
+  Branch,
+  MembershipPlan,
+  Membership,
+  Exercise,
+  TrainingProgram,
+  ProgramExercise,
+  Goal,
+  CheckIn,
+  Payment,
+  Notification,
+  DashboardStats,
+  AthleteDashboardData,
+  CoachDashboardData,
+  AuthTokens,
+} from "./types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+interface AuthPayload {
+  user: User;
+  tokens: AuthTokens;
+}
+
+const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = RAW_API_URL.replace(/\/$/, "");
 
 class ApiClient {
   private client: AxiosInstance;
@@ -102,244 +126,255 @@ class ApiClient {
   }
 
   // ---- Auth ----
-  async login(credentials: { email: string; password: string; rememberMe?: boolean }) {
-    const res = await this.client.post<ApiResponse>("/auth/login", credentials);
+  async login(credentials: { email: string; password: string; rememberMe?: boolean }): Promise<ApiResponse<AuthPayload>> {
+    // rememberMe is client-only; the backend accepts email+password only.
+    const { email, password } = credentials;
+    const res = await this.client.post<ApiResponse<AuthPayload>>("/auth/login", { email, password });
     return res.data;
   }
 
-  async register(data: { email: string; password: string; firstName: string; lastName: string; phone: string; role: string; branchId?: string }) {
-    const res = await this.client.post<ApiResponse>("/auth/register", data);
+  async register(data: { email: string; password: string; firstName: string; lastName: string; phone: string; branchId?: string }): Promise<ApiResponse<AuthPayload>> {
+    const res = await this.client.post<ApiResponse<AuthPayload>>("/auth/register", data);
     return res.data;
   }
 
-  async refreshToken(refreshToken: string) {
-    const res = await this.client.post<ApiResponse>("/auth/refresh", { refreshToken });
+  async refreshToken(refreshToken: string): Promise<ApiResponse<AuthTokens>> {
+    const res = await this.client.post<ApiResponse<AuthTokens>>("/auth/refresh", { refreshToken });
     return res.data;
   }
 
-  async logout() {
+  async logout(): Promise<ApiResponse> {
     const res = await this.client.post<ApiResponse>("/auth/logout");
     return res.data;
   }
 
-  async getProfile() {
-    const res = await this.client.get<ApiResponse>("/auth/profile");
+  async getProfile(): Promise<ApiResponse<User>> {
+    const res = await this.client.get<ApiResponse<User>>("/auth/profile");
     return res.data;
   }
 
   // ---- Users ----
-  async getUsers(params?: Record<string, unknown>) {
-    const res = await this.client.get("/users", { params });
+  async getUsers(params?: Record<string, unknown>): Promise<PaginatedResponse<User>> {
+    const res = await this.client.get<PaginatedResponse<User>>("/users", { params });
     return res.data;
   }
 
-  async getUser(id: string) {
-    const res = await this.client.get(`/users/${id}`);
+  async getUser(id: string): Promise<ApiResponse<User>> {
+    const res = await this.client.get<ApiResponse<User>>(`/users/${id}`);
     return res.data;
   }
 
-  async createUser(data: Record<string, unknown>) {
-    const res = await this.client.post("/users", data);
+  async createUser(data: Record<string, unknown>): Promise<ApiResponse<User>> {
+    const res = await this.client.post<ApiResponse<User>>("/users", data);
     return res.data;
   }
 
-  async updateUser(id: string, data: Record<string, unknown>) {
-    const res = await this.client.put(`/users/${id}`, data);
+  async updateUser(id: string, data: Record<string, unknown>): Promise<ApiResponse<User>> {
+    const res = await this.client.put<ApiResponse<User>>(`/users/${id}`, data);
     return res.data;
   }
 
-  async deleteUser(id: string) {
-    const res = await this.client.delete(`/users/${id}`);
+  async deleteUser(id: string): Promise<ApiResponse> {
+    const res = await this.client.delete<ApiResponse>(`/users/${id}`);
     return res.data;
   }
 
   // ---- Branches ----
-  async getBranches() {
-    const res = await this.client.get("/branches");
+  async getBranches(): Promise<PaginatedResponse<Branch>> {
+    const res = await this.client.get<PaginatedResponse<Branch>>("/branches");
     return res.data;
   }
 
-  async getBranch(id: string) {
-    const res = await this.client.get(`/branches/${id}`);
+  async getBranch(id: string): Promise<ApiResponse<Branch>> {
+    const res = await this.client.get<ApiResponse<Branch>>(`/branches/${id}`);
     return res.data;
   }
 
   // ---- Membership Plans ----
-  async getMembershipPlans() {
-    const res = await this.client.get("/membership-plans");
+  async getMembershipPlans(): Promise<PaginatedResponse<MembershipPlan>> {
+    const res = await this.client.get<PaginatedResponse<MembershipPlan>>("/membership-plans");
     return res.data;
   }
 
-  async getMembershipPlan(id: string) {
-    const res = await this.client.get(`/membership-plans/${id}`);
+  async getMembershipPlan(id: string): Promise<ApiResponse<MembershipPlan>> {
+    const res = await this.client.get<ApiResponse<MembershipPlan>>(`/membership-plans/${id}`);
     return res.data;
   }
 
-  async createMembershipPlan(data: Record<string, unknown>) {
-    const res = await this.client.post("/membership-plans", data);
+  async createMembershipPlan(data: Record<string, unknown>): Promise<ApiResponse<MembershipPlan>> {
+    const res = await this.client.post<ApiResponse<MembershipPlan>>("/membership-plans", data);
     return res.data;
   }
 
-  async updateMembershipPlan(id: string, data: Record<string, unknown>) {
-    const res = await this.client.put(`/membership-plans/${id}`, data);
+  async updateMembershipPlan(id: string, data: Record<string, unknown>): Promise<ApiResponse<MembershipPlan>> {
+    const res = await this.client.put<ApiResponse<MembershipPlan>>(`/membership-plans/${id}`, data);
     return res.data;
   }
 
   // ---- Memberships ----
-  async getMemberships(params?: Record<string, unknown>) {
-    const res = await this.client.get("/memberships", { params });
+  async getMemberships(params?: Record<string, unknown>): Promise<PaginatedResponse<Membership>> {
+    const res = await this.client.get<PaginatedResponse<Membership>>("/memberships", { params });
     return res.data;
   }
 
-  async getMembership(id: string) {
-    const res = await this.client.get(`/memberships/${id}`);
+  async getMembership(id: string): Promise<ApiResponse<Membership>> {
+    const res = await this.client.get<ApiResponse<Membership>>(`/memberships/${id}`);
     return res.data;
   }
 
-  async createMembership(data: Record<string, unknown>) {
-    const res = await this.client.post("/memberships", data);
+  async createMembership(data: Record<string, unknown>): Promise<ApiResponse<Membership>> {
+    const res = await this.client.post<ApiResponse<Membership>>("/memberships", data);
     return res.data;
   }
 
-  async freezeMembership(id: string, data: { reason: string; endDate?: string }) {
-    const res = await this.client.post(`/memberships/${id}/freeze`, data);
+  async freezeMembership(id: string, data: { reason?: string; endDate?: string }): Promise<ApiResponse<Membership>> {
+    // Backend MembershipUpdate contract uses freezeReason/freezeEndDate.
+    const res = await this.client.post<ApiResponse<Membership>>(`/memberships/${id}/freeze`, {
+      freezeReason: data.reason,
+      freezeEndDate: data.endDate,
+    });
     return res.data;
   }
 
-  async unfreezeMembership(id: string) {
-    const res = await this.client.post(`/memberships/${id}/unfreeze`);
+  async unfreezeMembership(id: string): Promise<ApiResponse<Membership>> {
+    const res = await this.client.post<ApiResponse<Membership>>(`/memberships/${id}/unfreeze`);
     return res.data;
   }
 
   // ---- Training Programs ----
-  async getTrainingPrograms(params?: Record<string, unknown>) {
-    const res = await this.client.get("/training-programs", { params });
+  async getTrainingPrograms(params?: Record<string, unknown>): Promise<PaginatedResponse<TrainingProgram>> {
+    const res = await this.client.get<PaginatedResponse<TrainingProgram>>("/training-programs", { params });
     return res.data;
   }
 
-  async getTrainingProgram(id: string) {
-    const res = await this.client.get(`/training-programs/${id}`);
+  async getTrainingProgram(id: string): Promise<ApiResponse<TrainingProgram>> {
+    const res = await this.client.get<ApiResponse<TrainingProgram>>(`/training-programs/${id}`);
     return res.data;
   }
 
-  async createTrainingProgram(data: Record<string, unknown>) {
-    const res = await this.client.post("/training-programs", data);
+  async createTrainingProgram(data: Record<string, unknown>): Promise<ApiResponse<TrainingProgram>> {
+    const res = await this.client.post<ApiResponse<TrainingProgram>>("/training-programs", data);
     return res.data;
   }
 
-  async updateTrainingProgram(id: string, data: Record<string, unknown>) {
-    const res = await this.client.put(`/training-programs/${id}`, data);
+  async updateTrainingProgram(id: string, data: Record<string, unknown>): Promise<ApiResponse<TrainingProgram>> {
+    const res = await this.client.put<ApiResponse<TrainingProgram>>(`/training-programs/${id}`, data);
     return res.data;
   }
 
-  async deleteTrainingProgram(id: string) {
-    const res = await this.client.delete(`/training-programs/${id}`);
+  async deleteTrainingProgram(id: string): Promise<ApiResponse> {
+    const res = await this.client.delete<ApiResponse>(`/training-programs/${id}`);
     return res.data;
   }
 
-  async completeProgramExercise(programId: string, exerciseId: string, data: Record<string, unknown>) {
-    const res = await this.client.post(`/training-programs/${programId}/exercises/${exerciseId}/complete`, data);
+  async completeProgramExercise(programId: string, exerciseId: string, data: Record<string, unknown>): Promise<ApiResponse<ProgramExercise>> {
+    const res = await this.client.post<ApiResponse<ProgramExercise>>(`/training-programs/${programId}/exercises/${exerciseId}/complete`, data);
     return res.data;
   }
 
   // ---- Exercises ----
-  async getExercises(params?: Record<string, unknown>) {
-    const res = await this.client.get("/exercises", { params });
+  async getExercises(params?: Record<string, unknown>): Promise<PaginatedResponse<Exercise>> {
+    const res = await this.client.get<PaginatedResponse<Exercise>>("/exercises", { params });
     return res.data;
   }
 
-  async getExercise(id: string) {
-    const res = await this.client.get(`/exercises/${id}`);
+  async getExercise(id: string): Promise<ApiResponse<Exercise>> {
+    const res = await this.client.get<ApiResponse<Exercise>>(`/exercises/${id}`);
     return res.data;
   }
 
-  async createExercise(data: Record<string, unknown>) {
-    const res = await this.client.post("/exercises", data);
+  async createExercise(data: Record<string, unknown>): Promise<ApiResponse<Exercise>> {
+    const res = await this.client.post<ApiResponse<Exercise>>("/exercises", data);
     return res.data;
   }
 
   // ---- Goals ----
-  async getGoals(params?: Record<string, unknown>) {
-    const res = await this.client.get("/goals", { params });
+  async getGoals(params?: Record<string, unknown>): Promise<PaginatedResponse<Goal>> {
+    const res = await this.client.get<PaginatedResponse<Goal>>("/goals", { params });
     return res.data;
   }
 
-  async getGoal(id: string) {
-    const res = await this.client.get(`/goals/${id}`);
+  async getGoal(id: string): Promise<ApiResponse<Goal>> {
+    const res = await this.client.get<ApiResponse<Goal>>(`/goals/${id}`);
     return res.data;
   }
 
-  async createGoal(data: Record<string, unknown>) {
-    const res = await this.client.post("/goals", data);
+  async createGoal(data: Record<string, unknown>): Promise<ApiResponse<Goal>> {
+    const res = await this.client.post<ApiResponse<Goal>>("/goals", data);
     return res.data;
   }
 
-  async updateGoalProgress(id: string, currentValue: number) {
-    const res = await this.client.post(`/goals/${id}/progress`, { currentValue });
+  async updateGoalProgress(id: string, currentValue: number): Promise<ApiResponse<Goal>> {
+    const res = await this.client.post<ApiResponse<Goal>>(`/goals/${id}/progress`, { currentValue });
     return res.data;
   }
 
   // ---- Check-ins ----
-  async checkIn(data: { userId: string; branchId: string }) {
-    const res = await this.client.post("/check-ins", data);
+  async checkIn(data: { userId: string; branchId: string }): Promise<ApiResponse<CheckIn>> {
+    const res = await this.client.post<ApiResponse<CheckIn>>("/check-ins", data);
     return res.data;
   }
 
-  async checkOut(data: { checkInId: string }) {
-    const res = await this.client.post("/check-ins/check-out", data);
+  async checkOut(data: { checkInId: string }): Promise<ApiResponse<CheckIn>> {
+    const res = await this.client.post<ApiResponse<CheckIn>>("/check-ins/check-out", data);
     return res.data;
   }
 
-  async qrCheckIn(data: { code: string }) {
-    const res = await this.client.post("/check-ins/qr/check-in", data);
+  async qrCheckIn(data: { code: string }): Promise<ApiResponse<CheckIn>> {
+    const res = await this.client.post<ApiResponse<CheckIn>>("/check-ins/qr/check-in", data);
     return res.data;
   }
 
-  async getCheckIns(params?: Record<string, unknown>) {
-    const res = await this.client.get("/check-ins", { params });
+  async getCheckIns(params?: Record<string, unknown>): Promise<PaginatedResponse<CheckIn>> {
+    const res = await this.client.get<PaginatedResponse<CheckIn>>("/check-ins", { params });
     return res.data;
   }
 
   // ---- Payments ----
-  async getPayments(params?: Record<string, unknown>) {
-    const res = await this.client.get("/payments", { params });
+  async getPayments(params?: Record<string, unknown>): Promise<PaginatedResponse<Payment>> {
+    const res = await this.client.get<PaginatedResponse<Payment>>("/payments", { params });
     return res.data;
   }
 
-  async createPayment(data: Record<string, unknown>) {
-    const res = await this.client.post("/payments", data);
+  async getPayment(id: string): Promise<ApiResponse<Payment>> {
+    const res = await this.client.get<ApiResponse<Payment>>(`/payments/${id}`);
+    return res.data;
+  }
+
+  async createPayment(data: Record<string, unknown>): Promise<ApiResponse<Payment>> {
+    const res = await this.client.post<ApiResponse<Payment>>("/payments", data);
     return res.data;
   }
 
   // ---- Dashboard ----
-  async getDashboardStats() {
-    const res = await this.client.get("/dashboard/stats");
+  async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
+    const res = await this.client.get<ApiResponse<DashboardStats>>("/dashboard/stats");
     return res.data;
   }
 
-  async getAthleteDashboard(athleteId: string) {
-    const res = await this.client.get(`/dashboard/athlete/${athleteId}`);
+  async getAthleteDashboard(athleteId: string): Promise<ApiResponse<AthleteDashboardData>> {
+    const res = await this.client.get<ApiResponse<AthleteDashboardData>>(`/dashboard/athlete/${athleteId}`);
     return res.data;
   }
 
-  async getCoachDashboard(coachId: string) {
-    const res = await this.client.get(`/dashboard/coach/${coachId}`);
+  async getCoachDashboard(coachId: string): Promise<ApiResponse<CoachDashboardData>> {
+    const res = await this.client.get<ApiResponse<CoachDashboardData>>(`/dashboard/coach/${coachId}`);
     return res.data;
   }
 
   // ---- Notifications ----
-  async getNotifications(params?: Record<string, unknown>) {
-    const res = await this.client.get("/notifications", { params });
+  async getNotifications(params?: Record<string, unknown>): Promise<PaginatedResponse<Notification>> {
+    const res = await this.client.get<PaginatedResponse<Notification>>("/notifications", { params });
     return res.data;
   }
 
-  async markNotificationRead(id: string) {
-    const res = await this.client.post(`/notifications/${id}/read`);
+  async markNotificationRead(id: string): Promise<ApiResponse<Notification>> {
+    const res = await this.client.post<ApiResponse<Notification>>(`/notifications/${id}/read`);
     return res.data;
   }
 
-  async markAllNotificationsRead() {
-    const res = await this.client.post("/notifications/read-all");
+  async markAllNotificationsRead(): Promise<ApiResponse> {
+    const res = await this.client.post<ApiResponse>("/notifications/read-all");
     return res.data;
   }
 }

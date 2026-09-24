@@ -1,27 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Vazirmatn, Outfit, JetBrains_Mono } from "next/font/google";
+import { Vazirmatn } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { PwaRegister } from "@/components/PwaRegister";
 
 const vazirmatn = Vazirmatn({
-  subsets: ["latin", "arabic"],
-  weight: ["100", "300", "400", "500", "700", "900"],
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700", "900"],
   variable: "--font-vazirmatn",
   display: "swap",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  weight: ["100", "300", "400", "600", "800"],
-  variable: "--font-outfit",
-  display: "swap",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -59,8 +47,11 @@ export const metadata: Metadata = {
     images: ["/og-image.svg"],
   },
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/favicon.svg", sizes: "180x180", type: "image/svg+xml" }],
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   manifest: "/site.webmanifest",
   other: {
@@ -74,8 +65,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+    { media: "(prefers-color-scheme: light)", color: "#F6F7F9" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -88,8 +79,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" suppressHydrationWarning className={`${vazirmatn.variable} ${outfit.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen bg-background font-sans antialiased bg-dot-pattern">
+    <html lang="fa" dir="rtl" suppressHydrationWarning className={vazirmatn.variable}>
+      <body className="min-h-screen bg-background antialiased">
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:right-4 focus:top-4 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white">پرش به محتوا</a>
         <Providers>{children}</Providers>
         <PwaRegister />
       </body>

@@ -9,12 +9,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import { formatPersianNumber, formatDate, calculateProgress, cn } from "@/lib/utils";
 import { useTrainingProgram } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
+import { FadeIn } from "@/components/animations/FadeIn";
 
 const dayNames = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"];
 
 export default function ProgramDetailPage() {
   const params = useParams();
-  const { data, isLoading, isError, error } = useTrainingProgram(params.id as string);
+  const { data, isLoading, isError, error, refetch } = useTrainingProgram(params.id as string);
   const [completedExercises, setCompletedExercises] = useState<Record<string, number[]>>({});
 
   const program = data?.data;
@@ -34,7 +35,7 @@ export default function ProgramDetailPage() {
   }, [program]);
 
   if (isLoading) return <Loading />;
-  if (isError) return <ErrorDisplay message={error?.message} />;
+  if (isError) return <ErrorDisplay message={error?.message} onRetry={refetch} />;
   if (!program) return <ErrorDisplay message="برنامه یافت نشد" />;
 
   const toggleExercise = (day: string, exerciseId: number) => {
@@ -55,18 +56,23 @@ export default function ProgramDetailPage() {
 
   return (
     <div className="space-y-6">
+      <FadeIn direction="none">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{program.name}</h1>
         <p className="mt-1 text-muted-foreground">
           مربی: {program.coach?.firstName || ""} {program.coach?.lastName || ""} | {formatDate(program.startDate)} - {formatDate(program.endDate)} | {formatPersianNumber(program.frequencyPerWeek)} روز در هفته
         </p>
       </div>
+      </FadeIn>
 
+      <FadeIn delay={0.1}>
       <div className="flex items-center gap-4 rounded-xl border bg-white/30 backdrop-blur-sm p-4">
         <Progress value={overallProgress} className="flex-1" />
         <span className="text-sm font-medium">{formatPersianNumber(Math.round(overallProgress))}%</span>
       </div>
+      </FadeIn>
 
+      <FadeIn delay={0.15}>
       <Tabs defaultValue={dayNames[0]} dir="rtl">
         <TabsList className="w-full flex-wrap bg-white/40 backdrop-blur-xl border border-white/30">
           {dayNames.map((day) => (
@@ -117,6 +123,7 @@ export default function ProgramDetailPage() {
           </TabsContent>
         ))}
       </Tabs>
+      </FadeIn>
     </div>
   );
 }

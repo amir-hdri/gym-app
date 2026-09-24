@@ -72,8 +72,8 @@ function ResetPasswordContent() {
 
             {isDone ? (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-4">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30">
-                  <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success/10">
+                  <CheckCircle2 className="h-7 w-7 text-success" />
                 </div>
                 <p className="text-sm text-muted-foreground">رمز عبور با موفقیت تغییر کرد.</p>
                 <Button onClick={() => router.push("/auth/login")} className="mt-4">
@@ -85,12 +85,12 @@ function ResetPasswordContent() {
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
                   <div className="relative">
                     <Lock className="absolute right-3.5 top-[2.7rem] h-4.5 w-4.5 text-muted-foreground/40 pointer-events-none z-10" />
-                    <Input label="رمز عبور جدید" type="password" placeholder="••••••••" error={errors.password?.message} className="pr-10" {...register("password")} />
+                    <Input label="رمز عبور جدید" type="password" placeholder="••••••••" error={errors.password?.message} className="pr-10" autoComplete="new-password" {...register("password")} />
                   </div>
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-                  <Input label="تکرار رمز عبور" type="password" placeholder="••••••••" error={errors.confirmPassword?.message} {...register("confirmPassword")} />
+                  <Input label="تکرار رمز عبور" type="password" placeholder="••••••••" error={errors.confirmPassword?.message} autoComplete="new-password" {...register("confirmPassword")} />
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>

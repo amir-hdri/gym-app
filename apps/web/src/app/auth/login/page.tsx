@@ -1,201 +1,194 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { AuthLayout } from "@/components/auth/AuthLayout";
+import { useForm } from "react-hook-form";
+import { Mail, Lock, Heart, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Eye, EyeOff, Zap, Lock, Mail, ArrowRight } from "lucide-react";
+import { ActivityRings } from "@/components/ui/ActivityRings";
+import { useAuth } from "@/components/auth/AuthProvider";
 
-const loginSchema = z.object({
-  email: z.string().min(1, "ایمیل را وارد کنید").email("ایمیل نامعتبر است"),
-  password: z.string().min(1, "رمز عبور را وارد کنید").min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
-  rememberMe: z.boolean().optional(),
-});
+function FloatingBlur() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div className="absolute left-[8%] top-[-12%] h-[520px] w-[520px] rounded-full bg-activity-move/[0.07] blur-[100px]" />
+      <div className="absolute right-[6%] top-[18%] h-[420px] w-[420px] rounded-full bg-activity-exercise/[0.06] blur-[90px]" />
+      <div className="absolute bottom-[-12%] right-[12%] h-[460px] w-[460px] rounded-full bg-activity-stand/[0.07] blur-[110px]" />
+      <div className="absolute bottom-[10%] left-[-5%] h-[360px] w-[360px] rounded-full bg-foreground/[0.02] blur-[80px]" />
+    </div>
+  );
+}
 
-type LoginFormData = z.infer<typeof loginSchema>;
-
-export default function LoginPage() {
+function SignInContent() {
   const router = useRouter();
   const { login } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      rememberMe: false,
-    },
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: { email: "", password: "", rememberMe: false },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    setIsSubmitting(true);
+  const onSubmit = async (data: { email: string; password: string; rememberMe?: boolean }) => {
+    setSubmitError(null);
     try {
-      const loggedInUser = await login(data.email, data.password, data.rememberMe);
-      toast.success("با موفقیت وارد شدید");
-      if (loggedInUser) {
-        switch (loggedInUser.role) {
-          case "admin":
-            router.replace("/admin");
-            break;
-          case "coach":
-            router.replace("/coach");
-            break;
-          case "athlete":
-            router.replace("/athlete");
-            break;
-          default:
-            router.replace("/");
-        }
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "ورود ناموفق بود";
-      toast.error(message);
-    } finally {
-      setIsSubmitting(false);
+      await login(data.email, data.password, data.rememberMe);
+      router.push("/athlete");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "ورود ناموفق بود");
     }
   };
 
   return (
-    <AuthLayout>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+        <Input
+          id="email"
+          label="ایمیل"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          dir="ltr"
+          placeholder="your@email.com"
+          startAdornment={<Mail className="h-4.5 w-4.5" />}
+          error={errors.email?.message}
+          disabled={isSubmitting}
+          {...register("email", {
+            required: "ایمیل ضروری است",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "فرمت ایمیل نامعتبر است",
+            },
+          })}
+        />
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
+        <Input
+          id="password"
+          label="رمز عبور"
+          type={showPassword ? "text" : "password"}
+          autoComplete="current-password"
+          placeholder="••••••••"
+          startAdornment={<Lock className="h-4.5 w-4.5" />}
+          endAdornment={
+            <button
+              type="button"
+              className="rounded-lg p-1.5 text-muted-foreground/60 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "پنهان کردن رمز عبور" : "نمایش رمز عبور"}
+              aria-pressed={showPassword}
+              tabIndex={0}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          }
+          error={errors.password?.message}
+          disabled={isSubmitting}
+          {...register("password", {
+            required: "رمز عبور ضروری است",
+            minLength: { value: 6, message: "رمز باید حداقل ۶ کاراکتر باشد" },
+          })}
+        />
+      </motion.div>
+
+      {submitError && (
+        <motion.p
+          role="alert"
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-sm text-destructive text-center bg-destructive/10 rounded-xl px-4 py-3 border border-destructive/20"
+        >
+          {submitError}
+        </motion.p>
+      )}
+
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.25 }}
+        className="flex flex-wrap items-center justify-between gap-2"
       >
-        <Card glass className="overflow-visible border-white/70 shadow-[0_28px_80px_-35px_rgba(80,20,70,.45)] dark:border-white/10">
-          <CardContent className="p-8">
-            {/* Title */}
+        <label className="flex items-center gap-2 cursor-pointer group">
+          <input
+            type="checkbox"
+            className="h-4 w-4 rounded border-border text-primary focus:ring-ring/40 focus:ring-2"
+            {...register("rememberMe")}
+          />
+          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+            مرا به خاطر بسپار
+          </span>
+        </label>
+        <Link href="/auth/forgot-password" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 rounded-md">
+          فراموشی رمز؟
+        </Link>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+        <Button
+          type="submit"
+          loading={isSubmitting}
+          className="w-full h-11 text-base font-semibold shadow-lg shadow-primary/20"
+        >
+          <Heart className="h-4 w-4 ml-2" strokeWidth={2} />
+          ورود
+        </Button>
+      </motion.div>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="mt-6 text-center text-sm text-muted-foreground"
+      >
+        عضو نیستی؟{" "}
+        <Link href="/auth/register" className="font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 rounded-md">
+          ثبت‌نام کن
+          <ArrowLeft className="h-3.5 w-3.5" />
+        </Link>
+      </motion.p>
+    </form>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4 lg:justify-end lg:p-10">
+      <FloatingBlur />
+      <div className="relative z-10 w-full max-w-[440px] lg:ml-[7%] lg:mr-[7%]">
+        <div className="mb-7 flex items-center justify-center lg:justify-start">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-surface shadow-lg dark:bg-white/10">
+              <ActivityRings className="h-9 w-9" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-xl font-bold text-foreground leading-tight">جیم‌آپ</h2>
+              <p className="text-[11px] text-muted-foreground leading-tight">پلتفرم مدیریت هوشمند باشگاه</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="liquid-glass-card rounded-2xl text-card-foreground transition-all duration-300 overflow-visible border-border/60 shadow-[0_28px_80px_-35px_rgba(80,20,70,.45)] dark:border-white/10">
+          <div className="relative p-8">
             <div className="mb-8 text-center">
               <p className="latin-kicker mb-2">WELCOME BACK</p>
               <h1 className="text-3xl font-black tracking-tight">برگشتی که بدرخشی</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                خوش اومدی! برای ادامه وارد شو
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">خوش اومدی! برای ادامه وارد شو</p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* Email */}
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <div className="relative">
-                  <Mail className="absolute right-3.5 top-[2.7rem] h-4.5 w-4.5 text-muted-foreground/40 pointer-events-none z-10" />
-                  <Input
-                    label="ایمیل"
-                    type="email"
-                    placeholder="your@email.com"
-                    error={errors.email?.message}
-                    className="pr-10"
-                    {...register("email")}
-                  />
-                </div>
-              </motion.div>
-
-              {/* Password */}
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <div className="relative">
-                  <Lock className="absolute right-3.5 top-[2.7rem] h-4.5 w-4.5 text-muted-foreground/40 pointer-events-none z-10" />
-                  <Input
-                    label="رمز عبور"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    error={errors.password?.message}
-                    className="pr-10 pl-10"
-                    {...register("password")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-3.5 top-[2.65rem] text-muted-foreground/40 hover:text-muted-foreground transition-colors z-10"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </motion.div>
-
-              {/* Remember Me & Forgot Password */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="flex flex-wrap items-center justify-between gap-2"
-              >
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-border/80 text-primary focus:ring-primary/30"
-                    {...register("rememberMe")}
-                  />
-                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                    مرا به خاطر بسپار
-                  </span>
-                </label>
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  فراموشی رمز؟
-                </Link>
-              </motion.div>
-
-              {/* Submit Button */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Button
-                  type="submit"
-                  loading={isSubmitting}
-                  className="w-full h-11 text-base font-semibold shadow-lg shadow-primary/20"
-                  size="default"
-                >
-                  <Zap className="h-4 w-4 ml-2" />
-                  ورود
-                </Button>
-              </motion.div>
-            </form>
-
-            {/* Register Link */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="mt-6 text-center text-sm text-muted-foreground"
-            >
-              عضو نیستی؟{" "}
-              <Link
-                href="/auth/register"
-                className="font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1 transition-colors"
-              >
-                ثبت‌نام کن
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </motion.p>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </AuthLayout>
+            <SignInContent />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -13,19 +13,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { formatPersianNumber, getInitials, generateAvatarColor, formatDate, calculateProgress } from "@/lib/utils";
 import { useUser, useGoals, useTrainingPrograms, useCheckIns } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
+import { FadeIn } from "@/components/animations/FadeIn";
 import { SessionDurationChart } from "@/components/analytics/Charts";
 
 const persianDays = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"];
 
 export default function AthleteDetailPage() {
   const params = useParams<{ id: string }>();
-  const { data: userData, isLoading: userLoading, isError: userError, error: userErr } = useUser(params.id);
+  const { data: userData, isLoading: userLoading, isError: userError, error: userErr, refetch: refetchUser } = useUser(params.id);
   const { data: goalsData, isLoading: goalsLoading } = useGoals(params.id);
   const { data: programsData, isLoading: programsLoading } = useTrainingPrograms();
   const { data: checkInsData, isLoading: checkinsLoading } = useCheckIns(params.id);
 
   if (userLoading) return <Loading />;
-  if (userError) return <ErrorDisplay message={userErr?.message} />;
+  if (userError) return <ErrorDisplay message={userErr?.message} onRetry={refetchUser} />;
 
   const athlete = userData?.data;
   if (!athlete) return null;
@@ -56,6 +57,7 @@ export default function AthleteDetailPage() {
 
   return (
     <div className="space-y-6">
+      <FadeIn direction="none">
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-2">
           <Link href="/coach/athletes">
@@ -64,7 +66,9 @@ export default function AthleteDetailPage() {
           </Link>
         </Button>
       </div>
+      </FadeIn>
 
+      <FadeIn delay={0.1}>
       <Card glass>
         <CardContent className="flex items-center gap-6 p-6">
           <Avatar className="h-20 w-20">
@@ -100,7 +104,9 @@ export default function AthleteDetailPage() {
           </div>
         </CardContent>
       </Card>
+      </FadeIn>
 
+      <FadeIn delay={0.15}>
       <Tabs defaultValue="program" dir="rtl">
         <TabsList>
           <TabsTrigger value="program">برنامه تمرینی</TabsTrigger>
@@ -211,6 +217,7 @@ export default function AthleteDetailPage() {
           )}
         </TabsContent>
       </Tabs>
+      </FadeIn>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Users, ClipboardList, CalendarCheck, Sparkles } from "lucide-react";
+import { Users, ClipboardList, CalendarCheck, Sparkles, Target, Clock3 } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { StaggerScroll, StaggerScrollItem } from "@/components/animations/ScrollReveal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -30,9 +30,14 @@ export default function CoachDashboard() {
   const dashboard = data?.data;
   if (!dashboard) return null;
 
+  const athletes = dashboard.athletes ?? [];
+  const totalAthletes = dashboard.totalAthletes ?? dashboard.athletesCount ?? athletes.length;
+
   const statCards = [
-    { label: "تعداد شاگردان", value: dashboard.totalAthletes, icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30" },
+    { label: "تعداد شاگردان", value: dashboard.totalAthletes ?? dashboard.athletesCount ?? 0, icon: Users, color: "text-activity-stand", bg: "bg-activity-stand/10" },
     { label: "برنامه‌های فعال", value: dashboard.activePrograms, icon: ClipboardList, color: "text-activity-move", bg: "bg-activity-move/10" },
+    { label: "جلسات امروز", value: dashboard.todaySessions ?? 0, icon: Clock3, color: "text-success", bg: "bg-success/10" },
+    { label: "اهداف در انتظار", value: dashboard.pendingGoals ?? 0, icon: Target, color: "text-warning", bg: "bg-warning/10" },
   ];
 
   return (
@@ -45,11 +50,11 @@ export default function CoachDashboard() {
             <h1 className="text-3xl font-black tracking-tight md:text-4xl">اثر تو، قدرت آن‌هاست.</h1>
             <p className="mt-2 text-sm text-white/65">جلسه‌ها، بازبینی‌ها و پیشرفت شاگردانت در یک نگاه.</p>
           </div>
-          <div className="hidden rounded-[1.5rem] border border-white/20 bg-white/10 px-6 py-4 text-center backdrop-blur-xl sm:block"><p className="text-3xl font-black">{formatPersianNumber(dashboard.totalAthletes)}</p><p className="text-xs text-white/75">شاگرد</p></div>
+          <div className="hidden rounded-[1.5rem] border border-white/20 bg-white/10 px-6 py-4 text-center backdrop-blur-xl sm:block"><p className="text-3xl font-black">{formatPersianNumber(totalAthletes)}</p><p className="text-xs text-white/75">شاگرد</p></div>
         </div>
       </div>
 
-      <StaggerScroll className="grid gap-4 md:grid-cols-2" stagger={0.08}>
+      <StaggerScroll className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" stagger={0.08}>
         {statCards.map((stat) => (
           <StaggerScrollItem key={stat.label}>
             <Card glass hover>
@@ -72,7 +77,7 @@ export default function CoachDashboard() {
           <CardHeader>
             <div><CardTitle>نبض پیشرفت شاگردان</CardTitle><p className="mt-1 text-xs text-muted-foreground">درصد تکمیل فعلی حرکت‌های هر برنامه</p></div>
           </CardHeader>
-          <CardContent><AthleteProgressChart athletes={dashboard.athletes} /></CardContent>
+          <CardContent><AthleteProgressChart athletes={athletes} /></CardContent>
         </Card>
       </ScrollReveal>
 
@@ -84,7 +89,9 @@ export default function CoachDashboard() {
             </CardHeader>
             <CardContent className="space-y-4">
               <StaggerScroll stagger={0.06}>
-                {dashboard.athletes.map((athlete) => (
+                {athletes.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-muted-foreground">هنوز شاگردی به شما منتسب نشده است.</p>
+                ) : athletes.map((athlete) => (
                   <StaggerScrollItem key={athlete.id}>
                     <div className={cn("flex items-center gap-4 rounded-lg p-4")}>
                       <Avatar className="h-12 w-12">

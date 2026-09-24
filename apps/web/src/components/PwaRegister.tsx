@@ -1,45 +1,127 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { X, Download, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 export function PwaRegister() {
+  const [needRefresh, setNeedRefresh] = useState(false);
+  const [offlineReady, setOfflineReady] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstall, setShowInstall] = useState(false);
+
   useEffect(() => {
+    const onBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      // show install banner only if not already installed
+      if (!window.matchMedia("(display-mode: standalone)").matches) {
+        setShowInstall(true);
+      }
+    };
+    window.addEventListener("beforeinstallprompt", onBeforeInstall as any);
+
+    const onAppInstalled = () => {
+      setShowInstall(false);
+      setDeferredPrompt(null);
+    };
+    window.addEventListener("appinstalled", onAppInstalled);
+
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-      const registerSW = async () => {
-        try {
-          const reg = await navigator.serviceWorker.register("/sw.js");
-          console.log("Service Worker registered successfully:", reg.scope);
-
+      navigator.serviceWorker
+        .register("/sw.js", { scope: "/" })
+        .then((reg) => {
           reg.addEventListener("updatefound", () => {
-            const worker = reg.installing;
-            if (worker) {
-              console.log("New service worker installing...");
-              worker.addEventListener("statechange", () => {
-                console.log("Service Worker state:", worker.state);
-                if (worker.state === "installed") {
-                  if (navigator.serviceWorker.controller) {
-                    console.log("نسخه جدید در دسترس است. صفحه را refresh کنید.");
-                  } else {
-                    console.log("Service Worker installed for offline use.");
-                  }
-                }
-              });
-            }
+            const sw = reg.installing;
+            if (!sw) return;
+            sw.addEventListener("statechange", () => {
+              if (sw.state === "installed" && navigator.serviceWorker.controller) {
+                setNeedRefresh(true);
+              }
+            });
           });
-
+          // listen for controller change
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            // new worker took over
+          });
           if (reg.active) {
-            console.log("Service Worker active for offline support.");
+            // ready
           }
-        } catch (error) {
-          console.error("Service Worker registration failed:", error);
-        }
-      };
+        })
+        .catch((err) => console.error("SW register failed", err));
 
-      registerSW();
-    } else {
-      console.log("Service Workers not supported in this browser.");
+      // listen for messages from SW
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        if (event.data?.type === "OFFLINE_READY") setOfflineReady(true);
+      });
     }
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstall as any);
+      window.removeEventListener("appinstalled", onAppInstalled);
+    };
   }, []);
 
-  return null;
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    if (choice.outcome === "accepted") setShowInstall(false);
+    setDeferredPrompt(null);
+  };
+
+  const handleUpdate = () => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        reg?.waiting?.postMessage("SKIP_WAITING");
+      });
+    }
+    window.location.reload();
+  };
+
+  return (
+    <>
+      {showInstall && (
+        <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-3 rounded-2xl border border-primary/20 bg-card p-3 shadow-xl backdrop-blur-xl md:inset-x-auto md:left-1/2 md:w-[420px] md:-translate-x-1/2 lg:bottom-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
+            <Download className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">نصب جیم‌آپ</p>
+            <p className="text-xs text-muted-foreground">دسترسی سریع مثل اپ نیتیو — بدون نیاز به استور</p>
+          </div>
+          <Button size="sm" onClick={handleInstall} className="shrink-0">
+            نصب
+          </Button>
+          <button
+            onClick={() => setShowInstall(false)}
+            aria-label="بستن"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+      {needRefresh && (
+        <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-3 shadow-xl dark:border-amber-900 dark:bg-amber-950 md:inset-x-auto md:left-1/2 md:w-[420px] md:-translate-x-1/2 lg:bottom-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
+            <RefreshCw className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">نسخه جدید در دسترس است</p>
+            <p className="text-xs text-amber-700 dark:text-amber-300">برای دریافت آخرین تغییرات بروزرسانی کنید</p>
+          </div>
+          <Button size="sm" onClick={handleUpdate} className="shrink-0 bg-amber-600 hover:bg-amber-700">
+            بروزرسانی
+          </Button>
+          <button onClick={() => setNeedRefresh(false)} aria-label="بستن" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-amber-700 hover:bg-amber-100 dark:text-amber-300">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+      {offlineReady && (
+        <div className="sr-only" aria-live="polite">آماده برای استفاده آفلاین</div>
+      )}
+    </>
+  );
 }

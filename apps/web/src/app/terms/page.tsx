@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
+import { FadeIn } from "@/components/animations/FadeIn";
 
 export default function TermsPage() {
   return (
@@ -9,6 +10,7 @@ export default function TermsPage() {
       <Button asChild variant="ghost" className="mb-6">
         <Link href="/auth/register"><ArrowRight className="h-4 w-4" />بازگشت به ثبت‌نام</Link>
       </Button>
+      <FadeIn>
       <Card>
         <CardContent className="space-y-7 p-6 sm:p-10">
           <div className="flex items-center gap-3">
@@ -21,6 +23,7 @@ export default function TermsPage() {
           <section><h2 className="text-lg font-bold">عضویت و پرداخت</h2><p className="mt-2 leading-8 text-muted-foreground">شرایط اعتبار، تمدید و لغو هر عضویت پیش از پرداخت نمایش داده می‌شود. ثبت پرداخت به معنی پذیرش شرایط همان طرح است.</p></section>
         </CardContent>
       </Card>
+      </FadeIn>
     </main>
   );
 }

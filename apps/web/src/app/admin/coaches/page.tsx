@@ -10,6 +10,7 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@
 import { formatPersianNumber } from "@/lib/utils";
 import { Search, Plus, UserCircle } from "lucide-react";
 import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { useUsers } from "@/hooks/use-api";
 
 const statusMap: Record<string, { label: string; variant: "success" | "secondary" | "destructive" }> = {
@@ -19,11 +20,11 @@ const statusMap: Record<string, { label: string; variant: "success" | "secondary
 };
 
 export default function CoachesPage() {
-  const { data, isLoading, isError } = useUsers("coach");
+  const { data, isLoading, isError, refetch } = useUsers("coach");
   const [search, setSearch] = useState("");
 
   if (isLoading) return <Loading />;
-  if (isError) return <ErrorDisplay />;
+  if (isError) return <ErrorDisplay onRetry={refetch} />;
   const coaches = data?.data || [];
 
   const filtered = coaches.filter((c) =>
@@ -32,6 +33,7 @@ export default function CoachesPage() {
 
   return (
     <div className="space-y-6">
+      <ScrollReveal direction="none">
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold leading-8">مدیریت مربیان</h1>
@@ -44,7 +46,9 @@ export default function CoachesPage() {
           </Link>
         </Button>
       </div>
+      </ScrollReveal>
 
+      <ScrollReveal delay={0.05}>
       <Card glass>
         <CardContent className="p-6">
           <div className="relative flex-1 max-w-md">
@@ -58,7 +62,9 @@ export default function CoachesPage() {
           </div>
         </CardContent>
       </Card>
+      </ScrollReveal>
 
+      <ScrollReveal delay={0.1}>
       <Card glass>
         <CardContent className="p-0">
           {filtered.length === 0 ? (
@@ -105,6 +111,7 @@ export default function CoachesPage() {
           )}
         </CardContent>
       </Card>
+      </ScrollReveal>
     </div>
   );
 }

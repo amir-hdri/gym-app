@@ -13,7 +13,6 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Label } from "@/components/ui/Label";
 import { ArrowRight } from "lucide-react";
 import { validateIranianPhone } from "@/lib/utils";
 
@@ -25,7 +24,6 @@ const registerSchema = z
     phone: z.string().min(1, "شماره موبایل را وارد کنید").refine((val) => validateIranianPhone(val), "شماره موبایل نامعتبر است"),
     password: z.string().min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
     confirmPassword: z.string().min(1, "تکرار رمز عبور را وارد کنید"),
-    role: z.enum(["athlete", "coach"], { message: "نقش را انتخاب کنید" }),
     acceptTerms: z.boolean().refine((accepted) => accepted, "پذیرش قوانین الزامی است"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -43,7 +41,6 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -54,12 +51,9 @@ export default function RegisterPage() {
       phone: "",
       password: "",
       confirmPassword: "",
-      role: "athlete",
       acceptTerms: false,
     },
   });
-
-  const selectedRole = watch("role");
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true);
@@ -70,11 +64,10 @@ export default function RegisterPage() {
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
-        role: data.role,
       });
       toast.success("ثبت‌نام با موفقیت انجام شد");
       if (registeredUser) {
-        router.replace(registeredUser.role === "coach" ? "/coach" : "/athlete");
+        router.replace("/athlete");
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "ثبت‌نام ناموفق بود";
@@ -96,49 +89,32 @@ export default function RegisterPage() {
             <div className="mb-8 text-center">
               <h1 className="text-2xl font-bold tracking-tight">ثبت‌نام</h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                حساب کاربری جدید بساز
+                حساب کاربری ورزشکار بساز — مربیان توسط مدیریت دعوت می‌شوند
               </p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
                 <div className="grid grid-cols-2 gap-3">
-                  <Input label="نام" placeholder="سارا" error={errors.firstName?.message} {...register("firstName")} />
-                  <Input label="نام خانوادگی" placeholder="محمدی" error={errors.lastName?.message} {...register("lastName")} />
+                  <Input label="نام" placeholder="سارا" error={errors.firstName?.message} autoComplete="given-name" {...register("firstName")} />
+                  <Input label="نام خانوادگی" placeholder="محمدی" error={errors.lastName?.message} autoComplete="family-name" {...register("lastName")} />
                 </div>
               </motion.div>
 
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
-                <Input label="ایمیل" type="email" placeholder="your@email.com" error={errors.email?.message} {...register("email")} />
+                <Input label="ایمیل" type="email" placeholder="your@email.com" error={errors.email?.message} autoComplete="email" inputMode="email" {...register("email")} />
               </motion.div>
 
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-                <Input label="شماره موبایل" type="tel" placeholder="۰۹۱۲۳۴۵۶۷۸۹" error={errors.phone?.message} {...register("phone")} />
-              </motion.div>
-
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground/80">نقش</Label>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <label className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border p-3 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 ${selectedRole === "athlete" ? "border-primary bg-primary/5" : "border-border/60 hover:border-border"}`}>
-                      <input type="radio" value="athlete" className="sr-only" {...register("role")} />
-                      <span className={`text-sm font-medium ${selectedRole === "athlete" ? "text-primary" : "text-muted-foreground"}`}>ورزشکار</span>
-                    </label>
-                    <label className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border p-3 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 ${selectedRole === "coach" ? "border-primary bg-primary/5" : "border-border/60 hover:border-border"}`}>
-                      <input type="radio" value="coach" className="sr-only" {...register("role")} />
-                      <span className={`text-sm font-medium ${selectedRole === "coach" ? "text-primary" : "text-muted-foreground"}`}>مربی</span>
-                    </label>
-                  </div>
-                  {errors.role && <p className="text-xs text-destructive">{errors.role.message}</p>}
-                </div>
+                <Input label="شماره موبایل" type="tel" placeholder="۰۹۱۲۳۴۵۶۷۸۹" error={errors.phone?.message} autoComplete="tel" inputMode="tel" {...register("phone")} />
               </motion.div>
 
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-                <Input label="رمز عبور" type="password" placeholder="••••••••" error={errors.password?.message} {...register("password")} />
+                <Input label="رمز عبور" type="password" placeholder="••••••••" error={errors.password?.message} autoComplete="new-password" {...register("password")} />
               </motion.div>
 
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 }}>
-                <Input label="تکرار رمز عبور" type="password" placeholder="••••••••" error={errors.confirmPassword?.message} {...register("confirmPassword")} />
+                <Input label="تکرار رمز عبور" type="password" placeholder="••••••••" error={errors.confirmPassword?.message} autoComplete="new-password" {...register("confirmPassword")} />
               </motion.div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
@@ -165,6 +141,9 @@ export default function RegisterPage() {
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </motion.p>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              مربی هستید؟ از مدیریت بخواهید حساب شما را بسازد.
+            </p>
           </CardContent>
         </Card>
       </motion.div>

@@ -57,6 +57,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
         )}
       </AnimatePresence>
       <aside
+        id="portal-sidebar"
         className={cn(
           "fixed inset-y-3 right-3 z-50 flex w-[264px] flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-white/78 shadow-[0_24px_80px_-28px_rgba(71,22,66,.35)] backdrop-blur-2xl transition-transform duration-500 ease-out lg:translate-x-0 dark:border-white/10 dark:bg-brand-surface/90",
           isOpen ? "translate-x-0" : "translate-x-full"
@@ -75,7 +76,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
           </Link>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 hover:bg-muted transition-colors lg:hidden"
+            className="rounded-lg p-1.5 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
             aria-label="بستن منو"
           >
             <X className="h-5 w-5" />
@@ -84,17 +85,18 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
 
         {/* Navigation */}
         <div className="mx-4 mb-3 rounded-2xl bg-gradient-to-l from-activity-move to-activity-stand p-[1px]">
-          <div className="flex items-center gap-3 rounded-[15px] bg-white/90 px-3 py-3 dark:bg-[#1d1725]/95">
+          <div className="flex items-center gap-3 rounded-[15px] bg-card px-3 py-3 dark:bg-card/90">
             <Sparkles className="h-4 w-4 text-primary" />
              <div><p className="text-xs font-extrabold">امروز برای تو</p><p className="text-xs text-muted-foreground">حرکت کن، بدرخش</p></div>
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-2">
           <ul className="space-y-0.5">
-            {items.map((item) => {
+            {items.map((item, index) => {
               const active = isActive(item);
               const hasSubItems = item.subItems && item.subItems.length > 0;
               const expanded = expandedItems.includes(item.label);
+              const submenuId = `sidebar-sub-${index}`;
 
               return (
                 <li key={item.label}>
@@ -102,11 +104,13 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                     <div>
                       <button
                         onClick={() => toggleExpanded(item.label)}
+                        aria-expanded={expanded}
+                        aria-controls={submenuId}
                         className={cn(
-                          "relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                          "relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           active
-                            ? "bg-[#17121e] text-white shadow-lg shadow-purple-950/10 dark:bg-white dark:text-[#17121e]"
-                            : "text-muted-foreground hover:bg-primary/8 hover:text-foreground"
+                            ? "bg-foreground text-background shadow-lg shadow-purple-950/10"
+                            : "text-muted-foreground hover:bg-primary/10 hover:text-foreground"
                         )}
                       >
                         <span className="flex h-5 w-5 shrink-0 items-center justify-center">
@@ -128,6 +132,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                       <AnimatePresence>
                         {expanded && (
                           <motion.ul
+                            id={submenuId}
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
@@ -142,7 +147,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                                     href={sub.href}
                                     onClick={onClose}
                                     className={cn(
-                                      "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                                      "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                                       subActive
                                         ? "text-primary bg-primary/5"
                                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -162,10 +167,10 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                       href={item.href}
                       onClick={onClose}
                       className={cn(
-                        "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                        "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         active
-                          ? "bg-[#17121e] text-white shadow-lg shadow-purple-950/10 dark:bg-white dark:text-[#17121e]"
-                          : "text-muted-foreground hover:bg-primary/8 hover:text-foreground"
+                          ? "bg-foreground text-background shadow-lg shadow-purple-950/10"
+                          : "text-muted-foreground hover:bg-primary/10 hover:text-foreground"
                       )}
                     >
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center">

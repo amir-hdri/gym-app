@@ -14,7 +14,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <button className="rounded-lg p-2 hover:bg-accent" aria-label="تغییر تم">
+      <button className="rounded-full p-2 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95" aria-label="تغییر تم">
         <div className="h-5 w-5" />
       </button>
     );
@@ -26,7 +26,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="rounded-full p-2 hover:bg-accent transition-colors"
+      className="rounded-full p-2 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95"
       aria-label={label}
       title={label}
     >

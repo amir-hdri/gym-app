@@ -211,14 +211,18 @@ export interface Notification {
 }
 
 export interface DashboardStats {
-  totalMembers: number;
+  totalUsers: number;
   activeMembers: number;
-  totalCoaches: number;
-  totalRevenue: number;
+  todayCheckins: number;
+  activeMemberships: number;
   monthlyRevenue: number;
-  expiringMemberships: number;
-  todayCheckIns: number;
-  avgSessionDuration: number;
+  // legacy + alias for frontend mock compatibility
+  totalMembers?: number;
+  totalCoaches?: number;
+  totalRevenue?: number;
+  expiringMemberships?: number;
+  avgSessionDuration?: number;
+  todayCheckIns?: number;
 }
 
 export interface AthleteDashboardData {
@@ -237,8 +241,10 @@ export interface AthleteDashboardData {
 
 export interface CoachDashboardData {
   totalAthletes: number;
+  athletesCount?: number;
   activePrograms: number;
   pendingReviews: number;
+  pendingGoals?: number;
   todaySessions: number;
   athletes: {
     id: string;

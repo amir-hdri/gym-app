@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Bell, Flame } from "lucide-react";
+import { Menu, Bell, Flame, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -33,36 +33,41 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const roleLabel = user?.role === "admin" ? "CLUB CONTROL" : user?.role === "coach" ? "COACH STUDIO" : "MY FITNESS";
 
   return (
-    <header className={cn("sticky top-0 z-30 w-full px-4 pt-3 md:px-7 lg:px-10")}>
-      <div className="flex h-16 items-center justify-between rounded-2xl border border-white/60 bg-white/70 px-3 shadow-[0_12px_40px_-30px_rgba(50,20,50,.4)] backdrop-blur-2xl dark:border-white/10 dark:bg-brand-surface/75 md:px-5">
+    <header className={cn("liquid-glass-header sticky top-0 z-40 w-full", "pt-[env(safe-area-inset-top)]")}>
+      <div className="flex h-14 items-center justify-between px-4 md:px-7 lg:px-10">
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuToggle}
-            className="rounded-lg p-2 hover:bg-muted lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/70 backdrop-blur-md border border-border/60 hover:bg-accent active:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:hidden"
             aria-label="باز کردن منو"
+            aria-controls="portal-sidebar"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-[20px] w-[20px] text-foreground" strokeWidth={1.75} />
           </button>
-          <div className="hidden sm:block">
+          <div className="hidden items-center gap-2 sm:flex">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand shadow-[0_2px_12px_hsl(var(--brand)/0.35)]">
+              <Sparkles className="h-3.5 w-3.5 text-white" strokeWidth={1.75} />
+            </span>
             <p className="latin-kicker">{roleLabel}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          <div className="hidden items-center gap-1 rounded-full bg-orange-500/10 px-3 py-1.5 text-xs font-extrabold text-orange-600 sm:flex">
-            <Flame className="h-4 w-4 fill-orange-500" /> ۵ روز
+        <div className="flex items-center gap-1.5">
+          <div className="hidden items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/15 backdrop-blur-md border border-orange-500/15 px-3 py-1.5 text-xs font-semibold text-orange-400 sm:flex">
+            <Flame className="h-4 w-4 fill-orange-500 text-orange-500" strokeWidth={1.75} />
+            ۵ روز
           </div>
           <ThemeToggle />
 
           <Link
             href={notificationHref}
-            className="relative rounded-full p-2 transition-colors hover:bg-muted"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/70 backdrop-blur-md border border-border/60 hover:bg-accent active:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="اعلان‌ها"
           >
-            <Bell className="h-5 w-5 text-muted-foreground" />
+            <Bell className="h-[20px] w-[20px] text-foreground/90" strokeWidth={1.75} />
             <Badge
               variant="destructive"
-              className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center px-1 text-[10px] leading-none"
+              className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center border-0 bg-primary px-1 text-[10px] font-bold leading-none shadow-[0_2px_8px_hsl(var(--primary)/0.5)]"
             >
               ۳
             </Badge>
@@ -70,38 +75,38 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 rounded-full p-1 hover:bg-muted transition-colors">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-gradient-to-br from-activity-move to-activity-stand text-xs font-bold text-white">
+              <button className="flex min-h-11 items-center gap-2 rounded-xl bg-secondary/70 backdrop-blur-md border border-border/60 p-1 pr-2 hover:bg-accent active:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                <Avatar className="h-8 w-8 ring-1 ring-border">
+                  <AvatarFallback className="bg-gradient-to-br from-brand to-brand-2 text-xs font-bold text-white">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden text-sm font-medium md:block max-w-[120px] truncate">
+                <span className="hidden text-sm font-medium text-foreground md:block max-w-[120px] truncate">
                   {fullName}
                 </span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 border-border bg-popover text-popover-foreground">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col gap-1">
-                  <span className="font-semibold">{fullName}</span>
+                  <span className="font-semibold text-foreground">{fullName}</span>
                   <span className="text-xs text-muted-foreground">
                     {user?.email}
                   </span>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
+              <DropdownMenuSeparator className="bg-border/60" />
+              <DropdownMenuItem asChild className="focus:bg-accent focus:text-accent-foreground">
                 <Link href={user?.role === "admin" ? "/admin/profile" : user?.role === "coach" ? "/coach/profile" : "/athlete/profile"}>پروفایل</Link>
               </DropdownMenuItem>
               {user?.role === "admin" && (
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="focus:bg-accent focus:text-accent-foreground">
                   <Link href="/admin/settings">تنظیمات</Link>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-border/60" />
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
+                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                 onClick={logout}
               >
                 خروج

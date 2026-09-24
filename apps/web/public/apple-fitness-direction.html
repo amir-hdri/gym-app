@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apple Fitness — جهت طراحی GymApp</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&family=Inter:wght@500;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Vazirmatn',system-ui,sans-serif;background:#000;color:#F5F5F7;line-height:1.7}
+  .wrap{max-width:980px;margin:0 auto;padding:28px 20px}
+  .kicker{font-size:11px;letter-spacing:.14em;font-weight:700;color:#FF375F;text-transform:uppercase}
+  h1{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:6px}
+  h2{font-size:20px;font-weight:700;margin-top:28px;margin-bottom:8px}
+  p{color:#A1A1A6;font-size:14px}
+  .grid{display:grid;gap:14px;margin-top:16px}
+  .grid2{grid-template-columns:1fr 1fr}
+  .grid3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr}}
+  .card{background:#1C1C1E;border:1px solid #2C2C2E;border-radius:16px;padding:18px}
+  .card h3{font-size:15px;font-weight:700;color:#F5F5F7;margin-bottom:6px}
+  .card p{font-size:13px;color:#98989D}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:#1C1C1E;border:1px solid #2C2C2E;border-radius:999px;padding:6px 12px;font-size:12px;color:#A1A1A6}
+  .ring-demo{display:flex;align-items:center;gap:18px;background:#000;border:1px solid #2C2C2E;border-radius:16px;padding:18px}
+  .spec{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .spec span{background:#1C1C1E;border:1px solid #2C2C2E;border-radius:999px;padding:6px 10px;font-size:11px;color:#A1A1A6}
+  .bar{height:8px;border-radius:999px;background:#2C2C2E;overflow:hidden;margin-top:8px}
+  .bar i{display:block;height:100%;border-radius:999px}
+  .tabbar{display:flex;justify-content:space-around;align-items:center;background:rgba(28,28,30,.82);backdrop-filter:blur(20px);border-top:1px solid #38383A;border-radius:0;padding:10px 0 18px;margin-top:18px}
+  .tab{font-size:10px;color:#98989D;text-align:center}
+  .tab b{display:block;font-size:20px;margin-bottom:2px}
+  .tab.on{color:#FF375F}
+  .list{background:#1C1C1E;border-radius:12px;overflow:hidden;border:1px solid #2C2C2E}
+  .list div{padding:14px 16px;border-bottom:1px solid #38383A;display:flex;justify-content:space-between;color:#F5F5F7;font-size:14px}
+  .list div:last-child{border:0}
+  .list small{color:#98989D}
+  .stage{border:1px solid #2C2C2E;border-radius:16px;padding:16px;background:#101011}
+  .stage h4{font-size:13px;font-weight:700;color:#F5F5F7}
+  .stage p{font-size:12px;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Apple Fitness · Human Interface Guidelines · iOS 18</div>
+  <h1>بازطراحی GymApp دقیقا مثل Apple Fitness</h1>
+  <p style="margin-top:8px">تمام سطوح — توکن‌ها، پوسته، حلقه‌ها، نمودارها، کارت‌ها، انیمیشن — بازطراحی ۱:۱ با Fitness اپل. پس‌زمینه مشکی مات، SF Pro، تب‌بار شفاف، حلقه‌های Activity بدون سایه اضافی.</p>
+
+  <div class="spec">
+    <span>Background #000000</span><span>Card #1C1C1E</span><span>Separator #38383A</span><span>Move #FF2D55</span><span>Exercise #30D158</span><span>Stand #0A84FF</span><span>Radius 12–16</span><span>SF Pro Display</span>
+  </div>
+
+  <h2>۱) زبان طراحی اپل — مرجع</h2>
+  <div class="grid grid2">
+    <div class="card">
+      <h3>Activity Rings — روی مشکی خالص</h3>
+      <p>Apple HIG: «Always display Activity rings on a black background. No gradient/shadow.» حلقه بیرونی با stroke مشکی نازک. ضخامت 8pt، cap گرد.</p>
+      <div class="ring-demo" style="margin-top:12px">
+        <svg width="96" height="96" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#1C1C1E" stroke-width="8"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#FF2D55" stroke-width="8" stroke-linecap="round" stroke-dasharray="263.89" stroke-dashoffset="42"/>
+          <circle cx="50" cy="50" r="31" fill="none" stroke="#1C1C1E" stroke-width="8"/>
+          <circle cx="50" cy="50" r="31" fill="none" stroke="#30D158" stroke-width="8" stroke-linecap="round" stroke-dasharray="194.77" stroke-dashoffset="62"/>
+          <circle cx="50" cy="50" r="20" fill="none" stroke="#1C1C1E" stroke-width="8"/>
+          <circle cx="50" cy="50" r="20" fill="none" stroke="#0A84FF" stroke-width="8" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="25"/>
+        </svg>
+        <div>
+          <div style="font-weight:700;font-size:14px;color:#fff">امروز ۷۸٪</div>
+          <div style="font-size:12px;color:#98989D">۳ حلقه روی #000</div>
+          <div style="display:flex;gap:6px;margin-top:8px"><span style="width:12px;height:4px;border-radius:999px;background:#FF2D55;display:block"></span><span style="width:12px;height:4px;border-radius:999px;background:#30D158;display:block"></span><span style="width:12px;height:4px;border-radius:999px;background:#0A84FF;display:block"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>تایپوگرافی SF Pro</h3>
+      <p>Large Title 34 Bold · Headline 17 Semibold · Subhead 15 Regular · Caption 12. فارسی: Vazirmatn با همان مقیاس، وزن 700/400.</p>
+      <div style="margin-top:12px;background:#000;border-radius:12px;padding:14px;border:1px solid #2C2C2E">
+        <div style="font-size:34px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1">خلاصه</div>
+        <div style="font-size:20px;font-weight:700;color:#fff;margin-top:6px">تمرین امروز</div>
+        <div style="font-size:15px;color:#A1A1A6;margin-top:4px">شنبه · ۴۵ دقیقه · قدرت</div>
+        <div style="font-size:12px;color:#98989D;margin-top:6px;letter-spacing:.06em">CAPTION</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>۲) نگاشت GymApp → Apple Fitness</h2>
+  <div class="grid grid3">
+    <div class="card"><h3>Dashboard → خلاصه (Summary)</h3><p>همان صفحه Fitness: حلقه‌ها بالا، سپس «روندها»، «تمرین‌ها»، «جوایز». ما: حلقه + برنامه امروز + اهداف + تاریخچه.</p><div class="bar"><i style="width:78%;background:#FF2D55"></i></div></div>
+    <div class="card"><h3>Workouts → تمرین‌ها</h3><p>لیست Inset Grouped، هر ردیف آیکون رنگی 28pt + عنوان + زیرعنوان + chevron. فیلتر بالا: همه / قدرتی / هوازی.</p><div class="list" style="margin-top:10px"><div>قدرت پایین‌تنه <small>۴۵′ · مهسا ›</small></div><div>پیلاتس <small>۳۵′ ›</small></div></div></div>
+    <div class="card"><h3>Trends → روندها</h3><p>نمودار میله‌ای/خطی روی مشکی، گرید #2C2C2E، مقدارها سفید، برچسب 12px خاکستری.</p><div style="display:flex;align-items:end;gap:4px;height:48px;margin-top:10px"><span style="flex:1;height:18px;background:#FF2D55;border-radius:4px 4px 0 0"></span><span style="flex:1;height:28px;background:#FF2D55;border-radius:4px 4px 0 0"></span><span style="flex:1;height:38px;background:#FF2D55;border-radius:4px 4px 0 0"></span><span style="flex:1;height:22px;background:#2C2C2E;border-radius:4px 4px 0 0"></span></div></div>
+  </div>
+
+  <h2>۳) پوسته — تب‌بار و هدر اپل</h2>
+  <div class="grid grid2">
+    <div class="card">
+      <h3>Tab Bar شفاف 49pt</h3>
+      <p>پس‌زمینه `rgba(28,28,30,.82) blur 20`، لبه بالا #38383A، آیکون 24pt، لیبل 10pt. انتخاب: fill + رنگ Move.</p>
+      <div class="tabbar"><div class="tab on"><b>◉</b>خلاصه</div><div class="tab"><b>◆</b>تمرین</div><div class="tab"><b>◎</b>چک‌این</div><div class="tab"><b>▭</b>تاریخچه</div><div class="tab"><b>…</b>بیشتر</div></div>
+    </div>
+    <div class="card">
+      <h3>Large Title + Sticky</h3>
+      <p>عنوان بزرگ 34 در top، با اسکرول به 17 در هدر sticky جمع می‌شود. دکمه‌ها 44pt، آیکون‌ها outline.</p>
+      <div style="background:#000;border:1px solid #2C2C2E;border-radius:12px;padding:14px;margin-top:10px">
+        <div style="font-size:34px;font-weight:800;color:#fff">خلاصه</div>
+        <div style="font-size:13px;color:#98989D;margin-top:4px">شنبه ۵ شهریور · خوش آمدی، مهسا</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>۴) پلن اجرا — ۶ گام دقیق</h2>
+  <div class="grid grid3">
+    <div class="stage"><h4>AF1 — توکن‌ها</h4><p>bg #000، card #1C1C1E، separator #38383A، ring colors دقیق اپل، SF Pro stack، radius 12/16، بدون سایه رنگی.</p><span class="pill" style="margin-top:8px">globals.css</span></div>
+    <div class="stage"><h4>AF2 — پوسته</h4><p>Header large title + sticky 44، TabBar translucent + FAB چک‌این به‌سبک +، safe-area.</p><span class="pill" style="margin-top:8px">Header + BottomNav + Portal</span></div>
+    <div class="stage"><h4>AF3 — حلقه‌ها و نمودارها</h4><p>ActivityRings روی #000 بدون glow، ضخامت 8، روندها میله‌ای/خطی #2C2C2E.</p><span class="pill" style="margin-top:8px">ActivityRings + Charts</span></div>
+    <div class="stage"><h4>AF4 — کارت/لیست</h4><p>Inset grouped list، کارت 16، جدول برنامه به ردیف‌های اپل.</p><span class="pill" style="margin-top:8px">Card + List</span></div>
+    <div class="stage"><h4>AF5 — انیمیشن</h4><p>حلقه draw 1.2s ease [0.16,1,0.3,1]، stagger 0.06، haptic 10.</p><span class="pill" style="margin-top:8px">framer-motion</span></div>
+    <div class="stage"><h4>AF6 — تأیید</h4><p>Desktop 1440 + Mobile 390، contrast 13:1، lint/build سبز، preview.</p><span class="pill" style="margin-top:8px">Verify</span></div>
+  </div>
+  <p style="margin-top:18px;font-size:12px;color:#636366">مبنای فنی: Apple HIG Activity Rings «Always on black» · Fitness app dark #000 · SF Pro 17/34.</p>
+</div>
+</body>
+</html>

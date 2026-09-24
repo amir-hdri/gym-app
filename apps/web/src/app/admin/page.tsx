@@ -24,12 +24,12 @@ export default function AdminDashboard() {
   if (isError) return <ErrorDisplay />;
   const s = statsRes?.data;
   const stats = s ? [
-    { label: "کل اعضا", value: s.totalMembers, icon: Users, color: "text-blue-600" },
-    { label: "اعضای فعال", value: s.activeMembers, icon: UserCheck, color: "text-green-600" },
-    { label: "مربیان", value: s.totalCoaches, icon: UserCircle, color: "text-purple-600" },
-    { label: "درآمد ماهانه", value: s.monthlyRevenue, icon: DollarSign, color: "text-emerald-600", isCurrency: true },
-    { label: "چک‌این امروز", value: s.todayCheckIns, icon: LogIn, color: "text-orange-600" },
-    { label: "اشتراک‌های در حال انقضا", value: s.expiringMemberships, icon: AlertTriangle, color: "text-red-600" },
+    { label: "کل اعضا", value: s.totalMembers ?? s.totalUsers ?? 0, icon: Users, color: "text-activity-stand" },
+    { label: "اعضای فعال", value: s.activeMembers ?? 0, icon: UserCheck, color: "text-success" },
+    { label: "مربیان", value: s.totalCoaches ?? 0, icon: UserCircle, color: "text-primary" },
+    { label: "درآمد ماهانه", value: s.monthlyRevenue ?? s.totalRevenue ?? 0, icon: DollarSign, color: "text-success", isCurrency: true },
+    { label: "چک‌این امروز", value: s.todayCheckIns ?? s.todayCheckins ?? 0, icon: LogIn, color: "text-warning" },
+    { label: "اشتراک‌های در حال انقضا", value: s.expiringMemberships ?? 0, icon: AlertTriangle, color: "text-destructive" },
   ] : [];
   const recentPayments = (paymentsRes?.data || []).slice(-6);
   return (

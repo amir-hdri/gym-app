@@ -8,6 +8,7 @@ import { formatPersianNumber, formatCurrency, formatDateTime } from "@/lib/utils
 import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
 import { usePayments } from "@/hooks/use-api";
 import { RevenueChart } from "@/components/analytics/Charts";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 const methodLabels: Record<string, string> = {
   card: "کارت",
@@ -31,30 +32,33 @@ const statusLabels: Record<string, { label: string; variant: "success" | "warnin
 };
 
 export default function PaymentsPage() {
-  const { data, isLoading, isError } = usePayments();
+  const { data, isLoading, isError, refetch } = usePayments();
   if (isLoading) return <Loading />;
-  if (isError) return <ErrorDisplay />;
+  if (isError) return <ErrorDisplay onRetry={refetch} />;
   const payments = data?.data || [];
   const totalRevenue = payments.reduce((sum: number, p) => sum + (p.status === "completed" ? p.amount : 0), 0);
   const totalPending = payments.reduce((sum: number, p) => sum + (p.status === "pending" ? p.amount : 0), 0);
   return (
     <div className="space-y-6">
+      <ScrollReveal direction="none">
       <div>
         <h1 className="text-2xl font-bold">پرداخت‌ها</h1>
         <p className="text-muted-foreground">مدیریت تراکنش‌های مالی باشگاه</p>
       </div>
+      </ScrollReveal>
 
+      <ScrollReveal delay={0.05}>
       <div className="grid gap-4 sm:grid-cols-3">
         <Card glass>
           <CardContent className="p-6">
             <p className="text-sm text-muted-foreground">کل درآمد (موفق)</p>
-            <p className="inline-block rounded-lg bg-white/70 backdrop-blur-sm border border-white/20 px-3 py-1 text-2xl font-bold text-green-600">{formatCurrency(totalRevenue)}</p>
+            <p className="inline-block rounded-lg bg-white/70 backdrop-blur-sm border border-white/20 px-3 py-1 text-2xl font-bold text-success">{formatCurrency(totalRevenue)}</p>
           </CardContent>
         </Card>
         <Card glass>
           <CardContent className="p-6">
             <p className="text-sm text-muted-foreground">درآمد در انتظار</p>
-            <p className="inline-block rounded-lg bg-white/70 backdrop-blur-sm border border-white/20 px-3 py-1 text-2xl font-bold text-yellow-600">{formatCurrency(totalPending)}</p>
+            <p className="inline-block rounded-lg bg-white/70 backdrop-blur-sm border border-white/20 px-3 py-1 text-2xl font-bold text-warning">{formatCurrency(totalPending)}</p>
           </CardContent>
         </Card>
         <Card glass>
@@ -64,7 +68,9 @@ export default function PaymentsPage() {
           </CardContent>
         </Card>
       </div>
+      </ScrollReveal>
 
+      <ScrollReveal delay={0.1}>
       <Card glass>
         <CardHeader>
           <div>
@@ -74,7 +80,9 @@ export default function PaymentsPage() {
         </CardHeader>
         <CardContent><RevenueChart payments={payments} /></CardContent>
       </Card>
+      </ScrollReveal>
 
+      <ScrollReveal delay={0.15}>
       <Card glass>
         <CardHeader>
           <CardTitle>لیست تراکنش‌ها</CardTitle>
@@ -122,6 +130,7 @@ export default function PaymentsPage() {
           )}
         </CardContent>
       </Card>
+      </ScrollReveal>
     </div>
   );
 }

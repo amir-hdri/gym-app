@@ -12,6 +12,7 @@ import { formatPersianNumber } from "@/lib/utils";
 import { Search, Plus, Dumbbell, Filter } from "lucide-react";
 import { useExercises } from "@/hooks/use-api";
 import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 const muscles = ["همه", "سینه", "پشت", "پاها", "بازو", "شکم", "سرشانه"];
 const difficulties = ["همه", "مبتدی", "متوسط", "پیشرفته"];
@@ -20,10 +21,10 @@ export default function ExerciseLibraryPage() {
   const [search, setSearch] = useState("");
   const [muscleFilter, setMuscleFilter] = useState("همه");
   const [difficultyFilter, setDifficultyFilter] = useState("همه");
-  const { data, isLoading, isError, error } = useExercises();
+  const { data, isLoading, isError, error, refetch } = useExercises();
 
   if (isLoading) return <Loading />;
-  if (isError) return <ErrorDisplay message={error?.message} />;
+  if (isError) return <ErrorDisplay message={error?.message} onRetry={refetch} />;
 
   const exercisesData = data?.data || [];
 
@@ -41,6 +42,7 @@ export default function ExerciseLibraryPage() {
 
   return (
     <div className="space-y-6">
+      <ScrollReveal direction="none">
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold leading-8">کتابخانه تمرینات</h1>
@@ -48,7 +50,9 @@ export default function ExerciseLibraryPage() {
         </div>
         <Button asChild className="w-full sm:w-auto"><Link href="/coach/exercises/new"><Plus className="ml-2 h-4 w-4" />افزودن حرکت جدید</Link></Button>
       </div>
+      </ScrollReveal>
 
+      <ScrollReveal delay={0.05}>
       <Card glass>
         <CardContent className="p-6">
           <div className="flex flex-wrap gap-3">
@@ -71,7 +75,9 @@ export default function ExerciseLibraryPage() {
           </div>
         </CardContent>
       </Card>
+      </ScrollReveal>
 
+      <ScrollReveal delay={0.1}>
       <Card glass>
         <CardContent className="p-0">
           <Table>
@@ -113,6 +119,7 @@ export default function ExerciseLibraryPage() {
           </Table>
         </CardContent>
       </Card>
+      </ScrollReveal>
     </div>
   );
 }

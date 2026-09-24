@@ -6,11 +6,16 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/Table";
 import { formatPersianNumber, formatDate } from "@/lib/utils";
 import { Search, Plus, Users } from "lucide-react";
 import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { useUsers } from "@/hooks/use-api";
+import type { User } from "@/lib/types";
+
+type MemberRow = User & { plan?: string };
 
 const statusMap: Record<string, { label: string; variant: "success" | "secondary" | "destructive" }> = {
   active: { label: "فعال", variant: "success" },
@@ -18,14 +23,21 @@ const statusMap: Record<string, { label: string; variant: "success" | "secondary
   suspended: { label: "تعلیق شده", variant: "destructive" },
 };
 
+const statusFilters: { value: string; label: string }[] = [
+  { value: "all", label: "همه" },
+  { value: "active", label: "فعال" },
+  { value: "inactive", label: "غیرفعال" },
+  { value: "suspended", label: "تعلیق شده" },
+];
+
 export default function MembersPage() {
-  const { data, isLoading, isError } = useUsers("athlete");
+  const { data, isLoading, isError, refetch } = useUsers("athlete");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
 
   if (isLoading) return <Loading />;
-  if (isError) return <ErrorDisplay />;
-  const members = data?.data || [];
+  if (isError) return <ErrorDisplay onRetry={refetch} />;
+  const members: MemberRow[] = data?.data || [];
 
   const filtered = members.filter((m) => {
     const matchSearch = `${m.firstName} ${m.lastName}`.includes(search) || m.email.includes(search) || m.phone.includes(search);
@@ -35,6 +47,7 @@ export default function MembersPage() {
 
   return (
     <div className="space-y-6">
+      <ScrollReveal direction="none">
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold leading-8">مدیریت اعضا</h1>
@@ -47,33 +60,41 @@ export default function MembersPage() {
           </Link>
         </Button>
       </div>
+      </ScrollReveal>
 
+      <ScrollReveal delay={0.05}>
       <Card glass>
         <CardContent className="p-6">
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
+                type="search"
+                aria-label="جستجوی عضو"
                 placeholder="جستجوی عضو..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pr-10 bg-white/70 backdrop-blur-sm border-white/30"
               />
             </div>
-            <select
-              className="flex h-10 w-40 rounded-lg border border-white/30 bg-white/70 backdrop-blur-sm px-3 py-2 text-sm"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            >
-              <option value="all">همه</option>
-              <option value="active">فعال</option>
-              <option value="inactive">غیرفعال</option>
-              <option value="suspended">تعلیق شده</option>
-            </select>
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger aria-label="فیلتر وضعیت" className="w-40 bg-white/70 backdrop-blur-sm border-white/30">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {statusFilters.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
+      </ScrollReveal>
 
+      <ScrollReveal delay={0.1}>
       <Card glass>
         <CardContent className="p-0">
           {filtered.length === 0 ? (
@@ -96,7 +117,7 @@ export default function MembersPage() {
                   </div>
                   <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-border/50 py-3 text-xs">
                     <div><dt className="text-muted-foreground">شماره تماس</dt><dd dir="ltr" className="mt-1 text-right font-medium">{member.phone}</dd></div>
-                    <div><dt className="text-muted-foreground">طرح اشتراک</dt><dd className="mt-1 font-medium">{(member as any).plan || "بدون طرح"}</dd></div>
+                    <div><dt className="text-muted-foreground">طرح اشتراک</dt><dd className="mt-1 font-medium">{member.plan || "بدون طرح"}</dd></div>
                     <div className="col-span-2"><dt className="text-muted-foreground">تاریخ ثبت‌نام</dt><dd className="mt-1 font-medium">{formatDate(member.createdAt)}</dd></div>
                   </dl>
                   <Button asChild variant="outline" size="sm" className="mt-3 w-full">
@@ -121,7 +142,7 @@ export default function MembersPage() {
               </TableHeader>
               <TableBody>
                 {filtered.map((member, idx) => (
-                  <TableRow key={member.id} className="transition-colors hover:bg-white/30">
+                  <TableRow key={member.id} className="transition-colors hover:bg-accent/50">
                     <TableCell>{formatPersianNumber(idx + 1)}</TableCell>
                     <TableCell className="font-medium">{member.firstName} {member.lastName}</TableCell>
                     <TableCell dir="ltr" className="text-left">{member.email}</TableCell>
@@ -131,7 +152,7 @@ export default function MembersPage() {
                         {statusMap[member.status].label}
                       </Badge>
                     </TableCell>
-                    <TableCell>{(member as any).plan}</TableCell>
+                    <TableCell>{member.plan}</TableCell>
                     <TableCell>{formatDate(member.createdAt)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -147,6 +168,7 @@ export default function MembersPage() {
           )}
         </CardContent>
       </Card>
+      </ScrollReveal>
     </div>
   );
 }

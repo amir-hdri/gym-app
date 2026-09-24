@@ -177,12 +177,15 @@ export function createMockPrograms(): TrainingProgram[] {
 }
 
 export const mockDashboardStats: DashboardStats = {
+  totalUsers: 12,
   totalMembers: 8,
   activeMembers: 7,
+  activeMemberships: 6,
   totalCoaches: 3,
   totalRevenue: 10800000,
   monthlyRevenue: 3200000,
   expiringMemberships: 3,
   todayCheckIns: 4,
+  todayCheckins: 4,
   avgSessionDuration: 90,
 };

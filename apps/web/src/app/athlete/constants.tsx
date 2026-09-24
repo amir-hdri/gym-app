@@ -1,15 +1,17 @@
-import { LayoutDashboard, ClipboardList, Target, LogIn, History, CalendarDays, CreditCard, MessageSquare, Bell, User } from "lucide-react";
+import { LayoutDashboard, Dumbbell, CalendarDays, Trophy, QrCode, History, CreditCard, MessageCircle, Bell, UserRound } from "lucide-react";
 import type { NavItem } from "@/components/layout/Sidebar";
 
+const iconProps = { className: "h-[22px] w-[22px]", strokeWidth: 1.75 } as const;
+
 export const athleteNavItems: NavItem[] = [
-  { label: "داشبورد", href: "/athlete", icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: "برنامه‌های تمرینی", href: "/athlete/programs", icon: <ClipboardList className="h-5 w-5" /> },
-  { label: "تقویم تمرینی", href: "/athlete/calendar", icon: <CalendarDays className="h-5 w-5" /> },
-  { label: "اهداف", href: "/athlete/goals", icon: <Target className="h-5 w-5" /> },
-  { label: "چک‌این", href: "/athlete/checkin", icon: <LogIn className="h-5 w-5" /> },
-  { label: "تاریخچه", href: "/athlete/history", icon: <History className="h-5 w-5" /> },
-  { label: "عضویت و پرداخت", href: "/athlete/membership", icon: <CreditCard className="h-5 w-5" /> },
-  { label: "پیام‌ها", href: "/athlete/messages", icon: <MessageSquare className="h-5 w-5" /> },
-  { label: "اعلان‌ها", href: "/athlete/notifications", icon: <Bell className="h-5 w-5" /> },
-  { label: "پروفایل", href: "/athlete/profile", icon: <User className="h-5 w-5" /> },
+  { label: "داشبورد", href: "/athlete", icon: <LayoutDashboard {...iconProps} /> },
+  { label: "برنامه‌های تمرینی", href: "/athlete/programs", icon: <Dumbbell {...iconProps} /> },
+  { label: "تقویم تمرینی", href: "/athlete/calendar", icon: <CalendarDays {...iconProps} /> },
+  { label: "اهداف", href: "/athlete/goals", icon: <Trophy {...iconProps} /> },
+  { label: "چک‌این", href: "/athlete/checkin", icon: <QrCode {...iconProps} /> },
+  { label: "تاریخچه", href: "/athlete/history", icon: <History {...iconProps} /> },
+  { label: "عضویت و پرداخت", href: "/athlete/membership", icon: <CreditCard {...iconProps} /> },
+  { label: "پیام‌ها", href: "/athlete/messages", icon: <MessageCircle {...iconProps} /> },
+  { label: "اعلان‌ها", href: "/athlete/notifications", icon: <Bell {...iconProps} /> },
+  { label: "پروفایل", href: "/athlete/profile", icon: <UserRound {...iconProps} /> },
 ];

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export function Skeleton({ className }: { className?: string }) {
   return (
     <motion.div
-      className={cn("rounded-lg bg-muted/50 animate-pulse", className)}
+      className={cn("animate-pulse rounded-lg bg-muted", className)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -16,7 +16,7 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function CardSkeleton() {
   return (
-    <div className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
+    <div className="liquid-glass-card space-y-4 rounded-2xl p-6">
       <div className="flex items-center justify-between">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-8 w-8 rounded-full" />
@@ -42,7 +42,7 @@ export function ListSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 rounded-lg border bg-card p-4">
+        <div key={i} className="liquid-glass-card flex items-center gap-4 rounded-2xl p-4">
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-3/4" />
@@ -50,6 +50,28 @@ export function ListSkeleton({ count = 3 }: { count?: number }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/** Full-page skeleton shaped like a portal page: header, stat cards, then content rows. */
+export function PageSkeleton() {
+  return (
+    <div className="space-y-6" role="status" aria-live="polite" aria-label="در حال بارگذاری صفحه">
+      <span className="sr-only">در حال بارگذاری...</span>
+      <div className="space-y-3">
+        <Skeleton className="h-7 w-40" />
+        <Skeleton className="h-4 w-64 max-w-full" />
+      </div>
+      <div className="grid gap-4 min-[380px]:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <CardSkeleton key={i} />
+        ))}
+      </div>
+      <div className="liquid-glass-card space-y-4 rounded-2xl p-5">
+        <Skeleton className="h-5 w-36" />
+        <TableSkeleton rows={4} />
+      </div>
     </div>
   );
 }

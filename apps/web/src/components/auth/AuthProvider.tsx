@@ -30,8 +30,6 @@ interface RegisterData {
   firstName: string;
   lastName: string;
   phone: string;
-  role: UserRole;
-  branchId?: string;
 }
 
 interface AuthResponse {
@@ -122,7 +120,14 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   }, [setAuth]);
 
   const register = useCallback(async (data: RegisterData) => {
-    const response = await api.register(data) as ApiResponse<AuthResponse>;
+    const payload = {
+      email: data.email,
+      password: data.password,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+    };
+    const response = await api.register(payload) as ApiResponse<AuthResponse>;
     
     if (response.success && response.data) {
       setAuth(response.data.user, response.data.tokens);

@@ -16,7 +16,7 @@ const Progress = React.forwardRef<
   >
     <ProgressPrimitive.Indicator asChild>
       <motion.div
-        className={cn("h-full w-full flex-1 rounded-full bg-gradient-to-l from-activity-move to-activity-stand shadow-[0_0_10px_rgba(255,45,135,.35)]", indicatorClassName)}
+        className={cn("h-full w-full flex-1 rounded-full bg-gradient-to-l from-activity-move to-activity-stand shadow-[0_0_12px_hsl(var(--primary)/0.35)]", indicatorClassName)}
         initial={{ width: "0%" }}
         animate={{ width: `${value || 0}%` }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}

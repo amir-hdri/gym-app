@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useReducedMotion } from "framer-motion";
 import type { CheckIn, CoachDashboardData, Payment } from "@/lib/types";
 import { cn, formatCurrency, formatPersianNumber } from "@/lib/utils";
@@ -23,11 +14,39 @@ function chartDate(value: string, formatter: Intl.DateTimeFormat) {
 
 function EmptyChart({ message, className }: { message: string; className?: string }) {
   return (
-    <div className={cn("flex h-64 items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 text-center text-sm text-muted-foreground", className)}>
+    <div
+      className={cn(
+        "flex h-64 items-center justify-center rounded-xl border border-dashed border-white/[0.08] bg-[#1C1C1E] px-6 text-center text-sm text-[#98989D]",
+        className
+      )}
+    >
       {message}
     </div>
   );
 }
+
+// Apple Fitness Trends — shared tooltip style
+const appleTooltip = {
+  cursor: { fill: "rgba(255,255,255,0.04)" },
+  contentStyle: {
+    direction: "rtl" as const,
+    maxWidth: 220,
+    borderRadius: "12px",
+    border: "1px solid rgba(56,56,58,0.8)",
+    background: "#2C2C2E",
+    color: "#F5F5F7",
+    boxShadow: "0 12px 32px rgba(0,0,0,0.6)",
+    whiteSpace: "normal" as const,
+    lineHeight: 1.5,
+    fontFamily: "var(--font-vazirmatn), system-ui, sans-serif",
+    fontSize: "12px",
+  },
+  labelStyle: { color: "#F5F5F7", fontWeight: 600 },
+  itemStyle: { color: "#98989D" },
+};
+
+const appleGrid = "rgba(56,56,58,0.5)";
+const appleTick = { fill: "#98989D", fontSize: 11, fontFamily: "var(--font-vazirmatn), system-ui, sans-serif" };
 
 export function RevenueChart({ payments, compact = false }: { payments: Payment[]; compact?: boolean }) {
   const reduceMotion = useReducedMotion();
@@ -54,25 +73,17 @@ export function RevenueChart({ payments, compact = false }: { payments: Payment[
   return (
     <div className={cn(compact ? "h-44" : "h-72")} dir="ltr" role="img" aria-label="نمودار درآمد پرداخت‌های موفق به تفکیک ماه">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 12, right: 4, left: -12, bottom: 0 }}>
-          <defs>
-            <linearGradient id="revenue-bar" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="1" />
-              <stop offset="100%" stopColor="hsl(var(--activity-stand))" stopOpacity="0.65" />
-            </linearGradient>
-          </defs>
-          <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="3 5" />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+        <BarChart data={data} margin={{ top: 12, right: 4, left: -12, bottom: 0 }} barCategoryGap={compact ? "30%" : "24%"}>
+          <CartesianGrid vertical={false} stroke={appleGrid} strokeDasharray="3 6" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={appleTick} />
           <YAxis hide />
           <Tooltip
-            cursor={{ fill: "hsl(var(--primary) / 0.08)" }}
-            contentStyle={{ direction: "rtl", maxWidth: 220, borderRadius: "14px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", boxShadow: "0 12px 30px -18px rgba(40, 18, 45, .45)", whiteSpace: "normal", lineHeight: 1.5 }}
-            formatter={(value, _name, item) => [formatCurrency(value as number), `${formatPersianNumber(item.payload.transactions)} تراکنش موفق`]}
+            cursor={appleTooltip.cursor}
+            contentStyle={appleTooltip.contentStyle as any}
+            formatter={(value, _name, item) => [formatCurrency(value as number), `${formatPersianNumber(item.payload.transactions)} تراکنش موفق`] as any}
             labelFormatter={(label) => `درآمد ${label}`}
           />
-          <Bar dataKey="revenue" radius={[9, 9, 3, 3]} maxBarSize={compact ? 28 : 44} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out">
-            {data.map((entry) => <Cell key={entry.label} fill="url(#revenue-bar)" />)}
-          </Bar>
+          <Bar dataKey="revenue" fill="#FF2D55" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -98,23 +109,17 @@ export function SessionDurationChart({ checkIns, compact = false }: { checkIns: 
   return (
     <div className={cn(compact ? "h-44" : "h-72")} dir="ltr" role="img" aria-label="نمودار مدت جلسات تکمیل‌شده به تفکیک تاریخ">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 12, right: 4, left: -12, bottom: 0 }}>
-          <defs>
-            <linearGradient id="session-bar" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--activity-exercise))" stopOpacity="1" />
-              <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity="0.6" />
-            </linearGradient>
-          </defs>
-          <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="3 5" />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+        <BarChart data={data} margin={{ top: 12, right: 4, left: -12, bottom: 0 }} barCategoryGap={compact ? "30%" : "24%"}>
+          <CartesianGrid vertical={false} stroke={appleGrid} strokeDasharray="3 6" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={appleTick} />
           <YAxis hide />
           <Tooltip
-            cursor={{ fill: "hsl(var(--activity-exercise) / 0.1)" }}
-            contentStyle={{ direction: "rtl", maxWidth: 220, borderRadius: "14px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", boxShadow: "0 12px 30px -18px rgba(40, 18, 45, .45)", whiteSpace: "normal", lineHeight: 1.5 }}
-            formatter={(value) => [`${formatPersianNumber(value as number)} دقیقه`, "مدت تمرین"]}
+            cursor={{ fill: "rgba(48,209,88,0.08)" }}
+            contentStyle={appleTooltip.contentStyle as any}
+            formatter={(value) => [`${formatPersianNumber(value as number)} دقیقه`, "مدت تمرین"] as any}
             labelFormatter={(label) => `جلسه ${label}`}
           />
-          <Bar dataKey="duration" fill="url(#session-bar)" radius={[9, 9, 3, 3]} maxBarSize={compact ? 28 : 44} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Bar dataKey="duration" fill="#30D158" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -138,21 +143,15 @@ export function AthleteProgressChart({ athletes }: { athletes: CoachAthlete[] })
     <div className="h-72" dir="ltr" role="img" aria-label="نمودار مقایسه درصد تکمیل برنامه شاگردان">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 10, left: 4, bottom: 0 }}>
-          <defs>
-            <linearGradient id="athlete-progress-bar" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--activity-stand))" />
-              <stop offset="100%" stopColor="hsl(var(--primary))" />
-            </linearGradient>
-          </defs>
-          <CartesianGrid horizontal={false} stroke="hsl(var(--border))" strokeDasharray="3 5" />
+          <CartesianGrid horizontal={false} stroke={appleGrid} strokeDasharray="3 6" />
           <XAxis type="number" domain={[0, 100]} hide />
-          <YAxis dataKey="name" type="category" width={90} tickLine={false} axisLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+          <YAxis dataKey="name" type="category" width={90} tickLine={false} axisLine={false} tick={appleTick} />
           <Tooltip
-            cursor={{ fill: "hsl(var(--primary) / 0.08)" }}
-            contentStyle={{ direction: "rtl", maxWidth: 220, borderRadius: "14px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", boxShadow: "0 12px 30px -18px rgba(40, 18, 45, .45)", whiteSpace: "normal", lineHeight: 1.5 }}
-            formatter={(value, _name, item) => [`${formatPersianNumber(value as number)}٪`, item.payload.program ?? "بدون برنامه فعال"]}
+            cursor={{ fill: "rgba(10,132,255,0.08)" }}
+            contentStyle={appleTooltip.contentStyle as any}
+            formatter={(value, _name, item) => [`${formatPersianNumber(value as number)}٪`, (item.payload as any).program ?? "بدون برنامه فعال"] as any}
           />
-          <Bar dataKey="progress" fill="url(#athlete-progress-bar)" radius={[0, 9, 9, 0]} maxBarSize={24} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
+          <Bar dataKey="progress" fill="#0A84FF" radius={[0, 6, 6, 0]} maxBarSize={20} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>

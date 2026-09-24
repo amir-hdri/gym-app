@@ -8,6 +8,7 @@ import { formatCurrency, formatPersianNumber, cn } from "@/lib/utils";
 import { Plus, Check } from "lucide-react";
 import { useState } from "react";
 import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { useMembershipPlans } from "@/hooks/use-api";
 import type { MembershipPlan } from "@/lib/types";
 
@@ -22,12 +23,12 @@ const durationLabel = (days: number) => {
 const borderColors = ["border-blue-200 dark:border-blue-800", "border-gray-300 dark:border-gray-600", "border-yellow-300 dark:border-yellow-700", "border-purple-300 dark:border-purple-700", "border-green-200 dark:border-green-800", "border-red-200 dark:border-red-800"];
 
 export default function PlansPage() {
-  const { data, isLoading, isError } = useMembershipPlans();
+  const { data, isLoading, isError, refetch } = useMembershipPlans();
   const [planList, setPlanList] = useState<MembershipPlan[] | null>(null);
   const plans = planList ?? data?.data ?? [];
 
   if (isLoading) return <Loading />;
-  if (isError) return <ErrorDisplay />;
+  if (isError) return <ErrorDisplay onRetry={refetch} />;
 
   const toggleStatus = (id: string) => {
     setPlanList((prev) =>
@@ -37,6 +38,7 @@ export default function PlansPage() {
 
   return (
     <div className="space-y-6">
+      <ScrollReveal direction="none">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">پلن‌های اشتراک</h1>
@@ -49,10 +51,12 @@ export default function PlansPage() {
           </Link>
         </Button>
       </div>
+      </ScrollReveal>
 
       {plans.length === 0 ? (
         <EmptyState title="هیچ پلنی یافت نشد" description="هنوز هیچ پلن اشتراکی تعریف نشده است" />
       ) : (
+        <ScrollReveal delay={0.05}>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan, idx) => (
             <Card key={plan.id} glass className={cn("border-t-4", borderColors[idx % borderColors.length], !plan.isActive && "opacity-60")}>
@@ -91,6 +95,7 @@ export default function PlansPage() {
             </Card>
           ))}
         </div>
+        </ScrollReveal>
       )}
     </div>
   );

@@ -1,13 +1,15 @@
-import { LayoutDashboard, Users, UserCircle, CreditCard, DollarSign, Settings, Bell, User } from "lucide-react";
+import { LayoutDashboard, Users, UserCircle2, CreditCard, DollarSign, Settings2, Bell, UserRound } from "lucide-react";
 import type { NavItem } from "@/components/layout/Sidebar";
 
+const p = { className: "h-[22px] w-[22px]", strokeWidth: 1.75 } as const;
+
 export const adminNavItems: NavItem[] = [
-  { label: "داشبورد", href: "/admin", icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: "اعضا", href: "/admin/members", icon: <Users className="h-5 w-5" /> },
-  { label: "مربیان", href: "/admin/coaches", icon: <UserCircle className="h-5 w-5" /> },
-  { label: "پلن‌های اشتراک", href: "/admin/plans", icon: <CreditCard className="h-5 w-5" /> },
-  { label: "پرداخت‌ها", href: "/admin/payments", icon: <DollarSign className="h-5 w-5" /> },
-  { label: "اطلاع‌رسانی", href: "/admin/notifications", icon: <Bell className="h-5 w-5" /> },
-  { label: "پروفایل", href: "/admin/profile", icon: <User className="h-5 w-5" /> },
-  { label: "تنظیمات", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
+  { label: "داشبورد", href: "/admin", icon: <LayoutDashboard {...p} /> },
+  { label: "اعضا", href: "/admin/members", icon: <Users {...p} /> },
+  { label: "مربیان", href: "/admin/coaches", icon: <UserCircle2 {...p} /> },
+  { label: "پلن‌های اشتراک", href: "/admin/plans", icon: <CreditCard {...p} /> },
+  { label: "پرداخت‌ها", href: "/admin/payments", icon: <DollarSign {...p} /> },
+  { label: "اطلاع‌رسانی", href: "/admin/notifications", icon: <Bell {...p} /> },
+  { label: "پروفایل", href: "/admin/profile", icon: <UserRound {...p} /> },
+  { label: "تنظیمات", href: "/admin/settings", icon: <Settings2 {...p} /> },
 ];

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     Boolean,
@@ -17,6 +17,10 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
+def _utcnow_naive() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -30,8 +34,8 @@ class User(Base):
     status = Column(String, default="active")
     avatar_url = Column(String, nullable=True)
     branch_id = Column(String, ForeignKey("branches.id", ondelete="SET NULL"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
+    updated_at = Column(DateTime, default=_utcnow_naive, onupdate=_utcnow_naive)
     last_login_at = Column(DateTime, nullable=True)
 
     branch = relationship("Branch", foreign_keys=[branch_id], back_populates="users", lazy="selectin")
@@ -58,8 +62,8 @@ class Branch(Base):
     email = Column(String, default="")
     manager_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
+    updated_at = Column(DateTime, default=_utcnow_naive, onupdate=_utcnow_naive)
 
     users = relationship("User", foreign_keys="User.branch_id", back_populates="branch", lazy="selectin")
     membership_plans = relationship("MembershipPlan", back_populates="branch", lazy="selectin")
@@ -80,8 +84,8 @@ class MembershipPlan(Base):
     features = Column(JSON, default=list)
     is_active = Column(Boolean, default=True)
     branch_id = Column(String, ForeignKey("branches.id", ondelete="SET NULL"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
+    updated_at = Column(DateTime, default=_utcnow_naive, onupdate=_utcnow_naive)
 
     branch = relationship("Branch", back_populates="membership_plans", lazy="selectin")
     memberships = relationship("Membership", back_populates="plan", lazy="selectin")
@@ -104,8 +108,8 @@ class Membership(Base):
     status = Column(String, default="active")
     freeze_reason = Column(String, nullable=True)
     freeze_end_date = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
+    updated_at = Column(DateTime, default=_utcnow_naive, onupdate=_utcnow_naive)
 
     user = relationship("User", back_populates="memberships", lazy="selectin")
     plan = relationship("MembershipPlan", back_populates="memberships", lazy="selectin")
@@ -129,8 +133,8 @@ class Exercise(Base):
     instructions = Column(Text, nullable=True)
     tips = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
+    updated_at = Column(DateTime, default=_utcnow_naive, onupdate=_utcnow_naive)
 
     program_exercises = relationship("ProgramExercise", back_populates="exercise", lazy="selectin")
 
@@ -147,8 +151,8 @@ class TrainingProgram(Base):
     end_date = Column(DateTime, nullable=False)
     frequency_per_week = Column(Integer, default=3)
     status = Column(String, default="draft")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
+    updated_at = Column(DateTime, default=_utcnow_naive, onupdate=_utcnow_naive)
 
     athlete = relationship("User", foreign_keys=[athlete_id], back_populates="training_programs_athlete", lazy="selectin")
     coach = relationship("User", foreign_keys=[coach_id], back_populates="training_programs_coach", lazy="selectin")
@@ -193,8 +197,8 @@ class Goal(Base):
     start_date = Column(DateTime, nullable=False)
     target_date = Column(DateTime, nullable=False)
     status = Column(String, default="not_started")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
+    updated_at = Column(DateTime, default=_utcnow_naive, onupdate=_utcnow_naive)
 
     athlete = relationship("User", foreign_keys=[athlete_id], back_populates="goals", lazy="selectin")
     coach = relationship("User", foreign_keys=[coach_id], lazy="selectin")
@@ -206,10 +210,10 @@ class CheckIn(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     branch_id = Column(String, ForeignKey("branches.id", ondelete="CASCADE"), nullable=False)
-    check_in_time = Column(DateTime, default=datetime.utcnow)
+    check_in_time = Column(DateTime, default=_utcnow_naive)
     check_out_time = Column(DateTime, nullable=True)
     session_deducted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
 
     user = relationship("User", back_populates="checkins", lazy="selectin")
     branch = relationship("Branch", back_populates="checkins", lazy="selectin")
@@ -228,8 +232,8 @@ class Payment(Base):
     reference_id = Column(String, nullable=True)
     description = Column(Text, nullable=True)
     paid_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
+    updated_at = Column(DateTime, default=_utcnow_naive, onupdate=_utcnow_naive)
 
     user = relationship("User", back_populates="payments", lazy="selectin")
 
@@ -244,6 +248,6 @@ class Notification(Base):
     type = Column(String, default="info")
     is_read = Column(Boolean, default=False)
     action_url = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow_naive)
 
     user = relationship("User", back_populates="notifications", lazy="selectin")

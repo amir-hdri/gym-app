@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, require_roles
 from app.database import get_db
 from app.models import MembershipPlan, User
 from app.responses import error_response, success_response
@@ -32,7 +32,7 @@ def list_plans(
 def create_plan(
     req: MembershipPlanCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "receptionist")),
 ):
     plan = MembershipPlan(**req.model_dump(by_alias=False))
     db.add(plan)
@@ -57,7 +57,7 @@ def update_plan(
     plan_id: str,
     req: MembershipPlanUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "receptionist")),
 ):
     plan = db.query(MembershipPlan).filter(MembershipPlan.id == plan_id).first()
     if not plan:

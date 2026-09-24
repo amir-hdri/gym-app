@@ -1,5 +1,7 @@
-from datetime import datetime, timedelta
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 from typing import Optional
+import time
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -14,6 +16,9 @@ from app.models import User
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
+# Simple in-memory rate limiter for login (per-IP)
+_rate_limit_store: dict[str, list[float]] = defaultdict(list)
+
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
@@ -23,15 +28,19 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
+def _utcnow_naive() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 def create_access_token(data: dict) -> tuple[str, datetime]:
-    expiry = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    expiry = _utcnow_naive() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {**data, "exp": expiry, "type": "access"}
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return token, expiry
 
 
 def create_refresh_token(data: dict) -> tuple[str, datetime]:
-    expiry = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    expiry = _utcnow_naive() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     payload = {**data, "exp": expiry, "type": "refresh"}
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return token, expiry
@@ -93,3 +102,14 @@ def require_roles(*roles: str):
         return current_user
 
     return dependency
+
+
+def check_login_rate_limit(identifier: str) -> None:
+    """Raises 429 if identifier has exceeded LOGIN_RATE_LIMIT per minute."""
+    now = time.time()
+    window = 60.0
+    # prune
+    _rate_limit_store[identifier] = [t for t in _rate_limit_store[identifier] if now - t < window]
+    if len(_rate_limit_store[identifier]) >= settings.LOGIN_RATE_LIMIT:
+        raise HTTPException(status_code=429, detail="Too many login attempts. Try again later.")
+    _rate_limit_store[identifier].append(now)

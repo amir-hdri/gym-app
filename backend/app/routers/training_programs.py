@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, require_roles
 from app.database import get_db
-from app.models import ProgramExercise, TrainingProgram, User
+from app.models import Exercise, ProgramExercise, TrainingProgram, User
 from app.responses import error_response, paginated_response, success_response
 from app.schemas import (
+    ExerciseResponse,
     ProgramExerciseCreate,
     ProgramExerciseResponse,
     ProgramExerciseUpdate,
@@ -19,10 +20,13 @@ router = APIRouter(prefix="/api/v1/training-programs", tags=["Training Programs"
 
 def _program_to_dict(program: TrainingProgram) -> dict:
     d = TrainingProgramResponse.model_validate(program).model_dump(by_alias=True)
-    d["exercises"] = [
-        ProgramExerciseResponse.model_validate(e).model_dump(by_alias=True)
-        for e in program.exercises
-    ]
+    exercises = []
+    for e in program.exercises or []:
+        ed = ProgramExerciseResponse.model_validate(e).model_dump(by_alias=True)
+        if e.exercise is not None:
+            ed["exercise"] = ExerciseResponse.model_validate(e.exercise).model_dump(by_alias=True)
+        exercises.append(ed)
+    d["exercises"] = exercises
     return d
 
 
@@ -36,6 +40,11 @@ def list_programs(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Athletes see only their own programs
+    if current_user.role == "athlete":
+        athlete_id = athlete_id or current_user.id
+        if athlete_id != current_user.id:
+            return error_response("Insufficient permissions", 403)
     query = db.query(TrainingProgram)
     if athlete_id:
         query = query.filter(TrainingProgram.athlete_id == athlete_id)
@@ -57,8 +66,11 @@ def list_programs(
 def create_program(
     req: TrainingProgramCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "coach")),
 ):
+    # Coaches can only create programs under their own coaching
+    if current_user.role == "coach" and req.coach_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     program = TrainingProgram(**req.model_dump(by_alias=False))
     db.add(program)
     db.commit()
@@ -71,6 +83,8 @@ def get_program(program_id: str, db: Session = Depends(get_db), current_user: Us
     program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
     if not program:
         return error_response("Program not found", 404)
+    if current_user.role == "athlete" and program.athlete_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     return success_response(data=_program_to_dict(program))
 
 
@@ -79,11 +93,13 @@ def update_program(
     program_id: str,
     req: TrainingProgramUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "coach")),
 ):
     program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
     if not program:
         return error_response("Program not found", 404)
+    if current_user.role == "coach" and program.coach_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     update_data = req.model_dump(exclude_unset=True, by_alias=False)
     for key, value in update_data.items():
         setattr(program, key, value)
@@ -93,10 +109,12 @@ def update_program(
 
 
 @router.delete("/{program_id}")
-def delete_program(program_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_program(program_id: str, db: Session = Depends(get_db), current_user: User = Depends(require_roles("admin", "coach"))):
     program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
     if not program:
         return error_response("Program not found", 404)
+    if current_user.role == "coach" and program.coach_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     db.delete(program)
     db.commit()
     return success_response(message="Program deleted")
@@ -107,11 +125,13 @@ def add_exercise_to_program(
     program_id: str,
     req: ProgramExerciseCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "coach")),
 ):
     program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
     if not program:
         return error_response("Program not found", 404)
+    if current_user.role == "coach" and program.coach_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     pe = ProgramExercise(program_id=program_id, **req.model_dump(by_alias=False))
     db.add(pe)
     db.commit()
@@ -128,8 +148,13 @@ def update_exercise_in_program(
     exercise_id: str,
     req: ProgramExerciseUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "coach")),
 ):
+    program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
+    if not program:
+        return error_response("Program not found", 404)
+    if current_user.role == "coach" and program.coach_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     pe = (
         db.query(ProgramExercise)
         .filter(
@@ -156,8 +181,13 @@ def remove_exercise_from_program(
     program_id: str,
     exercise_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "coach")),
 ):
+    program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
+    if not program:
+        return error_response("Program not found", 404)
+    if current_user.role == "coach" and program.coach_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     pe = (
         db.query(ProgramExercise)
         .filter(
@@ -182,6 +212,14 @@ def complete_exercise(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
+    if not program:
+        return error_response("Program not found", 404)
+    # Athletes complete only their own program; coaches only theirs; admins bypass
+    if current_user.role == "athlete" and program.athlete_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
+    if current_user.role == "coach" and program.coach_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     pe = (
         db.query(ProgramExercise)
         .filter(
@@ -193,10 +231,10 @@ def complete_exercise(
     if not pe:
         return error_response("Exercise not found in program", 404)
 
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     pe.is_completed = True
-    pe.completed_at = datetime.utcnow()
+    pe.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
     if req.actual_sets is not None:
         pe.actual_sets = req.actual_sets
     if req.actual_reps is not None:

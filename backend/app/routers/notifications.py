@@ -38,6 +38,9 @@ def create_notification(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Only staff/system can create notifications for others
+    if current_user.role == "athlete" and req.user_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     notification = Notification(**req.model_dump(by_alias=False))
     db.add(notification)
     db.commit()
@@ -46,6 +49,21 @@ def create_notification(
         data=NotificationResponse.model_validate(notification).model_dump(by_alias=True),
         message="Notification created",
     )
+
+
+@router.post("/read-all")
+@router.patch("/read-all")
+def mark_all_as_read(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    updated = (
+        db.query(Notification)
+        .filter(Notification.user_id == current_user.id, Notification.is_read == False)
+        .update({"is_read": True}, synchronize_session="fetch")
+    )
+    db.commit()
+    return success_response(message=f"{updated} notifications marked as read")
 
 
 @router.post("/{notification_id}/read")

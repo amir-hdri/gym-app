@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run type-check --workspace=apps/web
+      - run: npm run lint --workspace=apps/web
+      - run: npm run test --workspace=apps/web
+
+  backend:
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: ci-only-test-key
+      DATABASE_URL: sqlite:////tmp/ci.db
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r backend/requirements.txt
+      - run: python -m compileall -q backend/app
+      - run: python -m pytest tests -q
+        working-directory: backend

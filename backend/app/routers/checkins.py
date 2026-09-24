@@ -1,13 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
 from app.database import get_db
-from app.models import CheckIn, User
+from app.models import Branch, CheckIn, User
 from app.responses import error_response, paginated_response, success_response
-from app.schemas import CheckInCreate, CheckInResponse, CheckOutUpdate, QRCheckInRequest, QRCheckInResponse
+from app.schemas import CheckInCreate, CheckInResponse, CheckOutRequest, CheckOutUpdate, QRCheckInRequest, QRCheckInResponse
 
 router = APIRouter(prefix="/api/v1/check-ins", tags=["Check-Ins"])
 
@@ -23,6 +23,12 @@ def list_checkins(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Non-staff can only see their own check-ins
+    if current_user.role not in {"admin", "coach", "receptionist"} and user_id and user_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
+    if current_user.role not in {"admin", "coach", "receptionist"}:
+        user_id = user_id or current_user.id
+
     query = db.query(CheckIn)
     if user_id:
         query = query.filter(CheckIn.user_id == user_id)
@@ -60,10 +66,28 @@ def check_in(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Validate references
+    user = db.query(User).filter(User.id == req.user_id).first()
+    if not user:
+        return error_response("User not found", 404)
+    branch = db.query(Branch).filter(Branch.id == req.branch_id).first()
+    if not branch:
+        return error_response("Branch not found", 404)
+    # Athletes can only check themselves in
+    if current_user.role == "athlete" and req.user_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
+    # Prevent double check-in (open session exists)
+    open_session = (
+        db.query(CheckIn)
+        .filter(CheckIn.user_id == req.user_id, CheckIn.check_out_time.is_(None))
+        .first()
+    )
+    if open_session:
+        return error_response("User already checked in", 400)
     checkin = CheckIn(
         user_id=req.user_id,
         branch_id=req.branch_id,
-        check_in_time=req.check_in_time or datetime.utcnow(),
+        check_in_time=req.check_in_time or datetime.now(timezone.utc).replace(tzinfo=None),
     )
     db.add(checkin)
     db.commit()
@@ -72,15 +96,6 @@ def check_in(
         data=CheckInResponse.model_validate(checkin).model_dump(by_alias=True),
         message="Checked in",
     )
-
-
-from pydantic import BaseModel, Field
-
-
-class CheckOutRequest(BaseModel):
-    checkin_id: str = Field(..., alias="checkInId")
-
-    model_config = {"populate_by_name": True}
 
 
 @router.post("/check-out")
@@ -94,7 +109,10 @@ def check_out_post(
         return error_response("Check-in not found", 404)
     if checkin.check_out_time:
         return error_response("Already checked out", 400)
-    checkin.check_out_time = datetime.utcnow()
+    # Athletes can only check out their own sessions
+    if current_user.role == "athlete" and checkin.user_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
+    checkin.check_out_time = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
     db.refresh(checkin)
     d = CheckInResponse.model_validate(checkin).model_dump(by_alias=True)
@@ -115,7 +133,8 @@ def check_out(
         return error_response("Check-in not found", 404)
     if checkin.check_out_time:
         return error_response("Already checked out", 400)
-
+    if current_user.role == "athlete" and checkin.user_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     checkin.check_out_time = req.check_out_time
     db.commit()
     db.refresh(checkin)
@@ -126,7 +145,7 @@ def check_out(
     return success_response(data=d, message="Checked out")
 
 
-STAFF_ROLES = {"admin", "coach"}
+STAFF_ROLES = {"admin", "coach", "receptionist"}
 
 
 @router.post("/qr/check-in")
@@ -146,10 +165,19 @@ def qr_check_in(
     if not branch_id:
         return error_response("Staff member has no assigned branch", 400)
 
+    # Prevent double check-in for member
+    open_session = (
+        db.query(CheckIn)
+        .filter(CheckIn.user_id == member.id, CheckIn.check_out_time.is_(None))
+        .first()
+    )
+    if open_session:
+        return error_response("Member already checked in", 400)
+
     checkin = CheckIn(
         user_id=member.id,
         branch_id=branch_id,
-        check_in_time=datetime.utcnow(),
+        check_in_time=datetime.now(timezone.utc).replace(tzinfo=None),
     )
     db.add(checkin)
     db.commit()

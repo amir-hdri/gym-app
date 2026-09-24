@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, require_roles
 from app.database import get_db
 from app.models import Exercise, User
 from app.responses import error_response, paginated_response, success_response
@@ -47,7 +47,7 @@ def list_exercises(
 def create_exercise(
     req: ExerciseCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "coach")),
 ):
     exercise = Exercise(**req.model_dump(by_alias=False))
     db.add(exercise)
@@ -72,7 +72,7 @@ def update_exercise(
     exercise_id: str,
     req: ExerciseUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "coach")),
 ):
     exercise = db.query(Exercise).filter(Exercise.id == exercise_id).first()
     if not exercise:

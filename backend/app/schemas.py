@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 def to_camel(string: str) -> str:
@@ -21,18 +21,22 @@ class BaseSchema(BaseModel):
 
 # ---- Auth ----
 
+EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+
+
 class LoginRequest(BaseModel):
-    email: str = Field(max_length=255)
+    email: str = Field(max_length=255, pattern=EMAIL_PATTERN)
     password: str = Field(min_length=6)
 
 
 class RegisterRequest(BaseModel):
-    email: str = Field(max_length=255)
+    email: str = Field(max_length=255, pattern=EMAIL_PATTERN)
     password: str = Field(min_length=6)
     first_name: str = Field(..., alias="firstName", max_length=100)
     last_name: str = Field(..., alias="lastName", max_length=100)
     phone: str = Field(default="", max_length=100)
-    role: str = "athlete"
+    # NOTE: role is intentionally omitted — the server hardcodes "athlete"
+    # for self-registration to prevent privilege escalation.
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -71,7 +75,7 @@ class UserCreate(BaseSchema):
     first_name: str = Field(max_length=100)
     last_name: str = Field(max_length=100)
     phone: str = Field(default="", max_length=100)
-    role: str = "athlete"
+    # role is set server-side (default "athlete"); admin can specify via AdminUserCreate
     status: str = "active"
     branch_id: Optional[str] = None
 
@@ -81,14 +85,50 @@ class UserUpdate(BaseSchema):
     first_name: Optional[str] = Field(default=None, max_length=100)
     last_name: Optional[str] = Field(default=None, max_length=100)
     phone: Optional[str] = Field(default=None, max_length=100)
-    role: Optional[str] = None
     status: Optional[str] = None
     branch_id: Optional[str] = None
     avatar_url: Optional[str] = None
+    # role is intentionally excluded — only admins can update roles via a dedicated endpoint
+    # password is handled via a separate /users/{user_id}/password endpoint
 
 
 class UserStatusUpdate(BaseModel):
     status: str
+
+
+class AdminUserCreate(BaseModel):
+    """Schema for admins to create users with a specified role."""
+    email: str = Field(max_length=255)
+    password: str = Field(min_length=6)
+    first_name: str = Field(..., alias="firstName", max_length=100)
+    last_name: str = Field(..., alias="lastName", max_length=100)
+    phone: str = Field(default="", max_length=100)
+    role: str = "athlete"
+    status: str = "active"
+    branch_id: Optional[str] = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class PasswordChangeRequest(BaseModel):
+    """Schema for a user changing their own password (requires current password)."""
+    current_password: str = Field(..., alias="currentPassword")
+    new_password: str = Field(..., min_length=6, alias="newPassword")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class PasswordResetRequest(BaseModel):
+    """Schema for requesting a password reset link."""
+    email: str = Field(max_length=255)
+
+
+class PasswordResetConfirm(BaseModel):
+    """Schema for resetting a password using a token."""
+    token: str
+    new_password: str = Field(..., min_length=6, alias="newPassword")
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 # ---- Branch ----
@@ -413,7 +453,16 @@ class CheckInCreate(BaseSchema):
 
 
 class CheckOutUpdate(BaseModel):
-    check_out_time: datetime = Field(default_factory=datetime.utcnow, alias="checkOutTime")
+    check_out_time: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        alias="checkOutTime",
+    )
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class CheckOutRequest(BaseModel):
+    checkin_id: str = Field(..., alias="checkInId")
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -454,10 +503,19 @@ class PaymentCreate(BaseSchema):
     membership_id: Optional[str] = None
     amount: float = Field(gt=0)
     currency: str = "IRR"
+    # status is server-controlled — clients cannot mark a payment as "completed"
     status: str = "pending"
     method: str = "cash"
     reference_id: Optional[str] = None
     description: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_status(cls, data: Any) -> Any:
+        # status is server-controlled: clients may only open a "pending" payment.
+        if isinstance(data, dict) and data.get("status") not in (None, "pending"):
+            raise ValueError("status must be 'pending' on create; completion is set internally")
+        return data
 
 
 class PaymentStatusUpdate(BaseModel):

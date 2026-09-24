@@ -1,5 +1,6 @@
+import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
@@ -29,7 +30,12 @@ def seed_database():
         db.close()
         return
 
-    now = datetime.utcnow()
+    admin_password = os.environ.get("SEED_ADMIN_PASSWORD", "admin123")
+    coach_password = os.environ.get("SEED_COACH_PASSWORD", "coach123")
+    athlete_password = os.environ.get("SEED_ATHLETE_PASSWORD", "athlete123")
+    if admin_password == "admin123" or coach_password == "coach123" or athlete_password == "athlete123":
+        print("WARNING: seeding with default credentials — set SEED_*_PASSWORD env vars for non-dev environments")
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     # ---- Branch ----
     branch = Branch(
@@ -46,7 +52,7 @@ def seed_database():
     # ---- Admin ----
     admin = User(
         email="admin@gymapp.ir",
-        password_hash=hash_password("admin123"),
+        password_hash=hash_password(admin_password),
         first_name="مدیر",
         last_name="سیستم",
         phone="09121111111",
@@ -59,7 +65,7 @@ def seed_database():
     # ---- Coaches ----
     coach1 = User(
         email="coach1@gymapp.ir",
-        password_hash=hash_password("coach123"),
+        password_hash=hash_password(coach_password),
         first_name="علی",
         last_name="مرادی",
         phone="09122222222",
@@ -69,7 +75,7 @@ def seed_database():
     )
     coach2 = User(
         email="coach2@gymapp.ir",
-        password_hash=hash_password("coach123"),
+        password_hash=hash_password(coach_password),
         first_name="سارا",
         last_name="احمدی",
         phone="09123333333",
@@ -85,7 +91,7 @@ def seed_database():
     for i in range(1, 5):
         a = User(
             email=f"athlete{i}@gymapp.ir",
-            password_hash=hash_password("athlete123"),
+            password_hash=hash_password(athlete_password),
             first_name=f"ورزشکار",
             last_name=f"شماره {i}",
             phone=f"0912000000{i}",

@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.auth import (
+    check_login_rate_limit,
     create_access_token,
     create_refresh_token,
     decode_token,
@@ -26,7 +27,11 @@ router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
 
 @router.post("/login")
-def login(req: LoginRequest, db: Session = Depends(get_db)):
+def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
+    # Rate limit by client IP (proxy-aware via X-Forwarded-For)
+    forwarded = request.headers.get("x-forwarded-for", "")
+    client_ip = forwarded.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+    check_login_rate_limit(client_ip)
     user = db.query(User).filter(User.email == req.email).first()
     if not user or not verify_password(req.password, user.password_hash):
         return error_response("Invalid email or password", 401)
@@ -34,7 +39,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     if user.status != "active":
         return error_response("User account is not active", 403)
 
-    user.last_login_at = datetime.utcnow()
+    user.last_login_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
 
     access_token, access_exp = create_access_token({"user_id": user.id, "role": user.role})
@@ -60,13 +65,15 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     if existing:
         return error_response("Email already registered", 400)
 
+    # Self-registration is always athlete — role is not accepted from client
+    # to prevent privilege escalation. Admins use POST /users with AdminUserCreate.
     user = User(
         email=req.email,
         password_hash=hash_password(req.password),
         first_name=req.first_name,
         last_name=req.last_name,
         phone=req.phone,
-        role=req.role,
+        role="athlete",
     )
     db.add(user)
     db.commit()

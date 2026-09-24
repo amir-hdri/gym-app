@@ -1,6 +1,10 @@
+import logging
+
 from typing import Any, Optional, List
 
 from fastapi.responses import JSONResponse
+
+logger = logging.getLogger("gym-app")
 
 
 def success_response(
@@ -17,9 +21,11 @@ def success_response(
 
 
 def error_response(message: str = "Error", status_code: int = 400):
+    logger.error("API error %s: %s", status_code, message)
     return JSONResponse(
         status_code=status_code,
-        content={"success": False, "error": message, "statusCode": status_code},
+        # "message" mirrors "error": the frontend ApiResponse type reads message.
+        content={"success": False, "error": message, "message": message, "statusCode": status_code},
     )
 
 
@@ -41,3 +47,8 @@ def paginated_response(
             "totalPages": (total + page_size - 1) // page_size if page_size > 0 else 0,
         },
     }
+
+
+def log_exception(exc: Exception, request_path: str = "") -> None:
+    """Log an exception with context for debugging."""
+    logger.exception("Unhandled exception on %s: %s", request_path, exc)

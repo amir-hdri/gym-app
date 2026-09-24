@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -24,6 +24,12 @@ def list_payments(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Athletes can only list their own payments
+    if current_user.role == "athlete":
+        user_id = user_id or current_user.id
+        if user_id != current_user.id:
+            return error_response("Insufficient permissions", 403)
+
     query = db.query(Payment)
     if user_id:
         query = query.filter(Payment.user_id == user_id)
@@ -60,9 +66,16 @@ def create_payment(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Athletes can only create payments for themselves
+    if current_user.role == "athlete" and req.user_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
+    # Validate user exists
+    user = db.query(User).filter(User.id == req.user_id).first()
+    if not user:
+        return error_response("User not found", 404)
     payment = Payment(**req.model_dump(by_alias=False))
-    if req.status == "completed":
-        payment.paid_at = datetime.utcnow()
+    # status is forced to pending at creation; paid_at set only on status transition
+    payment.status = "pending"
     db.add(payment)
     db.commit()
     db.refresh(payment)
@@ -77,6 +90,8 @@ def get_payment(payment_id: str, db: Session = Depends(get_db), current_user: Us
     payment = db.query(Payment).filter(Payment.id == payment_id).first()
     if not payment:
         return error_response("Payment not found", 404)
+    if current_user.role == "athlete" and payment.user_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     return success_response(data=PaymentResponse.model_validate(payment).model_dump(by_alias=True))
 
 
@@ -87,12 +102,18 @@ def update_payment_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Only staff can transition payment status
+    if current_user.role not in {"admin", "receptionist"}:
+        return error_response("Only admin/receptionist can update payment status", 403)
     payment = db.query(Payment).filter(Payment.id == payment_id).first()
     if not payment:
         return error_response("Payment not found", 404)
+    allowed = {"pending", "completed", "failed", "refunded", "cancelled"}
+    if req.status not in allowed:
+        return error_response(f"Invalid status. Allowed: {', '.join(sorted(allowed))}", 400)
     payment.status = req.status
     if req.status == "completed" and not payment.paid_at:
-        payment.paid_at = datetime.utcnow()
+        payment.paid_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
     db.refresh(payment)
     return success_response(

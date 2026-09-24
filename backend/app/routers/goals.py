@@ -21,6 +21,11 @@ def list_goals(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Athletes see only their own goals
+    if current_user.role == "athlete":
+        athlete_id = athlete_id or current_user.id
+        if athlete_id != current_user.id:
+            return error_response("Insufficient permissions", 403)
     query = db.query(Goal)
     if athlete_id:
         query = query.filter(Goal.athlete_id == athlete_id)
@@ -46,6 +51,13 @@ def create_goal(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Athletes can only create goals for themselves
+    if current_user.role == "athlete" and req.athlete_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
+    # Validate athlete exists
+    athlete = db.query(User).filter(User.id == req.athlete_id).first()
+    if not athlete:
+        return error_response("Athlete not found", 404)
     goal = Goal(**req.model_dump(by_alias=False))
     db.add(goal)
     db.commit()
@@ -61,6 +73,8 @@ def get_goal(goal_id: str, db: Session = Depends(get_db), current_user: User = D
     goal = db.query(Goal).filter(Goal.id == goal_id).first()
     if not goal:
         return error_response("Goal not found", 404)
+    if current_user.role == "athlete" and goal.athlete_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     return success_response(data=GoalResponse.model_validate(goal).model_dump(by_alias=True))
 
 
@@ -74,6 +88,13 @@ def update_goal(
     goal = db.query(Goal).filter(Goal.id == goal_id).first()
     if not goal:
         return error_response("Goal not found", 404)
+    # Only athlete owner, assigned coach, or admin can update
+    if current_user.role == "athlete" and goal.athlete_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
+    if current_user.role == "coach" and goal.coach_id != current_user.id and current_user.role != "admin":
+        # coaches can only update their own assigned goals; admins bypass
+        if goal.coach_id is not None:
+            return error_response("Insufficient permissions", 403)
     update_data = req.model_dump(exclude_unset=True, by_alias=False)
     for key, value in update_data.items():
         setattr(goal, key, value)
@@ -96,6 +117,8 @@ def update_goal_progress(
     goal = db.query(Goal).filter(Goal.id == goal_id).first()
     if not goal:
         return error_response("Goal not found", 404)
+    if current_user.role == "athlete" and goal.athlete_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     goal.current_value = req.current_value
     if goal.current_value >= goal.target_value and goal.status not in ("achieved", "missed"):
         goal.status = "achieved"

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, require_roles
 from app.database import get_db
 from app.models import Branch, User
 from app.responses import error_response, success_response
@@ -19,7 +19,11 @@ def list_branches(db: Session = Depends(get_db), current_user: User = Depends(ge
 
 
 @router.post("")
-def create_branch(req: BranchCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_branch(
+    req: BranchCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("admin")),
+):
     branch = Branch(**req.model_dump(by_alias=False))
     db.add(branch)
     db.commit()
@@ -43,7 +47,7 @@ def update_branch(
     branch_id: str,
     req: BranchUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin")),
 ):
     branch = db.query(Branch).filter(Branch.id == branch_id).first()
     if not branch:

@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, require_roles
 from app.database import get_db
 from app.models import Membership, User
 from app.responses import error_response, paginated_response, success_response
@@ -23,6 +23,11 @@ def list_memberships(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Athletes can only see their own memberships
+    if current_user.role == "athlete":
+        user_id = user_id or current_user.id
+        if user_id != current_user.id:
+            return error_response("Insufficient permissions", 403)
     query = db.query(Membership)
     if user_id:
         query = query.filter(Membership.user_id == user_id)
@@ -46,7 +51,7 @@ def list_memberships(
 def create_membership(
     req: MembershipCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "receptionist")),
 ):
     membership = Membership(**req.model_dump(by_alias=False))
     db.add(membership)
@@ -63,6 +68,8 @@ def get_membership(membership_id: str, db: Session = Depends(get_db), current_us
     membership = db.query(Membership).filter(Membership.id == membership_id).first()
     if not membership:
         return error_response("Membership not found", 404)
+    if current_user.role == "athlete" and membership.user_id != current_user.id:
+        return error_response("Insufficient permissions", 403)
     d = MembershipResponse.model_validate(membership).model_dump(by_alias=True)
     d["sessionsRemaining"] = membership.sessions_total - membership.sessions_used
     return success_response(data=d)
@@ -73,7 +80,7 @@ def update_membership(
     membership_id: str,
     req: MembershipUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "receptionist")),
 ):
     membership = db.query(Membership).filter(Membership.id == membership_id).first()
     if not membership:
@@ -93,7 +100,7 @@ def freeze_membership(
     membership_id: str,
     req: MembershipUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "receptionist")),
 ):
     membership = db.query(Membership).filter(Membership.id == membership_id).first()
     if not membership:
@@ -115,7 +122,7 @@ def freeze_membership(
 def unfreeze_membership(
     membership_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "receptionist")),
 ):
     membership = db.query(Membership).filter(Membership.id == membership_id).first()
     if not membership:
@@ -137,7 +144,7 @@ def unfreeze_membership(
 def deduct_session(
     membership_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "receptionist", "coach")),
 ):
     membership = db.query(Membership).filter(Membership.id == membership_id).first()
     if not membership:

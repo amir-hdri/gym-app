@@ -1,9 +1,13 @@
+from contextlib import asynccontextmanager
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.config import settings
 from app.database import Base, engine
-from app.responses import error_response
+from app.responses import error_response, success_response
 from app.routers import (
     auth,
     branches,
@@ -20,16 +24,32 @@ from app.routers import (
 )
 from app.seed import seed_database
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    Base.metadata.create_all(bind=engine)
+    # Seed only in non-production or when explicitly allowed
+    if not settings.is_production:
+        try:
+            seed_database()
+        except Exception:
+            logging.getLogger("gym-app").exception("Database seed failed")
+    yield
+    # Shutdown — nothing to clean up for SQLite
+
+
 app = FastAPI(
     title="Gym Management API",
     description="Backend API for gym management application",
     version="1.0.0",
     docs_url="/docs",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -51,16 +71,23 @@ app.include_router(notifications.router)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    # Don't mask HTTPException — let FastAPI handle it
+    from fastapi import HTTPException as FastHTTPException
+
+    if isinstance(exc, FastHTTPException):
+        raise exc
+    import logging
+
+    logging.getLogger("gym-app").exception("Unhandled exception on %s: %s", request.url.path, exc)
     return JSONResponse(
         status_code=500,
         content={"success": False, "error": "Internal server error", "statusCode": 500},
     )
 
 
-@app.on_event("startup")
-def on_startup():
-    Base.metadata.create_all(bind=engine)
-    seed_database()
+@app.get("/health")
+def health():
+    return success_response(data={"status": "ok", "version": "1.0.0"}, message="healthy")
 
 
 @app.get("/")

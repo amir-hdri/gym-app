@@ -162,22 +162,15 @@ function SignInContent() {
 
 export default function LoginPage() {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4 lg:justify-end lg:p-10">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4 lg:p-10">
       <FloatingBlur />
-      <div className="relative z-10 w-full max-w-[440px] lg:ml-[7%] lg:mr-[7%]">
-        <div className="mb-7 flex items-center justify-center lg:justify-start">
-          <div className="flex flex-col items-center gap-1.5 text-foreground lg:items-start">
-            <LumiLogo size="md" variant="auto" showSubtitle showDivider />
-            <p className="text-[11px] text-muted-foreground leading-tight">پلتفرم مدیریت هوشمند باشگاه</p>
-          </div>
-        </div>
+      <div className="relative z-10 w-full max-w-[440px]">
 
         <div className="liquid-glass-card rounded-2xl text-card-foreground transition-all duration-300 overflow-visible border-border/60 shadow-[0_28px_80px_-35px_rgba(80,20,70,.45)] dark:border-white/10">
           <div className="relative p-8">
-            <div className="mb-8 text-center">
-              <p className="latin-kicker mb-2">WELCOME BACK</p>
-              <h1 className="text-3xl font-black tracking-tight">برگشتی که بدرخشی</h1>
-              <p className="mt-2 text-sm text-muted-foreground">خوش اومدی! برای ادامه وارد شو</p>
+            <div className="mb-8 flex flex-col items-center gap-2 text-foreground">
+              <LumiLogo size="lg" variant="auto" showSubtitle showDivider />
+              <p className="text-[11px] text-muted-foreground leading-tight">پلتفرم مدیریت هوشمند باشگاه</p>
             </div>
 
             <SignInContent />

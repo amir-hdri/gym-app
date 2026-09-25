@@ -77,7 +77,7 @@ function ResetPasswordContent() {
                 </div>
                 <p className="text-sm text-muted-foreground">رمز عبور با موفقیت تغییر کرد.</p>
                 <Button onClick={() => router.push("/auth/login")} className="mt-4">
-                  ورود به جیم‌آپ
+                  ورود به Lumi Wellness
                 </Button>
               </motion.div>
             ) : (

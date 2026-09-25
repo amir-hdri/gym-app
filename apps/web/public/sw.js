@@ -1,5 +1,5 @@
-/* GymApp service worker — offline-first shell, network-first API */
-const CACHE = "gymapp-shell-v2";
+/* Lumi Wellness service worker — offline-first shell, network-first API */
+const CACHE = "lumi-shell-v1";
 const OFFLINE_URL = "/offline";
 const PRECACHE = [
   "/",

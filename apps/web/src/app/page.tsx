@@ -10,6 +10,7 @@ import { Activity, Users, MessageCircle, Calendar, Heart, Sparkles, Dumbbell, Ch
 import { ScrollReveal, StaggerScroll, StaggerScrollItem } from "@/components/animations/ScrollReveal";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { ActivityRings } from "@/components/ui/ActivityRings";
+import { LumiLogo } from "@/components/ui/LumiLogo";
 
 function LoadingScreen() {
   return (
@@ -43,7 +44,7 @@ function LandingNavigation({ onLogin, onRegister }: { onLogin: () => void; onReg
   return (
     <header className="sticky inset-x-0 top-0 z-30 px-4 py-3">
       <nav className="liquid-glass-header mx-auto flex max-w-6xl items-center justify-between rounded-2xl px-4 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)]" aria-label="ناوبری صفحه اصلی">
-        <a href="#top" className="flex items-center gap-2 text-[15px] font-bold tracking-tight"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-sm font-bold text-white shadow-[0_2px_12px_hsl(var(--brand)/0.35)]">ج</span>جیم‌آپ</a>
+        <a href="#top" className="flex items-center text-foreground" aria-label="Lumi Wellness"><LumiLogo size="xs" variant="auto" showSubtitle={false} showDivider={false} /></a>
         <div className="hidden items-center gap-6 text-sm font-medium text-[#98989D] md:flex">
           <a href="#experience" className="transition-colors hover:text-foreground">تجربه تمرین</a>
           <a href="#schedule" className="transition-colors hover:text-foreground">برنامه هفتگی</a>
@@ -242,7 +243,7 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.5 }}
           >
-            جیم‌آپ، باشگاه دیجیتال اختصاصی بانوان برای برنامه تمرینی شخصی، ارتباط مستقیم با مربی و دیدن پیشرفت واقعی در هر روز.
+            Lumi Wellness، باشگاه دیجیتال اختصاصی بانوان برای برنامه تمرینی شخصی، ارتباط مستقیم با مربی و دیدن پیشرفت واقعی در هر روز.
           </motion.p>
 
           <motion.div
@@ -376,8 +377,8 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               <div className="sm:col-span-2 lg:col-span-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold tracking-tight">جیم‌آپ</span>
+                <div className="flex items-center gap-2 text-foreground">
+                  <LumiLogo size="xs" variant="auto" showSubtitle={false} showDivider={false} />
                   <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
                 </div>
                 <p className="mt-3 max-w-[28ch] text-sm leading-7 text-muted-foreground">
@@ -418,7 +419,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-border/50 pt-6 text-xs text-muted-foreground sm:flex-row">
-              <p>© ۱۴۰۴ جیم‌آپ — تمامی حقوق محفوظ است</p>
+              <p>© ۱۴۰۴ Lumi Wellness — تمامی حقوق محفوظ است</p>
               <p className="flex items-center gap-2">ساخته‌شده برای موبایل • <span className="rounded-full bg-muted px-2 py-0.5">v1.0</span></p>
             </div>
           </div>

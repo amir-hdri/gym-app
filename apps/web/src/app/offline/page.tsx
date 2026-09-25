@@ -2,7 +2,7 @@ import { WifiOff, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "آفلاین | جیم‌آپ",
+  title: "آفلاین | Lumi Wellness",
   robots: "noindex, nofollow",
 };
 
@@ -14,7 +14,7 @@ export default function OfflinePage() {
       </div>
       <h1 className="mt-6 text-xl font-bold tracking-tight">اتصال اینترنت برقرار نیست</h1>
       <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-        به نظر می‌رسد آفلاین هستید. برخی بخش‌های جیم‌آپ به صورت آفلاین در دسترس هستند — برای ادامه، اتصال را بررسی کنید.
+        به نظر می‌رسد آفلاین هستید. برخی بخش‌های Lumi Wellness به صورت آفلاین در دسترس هستند — برای ادامه، اتصال را بررسی کنید.
       </p>
       <div className="mt-6 flex gap-3">
         <Link

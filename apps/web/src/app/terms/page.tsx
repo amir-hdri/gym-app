@@ -15,7 +15,7 @@ export default function TermsPage() {
         <CardContent className="space-y-7 p-6 sm:p-10">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><ShieldCheck className="h-6 w-6" /></div>
-            <div><h1 className="text-2xl font-black sm:text-3xl">قوانین و مقررات جیم‌آپ</h1><p className="mt-1 text-sm text-muted-foreground">آخرین به‌روزرسانی: تیر ۱۴۰۵</p></div>
+            <div><h1 className="text-2xl font-black sm:text-3xl">قوانین و مقررات Lumi Wellness</h1><p className="mt-1 text-sm text-muted-foreground">آخرین به‌روزرسانی: تیر ۱۴۰۵</p></div>
           </div>
           <section><h2 className="text-lg font-bold">استفاده از خدمات</h2><p className="mt-2 leading-8 text-muted-foreground">با ایجاد حساب، متعهد می‌شوید اطلاعات صحیح ارائه دهید، از حساب خود محافظت کنید و از خدمات مطابق قوانین باشگاه استفاده کنید.</p></section>
           <section><h2 className="text-lg font-bold">سلامت و مسئولیت فردی</h2><p className="mt-2 leading-8 text-muted-foreground">برنامه‌های تمرینی جایگزین تشخیص پزشکی نیستند. پیش از شروع تمرین و در صورت وجود محدودیت جسمانی با پزشک یا مربی خود مشورت کنید.</p></section>

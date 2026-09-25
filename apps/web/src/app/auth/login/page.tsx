@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { Mail, Lock, Heart, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { ActivityRings } from "@/components/ui/ActivityRings";
+import { LumiLogo } from "@/components/ui/LumiLogo";
 import { useAuth } from "@/components/auth/AuthProvider";
 
 function FloatingBlur() {
@@ -166,14 +166,9 @@ export default function LoginPage() {
       <FloatingBlur />
       <div className="relative z-10 w-full max-w-[440px] lg:ml-[7%] lg:mr-[7%]">
         <div className="mb-7 flex items-center justify-center lg:justify-start">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-surface shadow-lg dark:bg-white/10">
-              <ActivityRings className="h-9 w-9" />
-            </div>
-            <div className="text-center">
-              <h2 className="text-xl font-bold text-foreground leading-tight">جیم‌آپ</h2>
-              <p className="text-[11px] text-muted-foreground leading-tight">پلتفرم مدیریت هوشمند باشگاه</p>
-            </div>
+          <div className="flex flex-col items-center gap-1.5 text-foreground lg:items-start">
+            <LumiLogo size="md" variant="auto" showSubtitle showDivider />
+            <p className="text-[11px] text-muted-foreground leading-tight">پلتفرم مدیریت هوشمند باشگاه</p>
           </div>
         </div>
 

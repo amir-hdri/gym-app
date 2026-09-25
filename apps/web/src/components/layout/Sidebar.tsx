@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Sparkles, X } from "lucide-react";
-import { ActivityRings } from "@/components/ui/ActivityRings";
+import { LumiLogo } from "@/components/ui/LumiLogo";
 import { cn } from "@/lib/utils";
 
 export interface NavItem {
@@ -65,14 +65,8 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
       >
         {/* Logo */}
         <div className="flex h-20 items-center justify-between px-5">
-          <Link href="/" className="flex items-center gap-3 text-lg font-black">
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-surface shadow-lg dark:bg-white/10">
-              <ActivityRings className="h-8 w-8" progress={[90, 74, 82]} />
-            </div>
-            <div>
-              <span className="block text-gradient-brand">جیم‌آپ</span>
-              <span className="latin-kicker block text-muted-foreground">MOVE WITH LOVE</span>
-            </div>
+          <Link href="/" className="flex items-center text-foreground" aria-label="Lumi Wellness">
+            <LumiLogo size="sm" variant="auto" showSubtitle showDivider />
           </Link>
           <button
             onClick={onClose}

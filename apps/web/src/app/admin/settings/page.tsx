@@ -11,7 +11,7 @@ import { FadeIn } from "@/components/animations/FadeIn";
 
 export default function SettingsPage() {
   const [form, setForm] = useState({
-    branchName: "باشگاه جیم‌آپ",
+    branchName: "باشگاه Lumi Wellness",
     address: "تهران، خیابان ولیعصر، نبش کوچه نور",
     phone: "۰۲۱-۱۲۳۴۵۶۷۸",
     email: "info@gymapp.ir",

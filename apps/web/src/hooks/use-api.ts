@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { mockService } from "@/lib/mock-service";
 import type {
   User, MembershipPlan, Exercise, TrainingProgram,
   Goal, Payment,
@@ -9,6 +8,22 @@ import type {
 // Toggle: set NEXT_PUBLIC_USE_MOCKS=true to keep mock data in dev.
 // Default is real API.
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCKS === "true";
+
+// The mock layer (~20KB of fixtures) is dev-only. Resolve it through a lazy
+// proxy so the bundler emits a separate chunk that production users never load.
+type MockService = typeof import("@/lib/mock-service").mockService;
+type MockServiceKeys = keyof MockService;
+let mockLoader: Promise<MockService> | undefined;
+function loadMockService(): Promise<MockService> {
+  mockLoader ??= import("@/lib/mock-service").then((m) => m.mockService);
+  return mockLoader;
+}
+const mockService = new Proxy({} as MockService, {
+  get(_target, prop: MockServiceKeys) {
+    return (...args: unknown[]) =>
+      loadMockService().then((service) => (service[prop] as (...a: unknown[]) => unknown)(...args));
+  },
+});
 
 const Q = {
   dashboardStats: ["dashboard", "stats"] as const,
@@ -162,15 +177,6 @@ export function useCompleteProgramExercise() {
       USE_MOCK
         ? mockService.completeProgramExercise(exerciseId)
         : api.completeProgramExercise(programId, exerciseId, data || {}),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["programs"] }),
-  });
-}
-
-// legacy single-arg callers (athlete workout row): fall back to program sniffing not needed; we update those callers
-export function useCompleteProgramExerciseLegacy() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (exerciseId: string) => mockService.completeProgramExercise(exerciseId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["programs"] }),
   });
 }

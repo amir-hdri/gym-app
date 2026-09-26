@@ -33,8 +33,8 @@ A full-stack gym management platform: member, coach, and admin portals with memb
 ### Frontend
 
 - **Next.js 16 App Router**, React 19, Tailwind CSS 4, TypeScript 5.9
-- **Data layer:** React Query hooks (`src/hooks/use-api.ts`) over `mock-service.ts`; real axios client in `src/lib/api.ts` (swap when backend is ready)
-- **Auth:** `AuthProvider` (localStorage JWT + refresh) and `RequireAuth` route guard on all portals
+- **Data layer:** React Query hooks (`src/hooks/use-api.ts`) over a lazily imported `mock-service` (fetched only when `NEXT_PUBLIC_USE_MOCKS=true`) and a lazy axios facade (`src/lib/api.ts` → dynamic `import("./api-client")`), so `axios` stays out of the critical chain of public routes
+- **Auth:** `AuthProvider` (localStorage JWT + refresh) and `RequireAuth` route guard on all portals; the marketing page (`/`) is intentionally *not* gated on auth state so the hero paints with the first paint
 - **UI:** Radix UI primitives, framer-motion, lucide-react, sonner toasts, react-hook-form + zod 4
 - **ESLint 10 flat config** (`eslint.config.js`)
 
@@ -70,7 +70,7 @@ Set `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:8000`) in `apps/web/.en
 | `npm run build` | root | Build all workspaces |
 | `npm run type-check` | root / `apps/web` | TypeScript check |
 | `npm run lint` | `apps/web` | ESLint |
-| `npm test` | `apps/web` | Vitest |
+| `npm run test --workspace=apps/web` | root | Vitest |
 
 ## Roles
 
@@ -82,6 +82,22 @@ Set `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:8000`) in `apps/web/.en
 
 Portals are protected client-side (`RequireAuth`); the backend enforces roles on staff endpoints. Note: admin accounts are not offered at self-registration — create them via the API/seed.
 
+## Performance
+
+Measured with Lighthouse 12 (mobile default throttling) against a production build:
+
+| Metric | Baseline | Current |
+| --- | ---: | ---: |
+| Performance score | 85 | **92** |
+| Accessibility | 96 | **100** |
+| Speed Index | 6.0 s | **1.2 s** |
+| LCP element render delay | 3,921 ms | **126 ms** |
+| Color-contrast audit | fail | pass |
+| Desktop Performance | 100 | 100 |
+
+Full methodology, fix log (P0/P1/P2) and the measured roadmap for reaching 95+:
+[`docs/PERFORMANCE_AUDIT.md`](docs/PERFORMANCE_AUDIT.md).
+
 ## Environment Variables
 
 | Variable | Where | Default |
@@ -92,4 +108,4 @@ Portals are protected client-side (`RequireAuth`); the backend enforces roles on
 | `REFRESH_TOKEN_EXPIRE_DAYS` | backend | 7 |
 | `NEXT_PUBLIC_API_URL` | apps/web | `http://localhost:8000` |
 
-See `FINAL_REPORT.md` for the full engineering audit, bug fixes, and known gaps.
+See `FINAL_REPORT.md` for the full engineering audit, bug fixes, and known gaps, and `docs/PERFORMANCE_AUDIT.md` for the performance/accessibility audit (2026-09-26).

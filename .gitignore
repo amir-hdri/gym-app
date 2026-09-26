@@ -53,3 +53,6 @@ coverage/
 
 # Dist
 dist/
+
+# Agent / browser tooling artifacts
+.playwright-mcp/

@@ -156,11 +156,11 @@ gym-app/
 
 ## 6. REMAINING GAPS (KNOWN — NOT HIDDEN)
 
-1. **`next build` blocked by network:** SWC dependency downloads from `registry.yarnpkg.com` time out in this environment. Build must be run with working network access.
+1. **`next build` (historical):** SWC dependency downloads from `registry.yarnpkg.com` used to time out in this environment. As of 2026-09-26 `npm run build --workspace=apps/web` completes normally (41/41 routes).
 2. **Password reset is a mock:** `/auth/forgot-password` and `/auth/reset-password` simulate success (1s delay) — the backend has no email/password-reset endpoint. Requires SMTP/email service.
 3. **No E2E tests:** Playwright/Cypress coverage for login → dashboard → QR check-in not set up.
 4. **`packages/` workspaces are empty** (reserved for shared code).
-5. **Mock data layer is the default:** `use-api.ts` calls `mock-service.ts`; switching to the real API requires wiring `lib/api.ts` into the hooks.
+5. **Mock data layer is the default:** `use-api.ts` prefers `mock-service.ts` when `NEXT_PUBLIC_USE_MOCKS=true`, otherwise the real API. Both paths are lazily imported, so neither axios nor the mock fixtures ship in the initial bundle of public routes.
 6. **Admin role not registrable** from the UI (register offers athlete/coach) — admin accounts must be created via the API/seed.
 
 ---
@@ -184,4 +184,60 @@ gym-app/
 
 ---
 
-*Report updated by unification & hardening pass — all claims backed by executed verification commands.*
+## 8. PERFORMANCE & UX AUDIT (2026-09-26)
+
+Full report: **[`docs/PERFORMANCE_AUDIT.md`](docs/PERFORMANCE_AUDIT.md)** (method, fix log, P2 roadmap).
+
+### Measured results (Lighthouse 12, production build)
+
+| Metric (mobile, simulated 4×CPU/150 ms RTT) | Before | After |
+|---|---:|---:|
+| Performance score | 85 | **92** |
+| Accessibility | 96 | **100** |
+| Speed Index | 6.0 s | **1.2 s** |
+| LCP element render delay | 3,921 ms | **126 ms** |
+| First Contentful Paint | 1.24 s | 1.22 s |
+| Largest Contentful Paint | 3.46 s | 3.29 s |
+| Total Blocking Time | 140 ms | 120 ms |
+| Cumulative Layout Shift | 0 | 0 |
+| Initial JS transfer | 263 KB | 238 KB |
+| Color-contrast audit | ❌ fail | ✅ pass |
+| Desktop Performance | 100 | 100 |
+
+### What was fixed
+
+- **P0 — landing page gated behind auth:** `/` no longer renders
+  `LoadingScreen` while `AuthProvider` boots; hero copy paints with FCP
+  (`src/app/page.tsx`). This is the 3.9 s → 126 ms render-delay fix.
+- **P0 — WCAG AA contrast:** new `--primary-solid` token (4.63:1 dark /
+  5.16:1 light) replaces `--primary` under light text on solid surfaces
+  (Button, Badge, toasts, error pages, nav badges…).
+- **P1 — client graph slimming:** prod-only `ReactQueryDevtools`, mock data and
+  axios behind lazy `import()` proxies (`hooks/use-api.ts`, `lib/api.ts` →
+  `lib/api-client.ts`), `recharts` behind `React.lazy` + skeleton
+  (`components/analytics/Charts.tsx`), faster page transitions (180 ms).
+- **Reverted after A/B:** `experimental.inlineCss` — HTML grew 4.7 KB → 74.5 KB
+  gzip and FCP regressed, so the external stylesheet stays.
+
+### Verification (2026-09-26)
+
+| Check | Command | Result |
+|---|---|---|
+| Lint | `npm run lint --workspaces` | ✅ clean |
+| Type-check | `npm run type-check --workspaces` | ✅ clean |
+| Unit tests | `npm run test --workspace=apps/web` | ✅ 5/5 passed |
+| Build | `npm run build --workspace=apps/web` | ✅ 41/41 routes |
+| Prod smoke | `next start -p 3100` + Lighthouse ×4 | ✅ `/`, `/athlete`, `/coach`, `/auth/login` render; mock/devtools/recharts chunks absent from initial HTML |
+
+### Known gaps carried forward
+
+1. LCP 3.3 s simulated is still above the 2.5 s budget — driven by early bytes
+   (`framer-motion` 43 KB, web fonts 79 KB, React runtime 116 KB). Ordered
+   roadmap in `docs/PERFORMANCE_AUDIT.md` §4.
+2. Password reset is still a front-end mock (no backend email flow).
+3. No E2E suite; `packages/` workspaces still reserved/empty.
+4. Admin role still not registrable from the UI.
+
+---
+
+*Report updated by unification & hardening pass (2026-09-26) — all claims backed by executed verification commands.*

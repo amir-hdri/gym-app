@@ -28,7 +28,7 @@ export function ErrorDisplay({ message = "خطا در بارگذاری اطلا�
       </div>
       <p className="mt-4 font-medium">{message}</p>
       {onRetry && (
-        <button onClick={onRetry} className="ring-focus mt-3 min-h-11 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90">
+        <button onClick={onRetry} className="ring-focus mt-3 min-h-11 rounded-xl bg-primary-solid px-4 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-solid/90">
           تلاش مجدد
         </button>
       )}

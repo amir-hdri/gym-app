@@ -10,6 +10,7 @@
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
   --color-primary: hsl(var(--primary));
+  --color-primary-solid: hsl(var(--primary-solid));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
@@ -45,6 +46,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 6% 10%;
     --primary: 353 85% 46%;
+    /* Solid surface behind white text — must clear WCAG AA 4.5:1 */
+    --primary-solid: 353 85% 46%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 14% 93%;
     --secondary-foreground: 240 5% 18%;
@@ -79,6 +82,9 @@
     --popover: 240 5% 11%;
     --popover-foreground: 0 0% 98%;
     --primary: 353 100% 61%;
+    /* Dark-mode brand stays vivid for text/icons; solid surfaces use the AA-safe
+       darkened sibling so white labels reach 4.6:1 instead of 3.5:1. */
+    --primary-solid: 353 100% 46%;
     --primary-foreground: 0 0% 100%;
     --secondary: 240 3% 16%;
     --secondary-foreground: 0 0% 98%;

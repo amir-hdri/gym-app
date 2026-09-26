@@ -5,7 +5,9 @@ import { Providers } from "./providers";
 import { PwaRegister } from "@/components/PwaRegister";
 
 const vazirmatn = Vazirmatn({
-  subsets: ["arabic"],
+  // `latin` is preloaded too (not just the Persian/Arabic glyphs) so the
+  // "Lumi Wellness" wordmark never waits for a second, CSS-discovered request.
+  subsets: ["arabic", "latin"],
   weight: ["400", "500", "600", "700", "900"],
   variable: "--font-vazirmatn",
   display: "swap",
@@ -81,7 +83,7 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning className={vazirmatn.variable}>
       <body className="min-h-screen bg-background antialiased">
-        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:right-4 focus:top-4 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white">پرش به محتوا</a>
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:right-4 focus:top-4 focus:rounded-lg focus:bg-primary-solid focus:px-4 focus:py-2 focus:text-white">پرش به محتوا</a>
         <Providers>{children}</Providers>
         <PwaRegister />
       </body>

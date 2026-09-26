@@ -33,7 +33,7 @@ export default function RootError({
       <div className="mt-7 flex items-center gap-3">
         <button
           onClick={() => retry()}
-          className="ring-focus inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.98]"
+          className="ring-focus inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary-solid px-6 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-solid/90 active:scale-[0.98]"
         >
           تلاش مجدد
         </button>

@@ -112,7 +112,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                         </span>
                         <span className="flex-1 text-right">{item.label}</span>
                         {item.badge !== undefined && (
-                          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground">
+                          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary-solid px-1.5 text-xs font-bold text-primary-foreground">
                             {item.badge}
                           </span>
                         )}
@@ -172,7 +172,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                       </span>
                       <span className="flex-1 text-right">{item.label}</span>
                       {item.badge !== undefined && (
-                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground">
+                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary-solid px-1.5 text-xs font-bold text-primary-foreground">
                           {item.badge}
                         </span>
                       )}

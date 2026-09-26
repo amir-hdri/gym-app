@@ -19,7 +19,7 @@ export default function OfflinePage() {
       <div className="mt-6 flex gap-3">
         <Link
           href="/"
-          className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/90"
+          className="inline-flex h-11 items-center justify-center rounded-xl bg-primary-solid px-6 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-solid/90"
         >
           <RefreshCw className="ml-2 h-4 w-4" />
           تلاش مجدد

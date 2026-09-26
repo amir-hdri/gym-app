@@ -67,7 +67,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <Bell className="h-[20px] w-[20px] text-foreground/90" strokeWidth={1.75} />
             <Badge
               variant="destructive"
-              className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center border-0 bg-primary px-1 text-[10px] font-bold leading-none shadow-[0_2px_8px_hsl(var(--primary)/0.5)]"
+              className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center border-0 bg-primary-solid px-1 text-[10px] font-bold leading-none shadow-[0_2px_8px_hsl(var(--primary)/0.5)]"
             >
               ۳
             </Badge>

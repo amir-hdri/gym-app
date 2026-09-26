@@ -9,25 +9,25 @@ export function generateId(): string {
 }
 
 export const mockUsers: User[] = [
-  { id: "u1", email: "admin@gympro.ir", firstName: "مدیر", lastName: "سیستم", phone: "09121111111", role: "admin", status: "active", avatarUrl: "", branchId: "b1", branchName: "باشگاه مرکزی", createdAt: "2024-01-01T00:00:00Z", updatedAt: "2025-01-01T00:00:00Z", lastLoginAt: "2025-07-20T08:30:00Z" },
-  { id: "u2", email: "mohseni@gympro.ir", firstName: "رضا", lastName: "محسنی", phone: "09122222222", role: "coach", status: "active", avatarUrl: "", branchId: "b1", branchName: "باشگاه مرکزی", createdAt: "2024-02-01T00:00:00Z", updatedAt: "2025-06-15T00:00:00Z", lastLoginAt: "2025-07-20T09:00:00Z" },
-  { id: "u3", email: "ahmadi@gympro.ir", firstName: "سارا", lastName: "احمدی", phone: "09123333333", role: "coach", status: "active", avatarUrl: "", branchId: "b1", branchName: "باشگاه مرکزی", createdAt: "2024-03-01T00:00:00Z", updatedAt: "2025-05-10T00:00:00Z", lastLoginAt: "2025-07-19T14:00:00Z" },
+  { id: "u1", email: "admin@gympro.ir", firstName: "مدیر", lastName: "سیستم", phone: "09121111111", role: "admin", status: "active", avatarUrl: "", branchId: "b1", branchName: "Lumi Wellness", createdAt: "2024-01-01T00:00:00Z", updatedAt: "2025-01-01T00:00:00Z", lastLoginAt: "2025-07-20T08:30:00Z" },
+  { id: "u2", email: "mohseni@gympro.ir", firstName: "رضا", lastName: "محسنی", phone: "09122222222", role: "coach", status: "active", avatarUrl: "", branchId: "b1", branchName: "Lumi Wellness", createdAt: "2024-02-01T00:00:00Z", updatedAt: "2025-06-15T00:00:00Z", lastLoginAt: "2025-07-20T09:00:00Z" },
+  { id: "u3", email: "ahmadi@gympro.ir", firstName: "سارا", lastName: "احمدی", phone: "09123333333", role: "coach", status: "active", avatarUrl: "", branchId: "b1", branchName: "Lumi Wellness", createdAt: "2024-03-01T00:00:00Z", updatedAt: "2025-05-10T00:00:00Z", lastLoginAt: "2025-07-19T14:00:00Z" },
   { id: "u4", email: "karimi@gympro.ir", firstName: "امیر", lastName: "کریمی", phone: "09124444444", role: "coach", status: "active", avatarUrl: "", branchId: "b2", branchName: "باشگاه غرب", createdAt: "2024-04-01T00:00:00Z", updatedAt: "2025-04-20T00:00:00Z" },
-  { id: "u5", email: "mohammadi@gympro.ir", firstName: "علی", lastName: "محمدی", phone: "09125555555", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "باشگاه مرکزی", createdAt: "2024-05-01T00:00:00Z", updatedAt: "2025-06-20T00:00:00Z" },
-  { id: "u6", email: "hoseini@gympro.ir", firstName: "مریم", lastName: "حسینی", phone: "09126666666", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "باشگاه مرکزی", createdAt: "2024-06-01T00:00:00Z", updatedAt: "2025-05-15T00:00:00Z" },
-  { id: "u7", email: "rezaei@gympro.ir", firstName: "حسین", lastName: "رضایی", phone: "09127777777", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "باشگاه مرکزی", createdAt: "2024-07-01T00:00:00Z", updatedAt: "2025-04-10T00:00:00Z" },
+  { id: "u5", email: "mohammadi@gympro.ir", firstName: "علی", lastName: "محمدی", phone: "09125555555", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "Lumi Wellness", createdAt: "2024-05-01T00:00:00Z", updatedAt: "2025-06-20T00:00:00Z" },
+  { id: "u6", email: "hoseini@gympro.ir", firstName: "مریم", lastName: "حسینی", phone: "09126666666", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "Lumi Wellness", createdAt: "2024-06-01T00:00:00Z", updatedAt: "2025-05-15T00:00:00Z" },
+  { id: "u7", email: "rezaei@gympro.ir", firstName: "حسین", lastName: "رضایی", phone: "09127777777", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "Lumi Wellness", createdAt: "2024-07-01T00:00:00Z", updatedAt: "2025-04-10T00:00:00Z" },
   { id: "u8", email: "moradi@gympro.ir", firstName: "زهرا", lastName: "مرادی", phone: "09128888888", role: "athlete", status: "active", avatarUrl: "", branchId: "b2", branchName: "باشگاه غرب", createdAt: "2024-08-01T00:00:00Z", updatedAt: "2025-03-05T00:00:00Z" },
-  { id: "u9", email: "nazari@gympro.ir", firstName: "کیان", lastName: "نظری", phone: "09129999999", role: "athlete", status: "inactive", avatarUrl: "", branchId: "b1", branchName: "باشگاه مرکزی", createdAt: "2024-09-01T00:00:00Z", updatedAt: "2025-02-01T00:00:00Z" },
+  { id: "u9", email: "nazari@gympro.ir", firstName: "کیان", lastName: "نظری", phone: "09129999999", role: "athlete", status: "inactive", avatarUrl: "", branchId: "b1", branchName: "Lumi Wellness", createdAt: "2024-09-01T00:00:00Z", updatedAt: "2025-02-01T00:00:00Z" },
   { id: "u10", email: "jalali@gympro.ir", firstName: "نرگس", lastName: "جلالی", phone: "09120000000", role: "athlete", status: "active", avatarUrl: "", branchId: "b2", branchName: "باشگاه غرب", createdAt: "2024-10-01T00:00:00Z", updatedAt: "2025-06-25T00:00:00Z" },
-  { id: "u11", email: "sadeghi@gympro.ir", firstName: "پدرام", lastName: "صادقی", phone: "09121112222", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "باشگاه مرکزی", createdAt: "2025-01-15T00:00:00Z", updatedAt: "2025-06-01T00:00:00Z" },
-  { id: "u12", email: "ghasemi@gympro.ir", firstName: "الناز", lastName: "قاسمی", phone: "09122223333", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "باشگاه مرکزی", createdAt: "2025-02-10T00:00:00Z", updatedAt: "2025-05-20T00:00:00Z" },
+  { id: "u11", email: "sadeghi@gympro.ir", firstName: "پدرام", lastName: "صادقی", phone: "09121112222", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "Lumi Wellness", createdAt: "2025-01-15T00:00:00Z", updatedAt: "2025-06-01T00:00:00Z" },
+  { id: "u12", email: "ghasemi@gympro.ir", firstName: "الناز", lastName: "قاسمی", phone: "09122223333", role: "athlete", status: "active", avatarUrl: "", branchId: "b1", branchName: "Lumi Wellness", createdAt: "2025-02-10T00:00:00Z", updatedAt: "2025-05-20T00:00:00Z" },
   { id: "u13", email: "mousavi@gympro.ir", firstName: "فرهاد", lastName: "موسوی", phone: "09123334444", role: "athlete", status: "suspended", avatarUrl: "", branchId: "b2", branchName: "باشگاه غرب", createdAt: "2024-11-01T00:00:00Z", updatedAt: "2025-03-01T00:00:00Z" },
 ];
 
 export const mockAthletes: User[] = mockUsers.filter(u => u.role === "athlete");
 
 export const mockBranches: Branch[] = [
-  { id: "b1", name: "باشگاه مرکزی", address: "تهران، خیابان ولیعصر، نبش کوچه فلاحی", phone: "021-12345678", email: "central@gympro.ir", managerId: "u1", isActive: true, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2025-01-01T00:00:00Z" },
+  { id: "b1", name: "Lumi Wellness", address: "همدان- سعیدیه", phone: "021-12345678", email: "central@gympro.ir", managerId: "u1", isActive: true, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2025-01-01T00:00:00Z" },
   { id: "b2", name: "باشگاه غرب", address: "تهران، سعادت‌آباد، بلوار سرو", phone: "021-87654321", email: "west@gympro.ir", managerId: "u4", isActive: true, createdAt: "2024-06-01T00:00:00Z", updatedAt: "2025-03-01T00:00:00Z" },
 ];
 

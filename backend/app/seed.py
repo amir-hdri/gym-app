@@ -40,8 +40,8 @@ def seed_database():
     # ---- Branch ----
     branch = Branch(
         id=str(uuid.uuid4()),
-        name="باشگاه مرکزی",
-        address="تهران، خیابان ولیعصر، نبش کوچه فلان",
+        name="Lumi Wellness",
+        address="همدان- سعیدیه",
         phone="021-12345678",
         email="info@central.gymapp.ir",
         is_active=True,

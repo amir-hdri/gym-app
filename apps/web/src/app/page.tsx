@@ -1,33 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, Suspense } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { Activity, Users, MessageCircle, Calendar, Heart, Sparkles, Dumbbell, ChevronDown, ArrowLeft, Star, CheckCircle2 } from "lucide-react";
+import { Activity, Users, MessageCircle, Calendar, Heart, Sparkles, ChevronDown, ArrowLeft, Star, CheckCircle2 } from "lucide-react";
 import { ScrollReveal, StaggerScroll, StaggerScrollItem } from "@/components/animations/ScrollReveal";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { ActivityRings } from "@/components/ui/ActivityRings";
 import { LumiLogo } from "@/components/ui/LumiLogo";
-
-function LoadingScreen() {
-  return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4">
-        <motion.div
-          className="gradient-brand flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg"
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <Dumbbell className="h-7 w-7 text-white" />
-        </motion.div>
-        <p className="text-sm text-muted-foreground animate-pulse">در حال بارگذاری...</p>
-      </div>
-    </div>
-  );
-}
 
 function FloatingBlur() {
   return (
@@ -144,14 +127,14 @@ function WeeklyExperienceSection() {
           <p className="mt-3 leading-7 text-white/70 text-sm">برنامه را ببین، حضور را ثبت کن و بازخورد مربی را همان‌جا دریافت کن.</p>
           <div className="mt-7 space-y-3">
             {sessions.map((session) => (
-              <div key={session.day} className={`flex items-center gap-4 rounded-xl p-4 ${session.active ? "bg-primary text-white" : "bg-white/[.08]"}`}>
+              <div key={session.day} className={`flex items-center gap-4 rounded-xl p-4 ${session.active ? "bg-primary-solid text-white" : "bg-white/[.08]"}`}>
                 <div className="w-14 text-xs font-bold">{session.day}</div><div className="h-9 w-px bg-white/20" /><div className="flex-1"><p className="text-sm font-semibold">{session.title}</p><p className="mt-1 text-xs text-white/70">{session.meta}</p></div><CheckCircle2 className="h-5 w-5" />
               </div>
             ))}
           </div>
         </div>
         <div id="coaches" className="liquid-glass-card rounded-[1.75rem] p-6 sm:p-8">
-          <div className="flex items-start justify-between gap-4"><div><p className="fitness-kicker">مربی همراه، نه فقط برنامه</p><h2 className="mt-3 text-[22px] font-bold md:text-2xl">مهسا احمدی</h2><p className="mt-1 text-sm text-muted-foreground">مربی قدرت و تناسب اندام بانوان</p></div><div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white">م‌ا</div></div>
+          <div className="flex items-start justify-between gap-4"><div><p className="fitness-kicker">مربی همراه، نه فقط برنامه</p><h2 className="mt-3 text-[22px] font-bold md:text-2xl">مهسا احمدی</h2><p className="mt-1 text-sm text-muted-foreground">مربی قدرت و تناسب اندام بانوان</p></div><div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary-solid text-sm font-bold text-white">م‌ا</div></div>
           <blockquote className="mt-6 rounded-xl border border-border/60 bg-card p-4 text-sm leading-7">«هر برنامه بر اساس توان امروز تو نوشته می‌شود، نه یک نسخه آماده برای همه.»</blockquote>
           <div className="mt-6 grid grid-cols-3 gap-3 text-center">
             <div className="rounded-xl bg-muted p-3"><p className="text-sm font-bold">+۸ سال</p><p className="mt-1 text-xs text-muted-foreground">تجربه</p></div>
@@ -202,16 +185,11 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
       <FloatingBlur />
 
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-14 lg:grid-cols-[1.05fr_.95fr]">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="text-center lg:text-right"
-        >
+        <div className="text-center lg:text-right">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-bold text-primary"
           >
             <Sparkles className="h-3.5 w-3.5" />
@@ -219,38 +197,19 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
           </motion.div>
 
           <h1 className="mb-5 text-4xl font-black leading-[1.2] tracking-tight md:text-6xl lg:text-7xl">
-            <motion.span
-              className="block"
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              حرکت، قدرت،
-            </motion.span>
-            <motion.span
-              className="block text-gradient-brand"
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              نسخه بهتر تو
-            </motion.span>
+            <span className="block">حرکت، قدرت،</span>
+            <span className="block text-gradient-brand">نسخه بهتر تو</span>
           </h1>
 
-          <motion.p
-            className="mx-auto mb-8 max-w-xl text-base leading-8 text-muted-foreground md:text-lg lg:mx-0"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-          >
+          <p className="mx-auto mb-8 max-w-xl text-base leading-8 text-muted-foreground md:text-lg lg:mx-0">
             Lumi Wellness، باشگاه دیجیتال اختصاصی بانوان برای برنامه تمرینی شخصی، ارتباط مستقیم با مربی و دیدن پیشرفت واقعی در هر روز.
-          </motion.p>
+          </p>
 
           <motion.div
             className="flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
           >
             <Button
               size="lg"
@@ -270,12 +229,12 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
               عضویت ورزشکار یا مربی
             </Button>
           </motion.div>
-        </motion.div>
+        </div>
 
         <motion.div
-          initial={{ opacity: 0, scale: .92, rotate: -2 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ delay: .35, duration: .7 }}
+          initial={{ opacity: 0, scale: .94, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: .15, duration: .5, ease: "easeOut" }}
           className="relative mx-auto w-full max-w-[30rem]"
         >
           <div className="absolute -inset-10 rounded-full bg-gradient-to-br from-brand-2/[0.12] via-transparent to-activity-stand/10 blur-3xl" />
@@ -339,7 +298,6 @@ export default function HomePage() {
     }
   }, [isLoading, isAuthenticated, user, router]);
 
-  if (isLoading) return <LoadingScreen />;
   if (isAuthenticated && user) {
     const panelHref = user.role === "admin" ? "/admin" : user.role === "coach" ? "/coach" : user.role === "athlete" ? "/athlete" : "/auth/login";
     const roleLabel = user.role === "admin" ? "پنل ادمین" : user.role === "coach" ? "پنل مربی" : "پنل ورزشکار";
@@ -361,7 +319,7 @@ export default function HomePage() {
   }
 
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <>
       <main id="main" className="relative min-h-screen overflow-hidden bg-background">
         <LandingNavigation onLogin={() => router.push("/auth/login")} onRegister={() => router.push("/auth/register")} />
         <HeroSection
@@ -425,6 +383,6 @@ export default function HomePage() {
           </div>
         </footer>
       </main>
-    </Suspense>
+    </>
   );
 }

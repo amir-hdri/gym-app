@@ -129,7 +129,7 @@ export function MobileBottomNavigation({ items }: MobileBottomNavigationProps) {
                       </span>
                       <span className="min-w-0 flex-1 truncate text-right text-[13px] font-semibold">{item.label}</span>
                       {item.badge !== undefined && (
-                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground shadow-[0_2px_8px_hsl(var(--primary)/0.4)]">
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-solid px-1.5 text-xs font-bold text-primary-foreground shadow-[0_2px_8px_hsl(var(--primary)/0.4)]">
                           {item.badge}
                         </span>
                       )}

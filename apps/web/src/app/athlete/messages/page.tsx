@@ -62,7 +62,7 @@ export default function AthleteMessagesPage() {
               <div className="flex max-h-[28rem] flex-col gap-3 overflow-y-auto py-2" role="log" aria-live="polite" aria-label="تاریخچه گفت‌وگو">
                 {messages.map((msg) => (
                   <div key={msg.id} className={`flex ${msg.sender === "athlete" ? "justify-start" : "justify-end"}`}>
-                    <div className={`max-w-[86%] rounded-2xl px-4 py-3 sm:max-w-[72%] ${msg.sender === "athlete" ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md border border-border/70 bg-muted"}`}>
+                    <div className={`max-w-[86%] rounded-2xl px-4 py-3 sm:max-w-[72%] ${msg.sender === "athlete" ? "rounded-br-md bg-primary-solid text-primary-foreground" : "rounded-bl-md border border-border/70 bg-muted"}`}>
                       <p className="text-sm leading-7">{msg.text}</p>
                       <div className={`mt-1.5 flex items-center gap-1.5 text-xs ${msg.sender === "athlete" ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
                         <time dateTime={msg.createdAt}>{formatRelativeTime(msg.createdAt)}</time>

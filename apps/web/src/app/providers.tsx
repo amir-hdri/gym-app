@@ -1,12 +1,19 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { MotionConfig } from "framer-motion";
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, lazy, Suspense } from "react";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
+
+// Devtools are dev-only: keep them out of the production chunk graph.
+const ReactQueryDevtools =
+  process.env.NODE_ENV === "production"
+    ? () => null
+    : lazy(() =>
+        import("@tanstack/react-query-devtools").then((m) => ({ default: m.ReactQueryDevtools }))
+      );
 
 export function Providers({ children }: Readonly<{ children: ReactNode }>) {
   const [queryClient] = useState(
@@ -37,13 +44,15 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
                 toast:
                   "liquid-glass-card rounded-2xl text-foreground border border-border/60 shadow-lg animate-slide-up",
                 description: "text-muted-foreground",
-                actionButton: "bg-primary text-primary-foreground",
+                actionButton: "bg-primary-solid text-primary-foreground",
                 cancelButton: "bg-muted text-foreground",
                 closeButton: "text-muted-foreground",
               },
             }}
           />
-          <ReactQueryDevtools initialIsOpen={false} />
+          <Suspense fallback={null}>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
         </QueryClientProvider>
       </MotionConfig>
     </ThemeProvider>

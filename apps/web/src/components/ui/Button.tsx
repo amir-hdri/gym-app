@@ -10,7 +10,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:bg-primary/95",
+        default: "bg-primary-solid text-primary-foreground shadow-sm hover:bg-primary-solid/90 active:bg-primary-solid/95",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
         outline: "border border-border bg-background hover:bg-muted hover:text-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm",
@@ -45,16 +45,17 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading, disabled, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    const showLoading = Boolean(loading) && !asChild;
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        disabled={disabled || loading}
+        disabled={asChild ? disabled : disabled || loading}
         aria-busy={loading}
         {...props}
       >
-        {loading ? (
-          <>
+        {showLoading ? (
+          <span className="inline-flex items-center gap-2">
             <svg
               className="h-4 w-4 animate-spin"
               xmlns="http://www.w3.org/2000/svg"
@@ -77,9 +78,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               />
             </svg>
             <span>در حال پردازش...</span>
-          </>
+          </span>
         ) : (
-          <>{children as React.ReactNode}</>
+          children
         )}
       </Comp>
     );

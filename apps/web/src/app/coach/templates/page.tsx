@@ -51,7 +51,7 @@ export default function TemplatesPage() {
         <CardContent className="p-6">
           <div className="relative max-w-md">
             <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="جستجوی الگو..." value={search} onChange={(e) => setSearch(e.target.value)} className="pr-10 bg-white/70 backdrop-blur-sm border-white/30" />
+            <Input placeholder="جستجوی الگو..." aria-label="جستجوی الگو" value={search} onChange={(e) => setSearch(e.target.value)} className="pr-10 bg-white/70 backdrop-blur-sm border-white/30" />
           </div>
         </CardContent>
       </Card>

@@ -17,7 +17,10 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
-  register: (data: RegisterData) => Promise<User>;
+  // Register does not sign the user in (backend mints no tokens on this path,
+  // so an existing email is indistinguishable from a new one). Resolves on
+  // success; the caller routes to the login page.
+  register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   refreshAccessToken: () => Promise<boolean>;
   updateUser: (user: Partial<User>) => void;
@@ -127,15 +130,15 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
       lastName: data.lastName,
       phone: data.phone,
     };
-    const response = await api.register(payload) as ApiResponse<AuthResponse>;
-    
-    if (response.success && response.data) {
-      setAuth(response.data.user, response.data.tokens);
-      return response.data.user;
-    } else {
-      throw new Error(response.error || "ثبت‌نام ناموفق بود");
+    // No tokens are minted on register (anti-enumeration) — do NOT set auth
+    // here. The caller routes the user to the login page instead.
+    const response = await api.register(payload);
+
+    if (response.success) {
+      return;
     }
-  }, [setAuth]);
+    throw new Error(response.error || "ثبت‌نام ناموفق بود");
+  }, []);
 
   const logout = useCallback(() => {
     clearAuth();

@@ -1,11 +1,11 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
 from app.database import get_db
-from app.models import Payment, User
+from app.models import Membership, Payment, User
 from app.responses import error_response, paginated_response, success_response
 from app.schemas import PaymentCreate, PaymentResponse, PaymentStatusUpdate
 
@@ -16,14 +16,17 @@ router = APIRouter(prefix="/api/v1/payments", tags=["Payments"])
 def list_payments(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    user_id: str = None,
-    status: str = None,
-    method: str = None,
-    date_from: str = None,
-    date_to: str = None,
+    user_id: str | None = None,
+    userId: str | None = None,  # camelCase alias — frontend sends userId
+    status: str | None = None,
+    method: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Accept both spellings of the user filter
+    user_id = user_id or userId
     # Athletes can only list their own payments
     if current_user.role == "athlete":
         user_id = user_id or current_user.id
@@ -73,6 +76,9 @@ def create_payment(
     user = db.query(User).filter(User.id == req.user_id).first()
     if not user:
         return error_response("User not found", 404)
+    # Validate membership exists (optional — payments may be standalone)
+    if req.membership_id and not db.query(Membership).filter(Membership.id == req.membership_id).first():
+        return error_response("Membership not found", 404)
     payment = Payment(**req.model_dump(by_alias=False))
     # status is forced to pending at creation; paid_at set only on status transition
     payment.status = "pending"
@@ -113,7 +119,7 @@ def update_payment_status(
         return error_response(f"Invalid status. Allowed: {', '.join(sorted(allowed))}", 400)
     payment.status = req.status
     if req.status == "completed" and not payment.paid_at:
-        payment.paid_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        payment.paid_at = datetime.now(UTC).replace(tzinfo=None)
     db.commit()
     db.refresh(payment)
     return success_response(

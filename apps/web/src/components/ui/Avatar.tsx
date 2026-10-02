@@ -1,3 +1,4 @@
+import Image from "next/image";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -12,14 +13,29 @@ const Avatar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElem
 );
 Avatar.displayName = "Avatar";
 
-type AvatarImageProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, "alt"> & { alt: string };
+type AvatarImageProps = Omit<
+  React.ImgHTMLAttributes<HTMLImageElement>,
+  "alt" | "width" | "height" | "src" | "srcSet" | "srcset"
+> & { alt: string; src?: string };
 
 const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
-  ({ className, alt, ...props }, ref) => (
-    // Avatar sources can be arbitrary user-provided URLs without known dimensions.
-    // eslint-disable-next-line @next/next/no-img-element
-    <img ref={ref} alt={alt} className={cn("aspect-square h-full w-full object-cover", className)} {...props} />
-  )
+  ({ className, alt, src, ...props }, ref) => {
+    if (!src) return null;
+    // `fill` fits the sized, relative parent Avatar. Sources can be arbitrary
+    // user-provided URLs without configured remote patterns, so the image is
+    // served as-is (`unoptimized`) instead of going through the optimizer.
+    return (
+      <Image
+        ref={ref}
+        src={src}
+        alt={alt}
+        fill
+        unoptimized
+        className={cn("aspect-square h-full w-full object-cover", className)}
+        {...props}
+      />
+    );
+  }
 );
 AvatarImage.displayName = "AvatarImage";
 

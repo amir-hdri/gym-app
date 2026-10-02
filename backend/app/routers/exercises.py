@@ -14,10 +14,10 @@ router = APIRouter(prefix="/api/v1/exercises", tags=["Exercises"])
 def list_exercises(
     page: int = Query(1, ge=1),
     page_size: int = Query(100, ge=1, le=500),
-    category: str = None,
-    muscle_group: str = None,
-    difficulty: str = None,
-    search: str = None,
+    category: str | None = None,
+    muscle_group: str | None = None,
+    difficulty: str | None = None,
+    search: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -29,10 +29,10 @@ def list_exercises(
     if difficulty:
         query = query.filter(Exercise.difficulty == difficulty)
     if search:
-        query = query.filter(
-            Exercise.name.ilike(f"%{search}%")
-            | Exercise.name_en.ilike(f"%{search}%")
-        )
+        # Escape LIKE wildcards so a literal % or _ in the query can't match everything.
+        escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        like = f"%{escaped}%"
+        query = query.filter(Exercise.name.ilike(like, escape="\\") | Exercise.name_en.ilike(like, escape="\\"))
     total = query.count()
     exercises = query.offset((page - 1) * page_size).limit(page_size).all()
     return paginated_response(

@@ -1,19 +1,23 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user, require_roles
 from app.database import get_db
 from app.models import MembershipPlan, User
 from app.responses import error_response, success_response
-from app.schemas import MembershipPlanCreate, MembershipPlanResponse, MembershipPlanUpdate
+from app.schemas import (
+    MembershipPlanCreate,
+    MembershipPlanResponse,
+    MembershipPlanUpdate,
+)
 
 router = APIRouter(prefix="/api/v1/membership-plans", tags=["Membership Plans"])
 
 
 @router.get("")
 def list_plans(
-    branch_id: str = None,
-    is_active: bool = None,
+    branch_id: str | None = None,
+    is_active: bool | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -23,9 +27,7 @@ def list_plans(
     if is_active is not None:
         query = query.filter(MembershipPlan.is_active == is_active)
     plans = query.all()
-    return success_response(
-        data=[MembershipPlanResponse.model_validate(p).model_dump(by_alias=True) for p in plans]
-    )
+    return success_response(data=[MembershipPlanResponse.model_validate(p).model_dump(by_alias=True) for p in plans])
 
 
 @router.post("")

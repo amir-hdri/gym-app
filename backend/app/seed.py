@@ -1,11 +1,9 @@
 import os
 import uuid
-from datetime import datetime, timedelta, timezone
-
-from sqlalchemy.orm import Session
+from datetime import UTC, datetime, timedelta
 
 from app.auth import hash_password
-from app.database import SessionLocal, engine, Base
+from app.database import Base, SessionLocal, engine
 from app.models import (
     Branch,
     CheckIn,
@@ -15,8 +13,8 @@ from app.models import (
     MembershipPlan,
     Notification,
     Payment,
-    TrainingProgram,
     ProgramExercise,
+    TrainingProgram,
     User,
 )
 
@@ -34,8 +32,13 @@ def seed_database():
     coach_password = os.environ.get("SEED_COACH_PASSWORD", "coach123")
     athlete_password = os.environ.get("SEED_ATHLETE_PASSWORD", "athlete123")
     if admin_password == "admin123" or coach_password == "coach123" or athlete_password == "athlete123":
-        print("WARNING: seeding with default credentials — set SEED_*_PASSWORD env vars for non-dev environments")
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+        print(
+            "WARNING: seeding with default credentials (admin@gymapp.ir/admin123 etc.). "
+            "Set SEED_*_PASSWORD env vars for non-dev environments. Demo seeding runs only in "
+            "ENVIRONMENT=development or when SEED_DEMO_DATA=true — do not enable SEED_DEMO_DATA "
+            "on any environment reachable from the internet without rotating these passwords."
+        )
+    now = datetime.now(UTC).replace(tzinfo=None)
 
     # ---- Branch ----
     branch = Branch(
@@ -92,7 +95,7 @@ def seed_database():
         a = User(
             email=f"athlete{i}@gymapp.ir",
             password_hash=hash_password(athlete_password),
-            first_name=f"ورزشکار",
+            first_name="ورزشکار",
             last_name=f"شماره {i}",
             phone=f"0912000000{i}",
             role="athlete",
@@ -105,10 +108,41 @@ def seed_database():
 
     # ---- Membership Plans ----
     plans_data = [
-        {"name": "پایه", "description": "Plan 30 روزه با 10 جلسه", "duration_days": 30, "sessions_count": 10, "price": 500000, "features": ["دسترسی به باشگاه", "10 جلسه تمرین"]},
-        {"name": "نقره‌ای", "description": "Plan 60 روزه با 20 جلسه", "duration_days": 60, "sessions_count": 20, "price": 900000, "discount_percent": 10, "features": ["دسترسی به باشگاه", "20 جلسه تمرین", "مربی شخصی"]},
-        {"name": "طلایی", "description": "Plan 90 روزه نامحدود", "duration_days": 90, "sessions_count": 0, "price": 1500000, "discount_percent": 15, "features": ["دسترسی نامحدود", "مربی شخصی", "برنامه تمرینی اختصاصی"]},
-        {"name": "پلاتینیوم", "description": "Plan 365 روزه نامحدود", "duration_days": 365, "sessions_count": 0, "price": 5000000, "discount_percent": 20, "features": ["دسترسی نامحدود", "مربی شخصی", "برنامه تمرینی اختصاصی", "مشاوره تغذیه"]},
+        {
+            "name": "پایه",
+            "description": "Plan 30 روزه با 10 جلسه",
+            "duration_days": 30,
+            "sessions_count": 10,
+            "price": 500000,
+            "features": ["دسترسی به باشگاه", "10 جلسه تمرین"],
+        },
+        {
+            "name": "نقره‌ای",
+            "description": "Plan 60 روزه با 20 جلسه",
+            "duration_days": 60,
+            "sessions_count": 20,
+            "price": 900000,
+            "discount_percent": 10,
+            "features": ["دسترسی به باشگاه", "20 جلسه تمرین", "مربی شخصی"],
+        },
+        {
+            "name": "طلایی",
+            "description": "Plan 90 روزه نامحدود",
+            "duration_days": 90,
+            "sessions_count": 0,
+            "price": 1500000,
+            "discount_percent": 15,
+            "features": ["دسترسی نامحدود", "مربی شخصی", "برنامه تمرینی اختصاصی"],
+        },
+        {
+            "name": "پلاتینیوم",
+            "description": "Plan 365 روزه نامحدود",
+            "duration_days": 365,
+            "sessions_count": 0,
+            "price": 5000000,
+            "discount_percent": 20,
+            "features": ["دسترسی نامحدود", "مربی شخصی", "برنامه تمرینی اختصاصی", "مشاوره تغذیه"],
+        },
     ]
     plans = []
     for pd in plans_data:
@@ -149,18 +183,114 @@ def seed_database():
 
     # ---- Exercises ----
     exercises_data = [
-        {"name": "پرس سینه هالتر", "name_en": "Barbell Bench Press", "category": "strength", "muscle_group": "chest", "difficulty": "intermediate", "equipment": "barbell", "secondary_muscles": ["shoulders", "triceps"]},
-        {"name": "اسکات", "name_en": "Squat", "category": "strength", "muscle_group": "legs", "difficulty": "intermediate", "equipment": "barbell", "secondary_muscles": ["core", "glutes"]},
-        {"name": "ددلیفت", "name_en": "Deadlift", "category": "strength", "muscle_group": "back", "difficulty": "advanced", "equipment": "barbell", "secondary_muscles": ["legs", "core", "glutes"]},
-        {"name": "پول‌آپ", "name_en": "Pull-Up", "category": "strength", "muscle_group": "back", "difficulty": "intermediate", "equipment": "bodyweight", "secondary_muscles": ["biceps", "core"]},
-        {"name": "پرس شانه دمبل", "name_en": "Dumbbell Shoulder Press", "category": "strength", "muscle_group": "shoulders", "difficulty": "beginner", "equipment": "dumbbell", "secondary_muscles": ["triceps"]},
-        {"name": "جلوبازو هالتر", "name_en": "Barbell Curl", "category": "strength", "muscle_group": "biceps", "difficulty": "beginner", "equipment": "barbell", "secondary_muscles": ["forearms"]},
-        {"name": "پشت بازو سیم کش", "name_en": "Tricep Pushdown", "category": "strength", "muscle_group": "triceps", "difficulty": "beginner", "equipment": "cable", "secondary_muscles": []},
-        {"name": "پرس پا", "name_en": "Leg Press", "category": "strength", "muscle_group": "legs", "difficulty": "beginner", "equipment": "machine", "secondary_muscles": ["glutes"]},
-        {"name": "لت پول‌داون", "name_en": "Lat Pulldown", "category": "strength", "muscle_group": "back", "difficulty": "beginner", "equipment": "cable", "secondary_muscles": ["biceps"]},
-        {"name": "کرانچ", "name_en": "Crunch", "category": "core", "muscle_group": "abs", "difficulty": "beginner", "equipment": "bodyweight", "secondary_muscles": []},
-        {"name": "پلانک", "name_en": "Plank", "category": "core", "muscle_group": "abs", "difficulty": "beginner", "equipment": "bodyweight", "secondary_muscles": ["core"]},
-        {"name": "پرس سینه دمبل", "name_en": "Dumbbell Bench Press", "category": "strength", "muscle_group": "chest", "difficulty": "beginner", "equipment": "dumbbell", "secondary_muscles": ["shoulders", "triceps"]},
+        {
+            "name": "پرس سینه هالتر",
+            "name_en": "Barbell Bench Press",
+            "category": "strength",
+            "muscle_group": "chest",
+            "difficulty": "intermediate",
+            "equipment": "barbell",
+            "secondary_muscles": ["shoulders", "triceps"],
+        },
+        {
+            "name": "اسکات",
+            "name_en": "Squat",
+            "category": "strength",
+            "muscle_group": "legs",
+            "difficulty": "intermediate",
+            "equipment": "barbell",
+            "secondary_muscles": ["core", "glutes"],
+        },
+        {
+            "name": "ددلیفت",
+            "name_en": "Deadlift",
+            "category": "strength",
+            "muscle_group": "back",
+            "difficulty": "advanced",
+            "equipment": "barbell",
+            "secondary_muscles": ["legs", "core", "glutes"],
+        },
+        {
+            "name": "پول‌آپ",
+            "name_en": "Pull-Up",
+            "category": "strength",
+            "muscle_group": "back",
+            "difficulty": "intermediate",
+            "equipment": "bodyweight",
+            "secondary_muscles": ["biceps", "core"],
+        },
+        {
+            "name": "پرس شانه دمبل",
+            "name_en": "Dumbbell Shoulder Press",
+            "category": "strength",
+            "muscle_group": "shoulders",
+            "difficulty": "beginner",
+            "equipment": "dumbbell",
+            "secondary_muscles": ["triceps"],
+        },
+        {
+            "name": "جلوبازو هالتر",
+            "name_en": "Barbell Curl",
+            "category": "strength",
+            "muscle_group": "biceps",
+            "difficulty": "beginner",
+            "equipment": "barbell",
+            "secondary_muscles": ["forearms"],
+        },
+        {
+            "name": "پشت بازو سیم کش",
+            "name_en": "Tricep Pushdown",
+            "category": "strength",
+            "muscle_group": "triceps",
+            "difficulty": "beginner",
+            "equipment": "cable",
+            "secondary_muscles": [],
+        },
+        {
+            "name": "پرس پا",
+            "name_en": "Leg Press",
+            "category": "strength",
+            "muscle_group": "legs",
+            "difficulty": "beginner",
+            "equipment": "machine",
+            "secondary_muscles": ["glutes"],
+        },
+        {
+            "name": "لت پول‌داون",
+            "name_en": "Lat Pulldown",
+            "category": "strength",
+            "muscle_group": "back",
+            "difficulty": "beginner",
+            "equipment": "cable",
+            "secondary_muscles": ["biceps"],
+        },
+        {
+            "name": "کرانچ",
+            "name_en": "Crunch",
+            "category": "core",
+            "muscle_group": "abs",
+            "difficulty": "beginner",
+            "equipment": "bodyweight",
+            "secondary_muscles": [],
+        },
+        {
+            "name": "پلانک",
+            "name_en": "Plank",
+            "category": "core",
+            "muscle_group": "abs",
+            "difficulty": "beginner",
+            "equipment": "bodyweight",
+            "secondary_muscles": ["core"],
+        },
+        {
+            "name": "پرس سینه دمبل",
+            "name_en": "Dumbbell Bench Press",
+            "category": "strength",
+            "muscle_group": "chest",
+            "difficulty": "beginner",
+            "equipment": "dumbbell",
+            "secondary_muscles": ["shoulders", "triceps"],
+        },
     ]
     exercises = []
     for ed in exercises_data:
@@ -211,10 +341,42 @@ def seed_database():
 
     # ---- Goals ----
     goals_data = [
-        {"athlete": athletes[0], "title": "کاهش وزن", "target_value": 10, "current_value": 3, "unit": "kg", "category": "weight_loss", "status": "in_progress"},
-        {"athlete": athletes[1], "title": "افزایش عضله", "target_value": 5, "current_value": 1, "unit": "kg", "category": "muscle_gain", "status": "in_progress"},
-        {"athlete": athletes[2], "title": "افزایش قدرت پرس سینه", "target_value": 80, "current_value": 60, "unit": "kg", "category": "strength", "status": "in_progress"},
-        {"athlete": athletes[3], "title": "بهبود استقامت", "target_value": 30, "current_value": 15, "unit": "min", "category": "endurance", "status": "not_started"},
+        {
+            "athlete": athletes[0],
+            "title": "کاهش وزن",
+            "target_value": 10,
+            "current_value": 3,
+            "unit": "kg",
+            "category": "weight_loss",
+            "status": "in_progress",
+        },
+        {
+            "athlete": athletes[1],
+            "title": "افزایش عضله",
+            "target_value": 5,
+            "current_value": 1,
+            "unit": "kg",
+            "category": "muscle_gain",
+            "status": "in_progress",
+        },
+        {
+            "athlete": athletes[2],
+            "title": "افزایش قدرت پرس سینه",
+            "target_value": 80,
+            "current_value": 60,
+            "unit": "kg",
+            "category": "strength",
+            "status": "in_progress",
+        },
+        {
+            "athlete": athletes[3],
+            "title": "بهبود استقامت",
+            "target_value": 30,
+            "current_value": 15,
+            "unit": "min",
+            "category": "endurance",
+            "status": "not_started",
+        },
     ]
     for gd in goals_data:
         goal = Goal(
@@ -232,7 +394,7 @@ def seed_database():
         db.add(goal)
 
     # ---- Check-Ins ----
-    for i, athlete in enumerate(athletes):
+    for _i, athlete in enumerate(athletes):
         for d in range(5):
             ci_time = now - timedelta(days=10 - d, hours=2)
             co_time = ci_time + timedelta(hours=1, minutes=30)
@@ -246,7 +408,7 @@ def seed_database():
             db.add(ci)
 
     # ---- Payments ----
-    for i, athlete in enumerate(athletes):
+    for _i, athlete in enumerate(athletes):
         membership = db.query(Membership).filter(Membership.user_id == athlete.id).first()
         p = Payment(
             user_id=athlete.id,

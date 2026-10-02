@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useInView } from "framer-motion";
 
 interface AnimatedCounterProps {
   value: number;
@@ -19,8 +18,28 @@ export function AnimatedCounter({
   className = "",
 }: AnimatedCounterProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  // If IntersectionObserver is unavailable (very old browsers), start in view.
+  const [isInView, setIsInView] = useState(() => typeof IntersectionObserver === "undefined");
   const [displayValue, setDisplayValue] = useState(0);
+
+  // Own in-view detection (IntersectionObserver) — no framer-motion, so this
+  // stays out of the landing-page bundle. SSR-safe: starts false, observes
+  // only on the client.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-50px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!isInView) return;

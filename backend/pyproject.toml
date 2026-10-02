@@ -1,0 +1,37 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "B",      # flake8-bugbear
+    "BLE",    # flake8-blind-except
+    "F",      # pyflakes
+    "I",      # isort
+    "RUF",    # ruff-specific
+    "SIM",    # flake8-simplify
+    "UP",     # pyupgrade
+]
+ignore = [
+    # B008 flags `Depends()`/`Query()` calls in parameter defaults, but that is
+    # FastAPI's designed dependency-injection idiom (evaluated intentionally at
+    # def time), not an accidental mutable-default bug. Migrating to
+    # `Annotated[..., Depends(...)]` is rejected: it turns DI params into
+    # non-default params, which is a SyntaxError whenever an earlier param
+    # keeps a real default (e.g. `user_id: str | None = None`).
+    "B008",
+]
+
+[tool.black]
+line-length = 120
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+# SQLAlchemy's plugin teaches mypy that model attributes (e.g. User.email)
+# are plain Python types, not Column[...].
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+# FastAPI's Depends/Query-in-defaults idiom is untyped by design; the
+# untyped-def surface is large, so strictness is introduced gradually.
+disallow_untyped_defs = false

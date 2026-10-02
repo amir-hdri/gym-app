@@ -77,7 +77,7 @@ export default function PlansPage() {
                   <span className="font-medium text-foreground">{formatPersianNumber(plan.sessionsCount)}</span> جلسه
                 </div>
                 <ul className="space-y-2">
-                  {plan.features.map((feature) => (
+                  {(plan.features ?? []).map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-green-500 shrink-0" />
                       <span className="bg-muted/50 px-2 py-0.5 rounded">{feature}</span>

@@ -340,11 +340,12 @@ export const mockService = {
     return wrapList(mockNotifications[userId] || createMockNotifications(userId));
   },
 
-  async markNotificationRead(id: string): Promise<ApiResponse<Notification>> {
+  async markNotificationRead(id: string): Promise<ApiResponse<null>> {
     await sleep(DELAY / 3);
     for (const key of Object.keys(mockNotifications)) {
       const n = mockNotifications[key].find((x) => x.id === id);
-      if (n) { n.isRead = true; return wrap(n); }
+      // Mirror the backend contract: success with no `data` key.
+      if (n) { n.isRead = true; return { success: true, message: "Notification marked as read" }; }
     }
     throw new Error("Notification not found");
   },

@@ -13,9 +13,7 @@ router = APIRouter(prefix="/api/v1/branches", tags=["Branches"])
 @router.get("")
 def list_branches(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     branches = db.query(Branch).all()
-    return success_response(
-        data=[BranchResponse.model_validate(b).model_dump(by_alias=True) for b in branches]
-    )
+    return success_response(data=[BranchResponse.model_validate(b).model_dump(by_alias=True) for b in branches])
 
 
 @router.post("")

@@ -1,9 +1,8 @@
-from collections import defaultdict
-from datetime import datetime, timedelta, timezone
-from typing import Optional
 import time
+from collections import defaultdict
+from datetime import UTC, datetime, timedelta
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -29,7 +28,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def _utcnow_naive() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 def create_access_token(data: dict) -> tuple[str, datetime]:
@@ -53,7 +52,7 @@ def decode_token(token: str) -> dict:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
-        )
+        ) from None
 
 
 async def get_current_user(
@@ -66,7 +65,13 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token type",
         )
-    user = db.query(User).filter(User.id == payload["user_id"]).first()
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token: missing user_id",
+        )
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -78,18 +83,6 @@ async def get_current_user(
             detail="User account is not active",
         )
     return user
-
-
-async def get_optional_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
-    db: Session = Depends(get_db),
-) -> Optional[User]:
-    if credentials is None:
-        return None
-    try:
-        return await get_current_user(credentials, db)
-    except HTTPException:
-        return None
 
 
 def require_roles(*roles: str):
@@ -104,12 +97,45 @@ def require_roles(*roles: str):
     return dependency
 
 
+def get_client_ip(request: Request) -> str:
+    """Best-effort client IP for rate limiting.
+
+    X-Forwarded-For is only trusted when TRUST_PROXY is enabled; otherwise an
+    attacker could bypass the rate limiter by rotating a spoofed header value
+    on every request (each spoofed value looks like a distinct client).
+    """
+    if settings.TRUST_PROXY:
+        forwarded = request.headers.get("x-forwarded-for", "")
+        first = forwarded.split(",")[0].strip()
+        if first:
+            return first
+    if request.client:
+        return request.client.host
+    return "unknown"
+
+
 def check_login_rate_limit(identifier: str) -> None:
-    """Raises 429 if identifier has exceeded LOGIN_RATE_LIMIT per minute."""
+    """Raises 429 if identifier has exceeded LOGIN_RATE_LIMIT failed attempts per minute.
+
+    Pure check: does NOT consume quota. Only failed login attempts consume
+    quota (via record_rate_limit_attempt), so a burst of legitimate successful
+    logins is never throttled.
+    """
     now = time.time()
     window = 60.0
     # prune
     _rate_limit_store[identifier] = [t for t in _rate_limit_store[identifier] if now - t < window]
     if len(_rate_limit_store[identifier]) >= settings.LOGIN_RATE_LIMIT:
         raise HTTPException(status_code=429, detail="Too many login attempts. Try again later.")
+
+
+def record_rate_limit_attempt(identifier: str) -> None:
+    """Consume one unit of rate-limit quota (call after the attempt is counted).
+
+    For login this is called only after a failed attempt; for register every
+    attempt consumes quota (spam protection).
+    """
+    now = time.time()
+    window = 60.0
+    _rate_limit_store[identifier] = [t for t in _rate_limit_store[identifier] if now - t < window]
     _rate_limit_store[identifier].append(now)

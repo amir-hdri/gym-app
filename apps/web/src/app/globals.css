@@ -369,3 +369,11 @@
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
 }
+
+/* PWA install/update banner is fixed-positioned; while it is visible it can
+   cover the landing hero CTA at short viewports (no bottom tab bar on `/`),
+   so give the page bottom breathing room. Set/cleared by PwaRegister via
+   body[data-pwa-banner="visible"]. padding-bottom is direction-neutral (RTL-safe). */
+body[data-pwa-banner="visible"] #main {
+  padding-bottom: 8rem;
+}

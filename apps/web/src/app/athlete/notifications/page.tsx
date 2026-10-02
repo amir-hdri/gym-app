@@ -4,7 +4,7 @@ import { FadeIn } from "@/components/animations/FadeIn";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
+import { cn, parseApiDate } from "@/lib/utils";
 import { Bell, Calendar, MessageSquare, CreditCard, Dumbbell, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -108,7 +108,7 @@ export default function NotificationsPage() {
 }
 
 function getRelativeTime(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
+  const diff = Date.now() - parseApiDate(dateStr).getTime();
   const minutes = Math.floor(diff / 60000);
   if (minutes < 1) return "چند لحظه پیش";
   if (minutes < 60) return `${minutes} دقیقه پیش`;

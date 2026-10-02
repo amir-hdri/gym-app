@@ -1,11 +1,9 @@
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user, require_roles
 from app.database import get_db
-from app.models import Membership, User
+from app.models import Branch, Membership, MembershipPlan, User
 from app.responses import error_response, paginated_response, success_response
 from app.schemas import MembershipCreate, MembershipResponse, MembershipUpdate
 
@@ -16,10 +14,10 @@ router = APIRouter(prefix="/api/v1/memberships", tags=["Memberships"])
 def list_memberships(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    user_id: str = None,
-    plan_id: str = None,
-    branch_id: str = None,
-    status: str = None,
+    user_id: str | None = None,
+    plan_id: str | None = None,
+    branch_id: str | None = None,
+    status: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -53,6 +51,12 @@ def create_membership(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles("admin", "receptionist")),
 ):
+    if not db.query(User).filter(User.id == req.user_id).first():
+        return error_response("User not found", 404)
+    if not db.query(MembershipPlan).filter(MembershipPlan.id == req.plan_id).first():
+        return error_response("Membership plan not found", 404)
+    if req.branch_id and not db.query(Branch).filter(Branch.id == req.branch_id).first():
+        return error_response("Branch not found", 404)
     membership = Membership(**req.model_dump(by_alias=False))
     db.add(membership)
     db.commit()

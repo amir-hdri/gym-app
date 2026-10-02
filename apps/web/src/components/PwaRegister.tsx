@@ -79,6 +79,19 @@ export function PwaRegister() {
     window.location.reload();
   };
 
+  const bannerVisible = showInstall || needRefresh;
+
+  // While the banner is visible it can cover the landing hero CTA at short
+  // viewports (no bottom tab bar on `/`); the CSS rule on
+  // body[data-pwa-banner="visible"] gives the page bottom breathing room.
+  useEffect(() => {
+    if (bannerVisible) {
+      document.body.setAttribute("data-pwa-banner", "visible");
+    } else {
+      document.body.removeAttribute("data-pwa-banner");
+    }
+  }, [bannerVisible]);
+
   return (
     <>
       {showInstall && (
@@ -96,7 +109,7 @@ export function PwaRegister() {
           <button
             onClick={() => setShowInstall(false)}
             aria-label="بستن"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
           >
             <X className="h-4 w-4" />
           </button>
@@ -114,7 +127,7 @@ export function PwaRegister() {
           <Button size="sm" onClick={handleUpdate} className="shrink-0 bg-amber-600 hover:bg-amber-700">
             بروزرسانی
           </Button>
-          <button onClick={() => setNeedRefresh(false)} aria-label="بستن" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-amber-700 hover:bg-amber-100 dark:text-amber-300">
+          <button onClick={() => setNeedRefresh(false)} aria-label="بستن" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-amber-700 hover:bg-amber-100 dark:text-amber-300">
             <X className="h-4 w-4" />
           </button>
         </div>

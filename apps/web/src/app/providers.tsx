@@ -1,7 +1,6 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MotionConfig } from "framer-motion";
 import { useState, ReactNode, lazy, Suspense } from "react";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -32,8 +31,7 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-      <MotionConfig reducedMotion="user">
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
           <AuthProvider>{children}</AuthProvider>
           <Toaster
             position="bottom-center"
@@ -54,7 +52,6 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
             <ReactQueryDevtools initialIsOpen={false} />
           </Suspense>
         </QueryClientProvider>
-      </MotionConfig>
     </ThemeProvider>
   );
 }

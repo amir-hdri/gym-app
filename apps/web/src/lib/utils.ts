@@ -10,12 +10,27 @@ export function formatPersianNumber(num: number | string): string {
   return String(num).replace(/\d/g, (digit) => persianDigits[parseInt(digit)]);
 }
 
+/**
+ * Backend stores naive UTC datetimes (e.g. "2026-10-02T03:00:00"). `new Date()`
+ * parses an offset-less ISO string as LOCAL time, shifting displayed times by
+ * the UTC offset (and possibly flipping the Jalali day near midnight). This
+ * helper treats offset-less datetimes as UTC ("Z") before constructing the
+ * Date. Strings that already carry a designator (Z or ±hh:mm) pass through
+ * untouched, as do Date instances and date-only strings (already UTC per spec).
+ */
+export function parseApiDate(date: string | Date): Date {
+  if (typeof date !== "string") return date;
+  const naive = date.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)$/);
+  if (naive) return new Date(`${naive[1]}T${naive[2]}Z`);
+  return new Date(date);
+}
+
 export function formatCurrency(amount: number, currency = "تومان"): string {
   return new Intl.NumberFormat("fa-IR").format(amount) + " " + currency;
 }
 
 export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOptions): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+  const d = typeof date === "string" ? parseApiDate(date) : date;
   return new Intl.DateTimeFormat("fa-IR", {
     year: "numeric",
     month: "long",
@@ -25,7 +40,7 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
 }
 
 export function formatDateTime(date: string | Date): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+  const d = typeof date === "string" ? parseApiDate(date) : date;
   return new Intl.DateTimeFormat("fa-IR", {
     year: "numeric",
     month: "short",
@@ -36,7 +51,7 @@ export function formatDateTime(date: string | Date): string {
 }
 
 export function formatRelativeTime(date: string | Date): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+  const d = typeof date === "string" ? parseApiDate(date) : date;
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffMins = Math.floor(diffMs / 60000);
@@ -97,7 +112,7 @@ export function calculateProgress(current: number, target: number): number {
 }
 
 export function calculateDaysRemaining(targetDate: string | Date): number {
-  const target = typeof targetDate === "string" ? new Date(targetDate) : targetDate;
+  const target = typeof targetDate === "string" ? parseApiDate(targetDate) : targetDate;
   const now = new Date();
   const diffMs = target.getTime() - now.getTime();
   return Math.ceil(diffMs / 86400000);

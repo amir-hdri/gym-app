@@ -1,11 +1,17 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user, hash_password, require_roles
+from app.auth import get_current_user, hash_password, require_roles, verify_password
 from app.database import get_db
-from app.models import User
+from app.models import Branch, User
 from app.responses import error_response, paginated_response, success_response
-from app.schemas import AdminUserCreate, PasswordChangeRequest, UserResponse, UserStatusUpdate, UserUpdate
+from app.schemas import (
+    AdminUserCreate,
+    PasswordChangeRequest,
+    UserResponse,
+    UserStatusUpdate,
+    UserUpdate,
+)
 
 router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 
@@ -14,9 +20,9 @@ router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 def list_users(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    role: str = None,
-    status: str = None,
-    search: str = None,
+    role: str | None = None,
+    status: str | None = None,
+    search: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -25,7 +31,7 @@ def list_users(
         return paginated_response(
             data=[UserResponse.model_validate(current_user).model_dump(by_alias=True)],
             total=1,
-            page=1,
+            page=page,
             page_size=page_size,
         )
     if current_user.role == "coach":
@@ -36,10 +42,13 @@ def list_users(
     if status:
         query = query.filter(User.status == status)
     if search:
+        # Escape LIKE wildcards so a literal %/_ in the term can't widen the match
+        escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        like = f"%{escaped}%"
         query = query.filter(
-            User.first_name.ilike(f"%{search}%")
-            | User.last_name.ilike(f"%{search}%")
-            | User.email.ilike(f"%{search}%")
+            User.first_name.ilike(like, escape="\\")
+            | User.last_name.ilike(like, escape="\\")
+            | User.email.ilike(like, escape="\\")
         )
     total = query.count()
     users = query.offset((page - 1) * page_size).limit(page_size).all()
@@ -59,11 +68,7 @@ def get_user(user_id: str, db: Session = Depends(get_db), current_user: User = D
     # Athletes can only view themselves; coaches can view themselves + athletes
     if current_user.role == "athlete" and user_id != current_user.id:
         return error_response("Insufficient permissions", 403)
-    if (
-        current_user.role == "coach"
-        and user_id != current_user.id
-        and user.role != "athlete"
-    ):
+    if current_user.role == "coach" and user_id != current_user.id and user.role != "athlete":
         return error_response("Insufficient permissions", 403)
     return success_response(data=UserResponse.model_validate(user).model_dump(by_alias=True))
 
@@ -86,6 +91,10 @@ def update_user(
     if current_user.role not in {"admin", "receptionist"}:
         update_data.pop("status", None)
         update_data.pop("branch_id", None)
+    # Email must stay unique — pre-check to return 409 instead of a 500 IntegrityError
+    new_email = update_data.get("email")
+    if new_email and new_email != user.email and db.query(User).filter(User.email == new_email).first():
+        return error_response("Email already registered", 409)
     for key, value in update_data.items():
         setattr(user, key, value)
 
@@ -126,11 +135,8 @@ def change_password(
     if not user:
         return error_response("User not found", 404)
     # Self-service must verify current password; admin bypasses
-    if current_user.id == user_id:
-        from app.auth import verify_password
-
-        if not verify_password(req.current_password, user.password_hash):
-            return error_response("Current password is incorrect", 401)
+    if current_user.id == user_id and not verify_password(req.current_password, user.password_hash):
+        return error_response("Current password is incorrect", 401)
     user.password_hash = hash_password(req.new_password)
     db.commit()
     return success_response(message="Password updated")
@@ -145,6 +151,8 @@ def create_user(
     existing = db.query(User).filter(User.email == req.email).first()
     if existing:
         return error_response("Email already registered", 409)
+    if req.branch_id and not db.query(Branch).filter(Branch.id == req.branch_id).first():
+        return error_response("Branch not found", 404)
     allowed_roles = {"athlete", "coach", "admin", "receptionist"}
     if req.role not in allowed_roles:
         return error_response(f"Invalid role. Allowed: {', '.join(sorted(allowed_roles))}", 400)
@@ -178,6 +186,10 @@ def delete_user(
         return error_response("User not found", 404)
     if user.id == current_user.id:
         return error_response("Cannot delete your own account", 400)
-    db.delete(user)
+    # Bulk delete (not session.delete): the User's selectin-loaded children
+    # would otherwise get their FKs nullified by the ORM unit of work, which
+    # violates the NOT NULL FK columns. DB-level ondelete="CASCADE" (enforced
+    # via PRAGMA foreign_keys=ON) removes the dependent rows instead.
+    db.query(User).filter(User.id == user_id).delete(synchronize_session=False)
     db.commit()
     return success_response(message="User deleted")

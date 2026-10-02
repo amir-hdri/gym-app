@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Activity, Users, MessageCircle, Calendar, Heart, Sparkles, ChevronDown, ArrowLeft, Star, CheckCircle2 } from "lucide-react";
-import { ScrollReveal, StaggerScroll, StaggerScrollItem } from "@/components/animations/ScrollReveal";
+import { Reveal } from "@/components/animations/ScrollReveal";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { ActivityRings } from "@/components/ui/ActivityRings";
 import { LumiLogo } from "@/components/ui/LumiLogo";
@@ -79,7 +78,7 @@ function FeaturesSection() {
   return (
     <section id="experience" className="relative py-20 px-4">
       <div className="max-w-6xl mx-auto">
-        <ScrollReveal direction="none" className="text-center mb-14">
+        <Reveal direction="none" className="text-center mb-14">
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-4">
             <Sparkles className="h-4 w-4" />
              تجربه‌ای ساخته‌شده برای تمرین
@@ -90,11 +89,11 @@ function FeaturesSection() {
           <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
             هر روز دقیقاً بدان چه تمرینی داری، مربی چه بازخوردی داده و چقدر به هدفت نزدیک شده‌ای.
           </p>
-        </ScrollReveal>
+        </Reveal>
 
-        <StaggerScroll className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" stagger={0.08}>
-          {features.map((f) => (
-            <StaggerScrollItem key={f.title}>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((f, i) => (
+            <Reveal key={f.title} delay={i * 0.08}>
               <div className="liquid-glass-card group relative h-full overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)]">
                 <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent opacity-60" />
                 <div className="relative mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-2 text-white shadow-[0_4px_16px_hsl(var(--brand)/0.35),inset_0_1px_0_rgba(255,255,255,0.2)]">
@@ -103,9 +102,9 @@ function FeaturesSection() {
                 <h3 className="relative mb-1.5 text-[15px] font-semibold tracking-tight text-white">{f.title}</h3>
                 <p className="relative text-sm leading-relaxed text-[#98989D]">{f.desc}</p>
               </div>
-            </StaggerScrollItem>
+            </Reveal>
           ))}
-        </StaggerScroll>
+        </div>
       </div>
     </section>
   );
@@ -159,9 +158,9 @@ function StatsSection() {
   return (
     <section className="relative py-16 px-4">
       <div className="max-w-5xl mx-auto">
-        <StaggerScroll className="grid grid-cols-2 md:grid-cols-4 gap-6" stagger={0.08}>
-          {stats.map((stat) => (
-            <StaggerScrollItem key={stat.label}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {stats.map((stat, i) => (
+            <Reveal key={stat.label} delay={i * 0.08}>
               <div className="text-center">
                 <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-primary/10 mb-3">
                   <stat.icon className="h-5 w-5 text-primary" />
@@ -171,9 +170,9 @@ function StatsSection() {
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
               </div>
-            </StaggerScrollItem>
+            </Reveal>
           ))}
-        </StaggerScroll>
+        </div>
       </div>
     </section>
   );
@@ -186,15 +185,15 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
 
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-14 lg:grid-cols-[1.05fr_.95fr]">
         <div className="text-center lg:text-right">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+          <Reveal
+            direction="none"
+            scale
+            duration={0.4}
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-bold text-primary"
           >
             <Sparkles className="h-3.5 w-3.5" />
             بهترین پلتفرم مدیریت باشگاه بانوان
-          </motion.div>
+          </Reveal>
 
           <h1 className="mb-5 text-4xl font-black leading-[1.2] tracking-tight md:text-6xl lg:text-7xl">
             <span className="block">حرکت، قدرت،</span>
@@ -205,11 +204,12 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
             Lumi Wellness، باشگاه دیجیتال اختصاصی بانوان برای برنامه تمرینی شخصی، ارتباط مستقیم با مربی و دیدن پیشرفت واقعی در هر روز.
           </p>
 
-          <motion.div
+          <Reveal
+            direction="up"
+            offset={12}
+            duration={0.4}
+            delay={0.1}
             className="flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
           >
             <Button
               size="lg"
@@ -228,13 +228,15 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
               <Sparkles className="h-4 w-4" />
               عضویت ورزشکار یا مربی
             </Button>
-          </motion.div>
+          </Reveal>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: .94, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: .15, duration: .5, ease: "easeOut" }}
+        <Reveal
+          direction="up"
+          offset={16}
+          scale
+          duration={0.5}
+          delay={0.15}
           className="relative mx-auto w-full max-w-[30rem]"
         >
           <div className="absolute -inset-10 rounded-full bg-gradient-to-br from-brand-2/[0.12] via-transparent to-activity-stand/10 blur-3xl" />
@@ -267,11 +269,11 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
              <p className="text-xs text-muted-foreground">همراه با مربی</p>
             <p className="text-xs font-black">برنامه اختصاصی تو</p>
           </div>
-        </motion.div>
+        </Reveal>
       </div>
-      <motion.div className="absolute bottom-8 left-1/2 -translate-x-1/2" animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <ChevronDown className="h-6 w-6 text-muted-foreground/40" />
-      </motion.div>
+      </div>
     </section>
   );
 }

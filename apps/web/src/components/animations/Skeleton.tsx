@@ -1,17 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export function Skeleton({ className }: { className?: string }) {
-  return (
-    <motion.div
-      className={cn("animate-pulse rounded-lg bg-muted", className)}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    />
-  );
+  return <div className={cn("animate-pulse rounded-lg bg-muted", className)} />;
 }
 
 export function CardSkeleton() {

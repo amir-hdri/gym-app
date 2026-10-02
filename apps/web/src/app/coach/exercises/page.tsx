@@ -58,7 +58,7 @@ export default function ExerciseLibraryPage() {
           <div className="flex flex-wrap gap-3">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="جستجوی حرکت..." value={search} onChange={(e) => setSearch(e.target.value)} className="pr-10 bg-white/70 backdrop-blur-sm border-white/30" />
+              <Input placeholder="جستجوی حرکت..." aria-label="جستجوی حرکت" value={search} onChange={(e) => setSearch(e.target.value)} className="pr-10 bg-white/70 backdrop-blur-sm border-white/30" />
             </div>
             <Select value={muscleFilter} onValueChange={setMuscleFilter}>
               <SelectTrigger className="w-36 bg-white/70 backdrop-blur-sm border-white/30">

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any, List, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -9,6 +9,16 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 def to_camel(string: str) -> str:
     parts = string.split("_")
     return parts[0] + "".join(word.capitalize() for word in parts[1:])
+
+
+def _as_naive(dt: datetime) -> datetime:
+    """Normalize a datetime for comparison.
+
+    The backend convention is naive UTC, but clients may send timezone-aware
+    ISO strings. Comparing naive with aware raises TypeError, so validators
+    normalize to naive before ordering checks (storage semantics unchanged).
+    """
+    return dt.replace(tzinfo=None) if dt.tzinfo is not None else dt
 
 
 class BaseSchema(BaseModel):
@@ -54,6 +64,7 @@ class TokenData(BaseModel):
 
 # ---- User ----
 
+
 class UserResponse(BaseSchema):
     id: str
     email: str = Field(max_length=255)
@@ -62,11 +73,11 @@ class UserResponse(BaseSchema):
     phone: str = Field(max_length=100)
     role: str
     status: str
-    avatar_url: Optional[str] = None
-    branch_id: Optional[str] = None
+    avatar_url: str | None = None
+    branch_id: str | None = None
     created_at: datetime
     updated_at: datetime
-    last_login_at: Optional[datetime] = None
+    last_login_at: datetime | None = None
 
 
 class UserCreate(BaseSchema):
@@ -77,17 +88,17 @@ class UserCreate(BaseSchema):
     phone: str = Field(default="", max_length=100)
     # role is set server-side (default "athlete"); admin can specify via AdminUserCreate
     status: str = "active"
-    branch_id: Optional[str] = None
+    branch_id: str | None = None
 
 
 class UserUpdate(BaseSchema):
-    email: Optional[str] = Field(default=None, max_length=255)
-    first_name: Optional[str] = Field(default=None, max_length=100)
-    last_name: Optional[str] = Field(default=None, max_length=100)
-    phone: Optional[str] = Field(default=None, max_length=100)
-    status: Optional[str] = None
-    branch_id: Optional[str] = None
-    avatar_url: Optional[str] = None
+    email: str | None = Field(default=None, max_length=255)
+    first_name: str | None = Field(default=None, max_length=100)
+    last_name: str | None = Field(default=None, max_length=100)
+    phone: str | None = Field(default=None, max_length=100)
+    status: str | None = None
+    branch_id: str | None = None
+    avatar_url: str | None = None
     # role is intentionally excluded — only admins can update roles via a dedicated endpoint
     # password is handled via a separate /users/{user_id}/password endpoint
 
@@ -98,6 +109,7 @@ class UserStatusUpdate(BaseModel):
 
 class AdminUserCreate(BaseModel):
     """Schema for admins to create users with a specified role."""
+
     email: str = Field(max_length=255)
     password: str = Field(min_length=6)
     first_name: str = Field(..., alias="firstName", max_length=100)
@@ -105,13 +117,14 @@ class AdminUserCreate(BaseModel):
     phone: str = Field(default="", max_length=100)
     role: str = "athlete"
     status: str = "active"
-    branch_id: Optional[str] = None
+    branch_id: str | None = Field(default=None, alias="branchId")
 
     model_config = ConfigDict(populate_by_name=True)
 
 
 class PasswordChangeRequest(BaseModel):
     """Schema for a user changing their own password (requires current password)."""
+
     current_password: str = Field(..., alias="currentPassword")
     new_password: str = Field(..., min_length=6, alias="newPassword")
 
@@ -120,11 +133,13 @@ class PasswordChangeRequest(BaseModel):
 
 class PasswordResetRequest(BaseModel):
     """Schema for requesting a password reset link."""
+
     email: str = Field(max_length=255)
 
 
 class PasswordResetConfirm(BaseModel):
     """Schema for resetting a password using a token."""
+
     token: str
     new_password: str = Field(..., min_length=6, alias="newPassword")
 
@@ -133,13 +148,14 @@ class PasswordResetConfirm(BaseModel):
 
 # ---- Branch ----
 
+
 class BranchResponse(BaseSchema):
     id: str
     name: str = Field(max_length=100)
     address: str = Field(max_length=100)
     phone: str = Field(max_length=100)
     email: str = Field(max_length=255)
-    manager_id: Optional[str] = None
+    manager_id: str | None = None
     is_active: bool
     created_at: datetime
     updated_at: datetime
@@ -150,32 +166,33 @@ class BranchCreate(BaseSchema):
     address: str = Field(default="", max_length=100)
     phone: str = Field(default="", max_length=100)
     email: str = Field(default="", max_length=255)
-    manager_id: Optional[str] = None
+    manager_id: str | None = None
     is_active: bool = True
 
 
 class BranchUpdate(BaseSchema):
-    name: Optional[str] = Field(default=None, max_length=100)
-    address: Optional[str] = Field(default=None, max_length=100)
-    phone: Optional[str] = Field(default=None, max_length=100)
-    email: Optional[str] = Field(default=None, max_length=255)
-    manager_id: Optional[str] = None
-    is_active: Optional[bool] = None
+    name: str | None = Field(default=None, max_length=100)
+    address: str | None = Field(default=None, max_length=100)
+    phone: str | None = Field(default=None, max_length=100)
+    email: str | None = Field(default=None, max_length=255)
+    manager_id: str | None = None
+    is_active: bool | None = None
 
 
 # ---- Membership Plan ----
 
+
 class MembershipPlanResponse(BaseSchema):
     id: str
     name: str = Field(max_length=100)
-    description: Optional[str] = None
+    description: str | None = None
     duration_days: int = Field(gt=0)
     sessions_count: int
     price: float = Field(gt=0)
     discount_percent: float
     features: Any = None
     is_active: bool
-    branch_id: Optional[str] = None
+    branch_id: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -189,22 +206,23 @@ class MembershipPlanCreate(BaseSchema):
     discount_percent: float = 0
     features: Any = None
     is_active: bool = True
-    branch_id: Optional[str] = None
+    branch_id: str | None = None
 
 
 class MembershipPlanUpdate(BaseSchema):
-    name: Optional[str] = Field(default=None, max_length=100)
-    description: Optional[str] = None
-    duration_days: Optional[int] = Field(default=None, gt=0)
-    sessions_count: Optional[int] = None
-    price: Optional[float] = Field(default=None, gt=0)
-    discount_percent: Optional[float] = None
+    name: str | None = Field(default=None, max_length=100)
+    description: str | None = None
+    duration_days: int | None = Field(default=None, gt=0)
+    sessions_count: int | None = None
+    price: float | None = Field(default=None, gt=0)
+    discount_percent: float | None = None
     features: Any = None
-    is_active: Optional[bool] = None
-    branch_id: Optional[str] = None
+    is_active: bool | None = None
+    branch_id: str | None = None
 
 
 # ---- Membership ----
+
 
 class MembershipResponse(BaseSchema):
     id: str
@@ -215,13 +233,13 @@ class MembershipResponse(BaseSchema):
     end_date: datetime
     sessions_total: int
     sessions_used: int
-    sessions_remaining: Optional[int] = None
+    sessions_remaining: int | None = None
     price: float
     discount_amount: float
     final_price: float
     status: str
-    freeze_reason: Optional[str] = None
-    freeze_end_date: Optional[datetime] = None
+    freeze_reason: str | None = None
+    freeze_end_date: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -239,32 +257,43 @@ class MembershipCreate(BaseSchema):
     final_price: float = Field(gt=0)
     status: str = "active"
 
+    @model_validator(mode="after")
+    def _validate_membership_ranges(self):
+        if _as_naive(self.end_date) < _as_naive(self.start_date):
+            raise ValueError("end_date must not be earlier than start_date")
+        if self.discount_amount > self.price:
+            raise ValueError("discount_amount must not exceed price")
+        if self.sessions_used > self.sessions_total:
+            raise ValueError("sessions_used must not exceed sessions_total")
+        return self
+
 
 class MembershipUpdate(BaseSchema):
-    end_date: Optional[datetime] = None
-    sessions_total: Optional[int] = None
-    sessions_used: Optional[int] = None
-    status: Optional[str] = None
-    freeze_reason: Optional[str] = None
-    freeze_end_date: Optional[datetime] = None
+    end_date: datetime | None = None
+    sessions_total: int | None = None
+    sessions_used: int | None = None
+    status: str | None = None
+    freeze_reason: str | None = None
+    freeze_end_date: datetime | None = None
 
 
 # ---- Exercise ----
 
+
 class ExerciseResponse(BaseSchema):
     id: str
     name: str = Field(max_length=100)
-    name_en: Optional[str] = Field(default=None, max_length=100)
-    description: Optional[str] = None
+    name_en: str | None = Field(default=None, max_length=100)
+    description: str | None = None
     category: str
     muscle_group: str
     secondary_muscles: Any = None
-    equipment: Optional[str] = None
+    equipment: str | None = None
     difficulty: str
-    video_url: Optional[str] = None
-    image_url: Optional[str] = None
-    instructions: Optional[str] = None
-    tips: Optional[str] = None
+    video_url: str | None = None
+    image_url: str | None = None
+    instructions: str | None = None
+    tips: str | None = None
     is_active: bool
     created_at: datetime
     updated_at: datetime
@@ -272,37 +301,38 @@ class ExerciseResponse(BaseSchema):
 
 class ExerciseCreate(BaseSchema):
     name: str = Field(max_length=100)
-    name_en: Optional[str] = Field(default=None, max_length=100)
-    description: Optional[str] = None
+    name_en: str | None = Field(default=None, max_length=100)
+    description: str | None = None
     category: str = "general"
     muscle_group: str = "general"
     secondary_muscles: Any = None
-    equipment: Optional[str] = None
+    equipment: str | None = None
     difficulty: str = "beginner"
-    video_url: Optional[str] = None
-    image_url: Optional[str] = None
-    instructions: Optional[str] = None
-    tips: Optional[str] = None
+    video_url: str | None = None
+    image_url: str | None = None
+    instructions: str | None = None
+    tips: str | None = None
     is_active: bool = True
 
 
 class ExerciseUpdate(BaseSchema):
-    name: Optional[str] = None
-    name_en: Optional[str] = None
-    description: Optional[str] = None
-    category: Optional[str] = None
-    muscle_group: Optional[str] = None
+    name: str | None = None
+    name_en: str | None = None
+    description: str | None = None
+    category: str | None = None
+    muscle_group: str | None = None
     secondary_muscles: Any = None
-    equipment: Optional[str] = None
-    difficulty: Optional[str] = None
-    video_url: Optional[str] = None
-    image_url: Optional[str] = None
-    instructions: Optional[str] = None
-    tips: Optional[str] = None
-    is_active: Optional[bool] = None
+    equipment: str | None = None
+    difficulty: str | None = None
+    video_url: str | None = None
+    image_url: str | None = None
+    instructions: str | None = None
+    tips: str | None = None
+    is_active: bool | None = None
 
 
 # ---- Training Program ----
+
 
 class ProgramExerciseResponse(BaseSchema):
     id: str
@@ -312,14 +342,14 @@ class ProgramExerciseResponse(BaseSchema):
     order: int
     sets: int
     reps: str
-    weight: Optional[float] = None
+    weight: float | None = None
     rest_seconds: int
-    notes: Optional[str] = None
+    notes: str | None = None
     is_completed: bool
-    completed_at: Optional[datetime] = None
-    actual_sets: Optional[int] = None
-    actual_reps: Optional[str] = None
-    actual_weight: Optional[float] = None
+    completed_at: datetime | None = None
+    actual_sets: int | None = None
+    actual_reps: str | None = None
+    actual_weight: float | None = None
 
 
 class ProgramExerciseCreate(BaseSchema):
@@ -328,23 +358,23 @@ class ProgramExerciseCreate(BaseSchema):
     order: int = 0
     sets: int = 3
     reps: str = "10"
-    weight: Optional[float] = None
+    weight: float | None = None
     rest_seconds: int = 60
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 class ProgramExerciseUpdate(BaseSchema):
-    day_of_week: Optional[int] = None
-    order: Optional[int] = None
-    sets: Optional[int] = None
-    reps: Optional[str] = None
-    weight: Optional[float] = None
-    rest_seconds: Optional[int] = None
-    notes: Optional[str] = None
-    is_completed: Optional[bool] = None
-    actual_sets: Optional[int] = None
-    actual_reps: Optional[str] = None
-    actual_weight: Optional[float] = None
+    day_of_week: int | None = None
+    order: int | None = None
+    sets: int | None = None
+    reps: str | None = None
+    weight: float | None = None
+    rest_seconds: int | None = None
+    notes: str | None = None
+    is_completed: bool | None = None
+    actual_sets: int | None = None
+    actual_reps: str | None = None
+    actual_weight: float | None = None
 
 
 class TrainingProgramResponse(BaseSchema):
@@ -352,44 +382,51 @@ class TrainingProgramResponse(BaseSchema):
     athlete_id: str
     coach_id: str
     name: str = Field(max_length=100)
-    description: Optional[str] = None
+    description: str | None = None
     start_date: datetime
     end_date: datetime
     frequency_per_week: int
     status: str
     created_at: datetime
     updated_at: datetime
-    exercises: Optional[List[ProgramExerciseResponse]] = None
+    exercises: list[ProgramExerciseResponse] | None = None
 
 
 class TrainingProgramCreate(BaseSchema):
     athlete_id: str
     coach_id: str
     name: str = Field(max_length=100)
-    description: Optional[str] = None
+    description: str | None = None
     start_date: datetime
     end_date: datetime
     frequency_per_week: int = 3
     status: str = "draft"
 
+    @model_validator(mode="after")
+    def _validate_program_dates(self):
+        if _as_naive(self.end_date) < _as_naive(self.start_date):
+            raise ValueError("end_date must not be earlier than start_date")
+        return self
+
 
 class TrainingProgramUpdate(BaseSchema):
-    name: Optional[str] = Field(default=None, max_length=100)
-    description: Optional[str] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    frequency_per_week: Optional[int] = None
-    status: Optional[str] = None
+    name: str | None = Field(default=None, max_length=100)
+    description: str | None = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    frequency_per_week: int | None = None
+    status: str | None = None
 
 
 # ---- Goal ----
 
+
 class GoalResponse(BaseSchema):
     id: str
     athlete_id: str
-    coach_id: Optional[str] = None
+    coach_id: str | None = None
     title: str = Field(max_length=100)
-    description: Optional[str] = None
+    description: str | None = None
     target_value: float = Field(ge=0)
     current_value: float = Field(ge=0)
     unit: str
@@ -403,28 +440,36 @@ class GoalResponse(BaseSchema):
 
 class GoalCreate(BaseSchema):
     athlete_id: str
-    coach_id: Optional[str] = None
+    coach_id: str | None = None
     title: str = Field(max_length=100)
-    description: Optional[str] = None
+    description: str | None = None
     target_value: float = Field(ge=0)
     current_value: float = Field(default=0, ge=0)
     unit: str = "kg"
     category: str = "general"
-    start_date: datetime
+    # Optional: the frontend athlete goal form never sends this. Defaults to
+    # today (naive UTC, matching the backend's datetime.now(UTC).replace(tzinfo=None) convention).
+    start_date: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
     target_date: datetime
     status: str = "not_started"
 
+    @model_validator(mode="after")
+    def _validate_goal_dates(self):
+        if _as_naive(self.start_date) > _as_naive(self.target_date):
+            raise ValueError("start_date must not be later than target_date")
+        return self
+
 
 class GoalUpdate(BaseSchema):
-    title: Optional[str] = Field(default=None, max_length=100)
-    description: Optional[str] = None
-    target_value: Optional[float] = Field(default=None, ge=0)
-    current_value: Optional[float] = Field(default=None, ge=0)
-    unit: Optional[str] = None
-    category: Optional[str] = None
-    start_date: Optional[datetime] = None
-    target_date: Optional[datetime] = None
-    status: Optional[str] = None
+    title: str | None = Field(default=None, max_length=100)
+    description: str | None = None
+    target_value: float | None = Field(default=None, ge=0)
+    current_value: float | None = Field(default=None, ge=0)
+    unit: str | None = None
+    category: str | None = None
+    start_date: datetime | None = None
+    target_date: datetime | None = None
+    status: str | None = None
 
 
 class GoalProgressUpdate(BaseModel):
@@ -435,13 +480,14 @@ class GoalProgressUpdate(BaseModel):
 
 # ---- CheckIn ----
 
+
 class CheckInResponse(BaseSchema):
     id: str
     user_id: str
     branch_id: str
     check_in_time: datetime
-    check_out_time: Optional[datetime] = None
-    duration_minutes: Optional[int] = None
+    check_out_time: datetime | None = None
+    duration_minutes: int | None = None
     session_deducted: bool
     created_at: datetime
 
@@ -449,12 +495,12 @@ class CheckInResponse(BaseSchema):
 class CheckInCreate(BaseSchema):
     user_id: str
     branch_id: str
-    check_in_time: Optional[datetime] = None
+    check_in_time: datetime | None = None
 
 
 class CheckOutUpdate(BaseModel):
     check_out_time: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None),
         alias="checkOutTime",
     )
 
@@ -483,31 +529,32 @@ class QRCheckInResponse(BaseSchema):
 
 # ---- Payment ----
 
+
 class PaymentResponse(BaseSchema):
     id: str
     user_id: str
-    membership_id: Optional[str] = None
+    membership_id: str | None = None
     amount: float
     currency: str
     status: str
     method: str
-    reference_id: Optional[str] = None
-    description: Optional[str] = None
-    paid_at: Optional[datetime] = None
+    reference_id: str | None = None
+    description: str | None = None
+    paid_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
 
 class PaymentCreate(BaseSchema):
     user_id: str
-    membership_id: Optional[str] = None
+    membership_id: str | None = None
     amount: float = Field(gt=0)
     currency: str = "IRR"
     # status is server-controlled — clients cannot mark a payment as "completed"
     status: str = "pending"
     method: str = "cash"
-    reference_id: Optional[str] = None
-    description: Optional[str] = None
+    reference_id: str | None = None
+    description: str | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -524,6 +571,7 @@ class PaymentStatusUpdate(BaseModel):
 
 # ---- Notification ----
 
+
 class NotificationResponse(BaseSchema):
     id: str
     user_id: str
@@ -531,7 +579,7 @@ class NotificationResponse(BaseSchema):
     message: str
     type: str
     is_read: bool
-    action_url: Optional[str] = None
+    action_url: str | None = None
     created_at: datetime
 
 
@@ -540,4 +588,4 @@ class NotificationCreate(BaseSchema):
     title: str = Field(max_length=100)
     message: str
     type: str = "info"
-    action_url: Optional[str] = None
+    action_url: str | None = None

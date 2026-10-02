@@ -59,6 +59,7 @@ export default function AthletesPage() {
               <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="جستجوی شاگرد..."
+                aria-label="جستجوی شاگرد"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pr-10"

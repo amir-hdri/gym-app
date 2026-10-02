@@ -58,17 +58,17 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true);
     try {
-      const registeredUser = await registerUser({
+      await registerUser({
         email: data.email,
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
       });
-      toast.success("ثبت‌نام با موفقیت انجام شد");
-      if (registeredUser) {
-        router.replace("/athlete");
-      }
+      // Register never signs the user in (backend mints no tokens on this
+      // path): route to login explicitly.
+      toast.success("ثبت‌نام انجام شد. لطفاً وارد شوید.");
+      router.replace("/auth/login");
     } catch (error) {
       const message = error instanceof Error ? error.message : "ثبت‌نام ناموفق بود";
       toast.error(message);

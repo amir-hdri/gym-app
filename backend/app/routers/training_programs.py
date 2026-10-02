@@ -1,9 +1,11 @@
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user, require_roles
 from app.database import get_db
-from app.models import Exercise, ProgramExercise, TrainingProgram, User
+from app.models import ProgramExercise, TrainingProgram, User
 from app.responses import error_response, paginated_response, success_response
 from app.schemas import (
     ExerciseResponse,
@@ -34,9 +36,9 @@ def _program_to_dict(program: TrainingProgram) -> dict:
 def list_programs(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    athlete_id: str = None,
-    coach_id: str = None,
-    status: str = None,
+    athlete_id: str | None = None,
+    coach_id: str | None = None,
+    status: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -71,6 +73,10 @@ def create_program(
     # Coaches can only create programs under their own coaching
     if current_user.role == "coach" and req.coach_id != current_user.id:
         return error_response("Insufficient permissions", 403)
+    if not db.query(User).filter(User.id == req.athlete_id).first():
+        return error_response("Athlete not found", 404)
+    if not db.query(User).filter(User.id == req.coach_id).first():
+        return error_response("Coach not found", 404)
     program = TrainingProgram(**req.model_dump(by_alias=False))
     db.add(program)
     db.commit()
@@ -109,7 +115,9 @@ def update_program(
 
 
 @router.delete("/{program_id}")
-def delete_program(program_id: str, db: Session = Depends(get_db), current_user: User = Depends(require_roles("admin", "coach"))):
+def delete_program(
+    program_id: str, db: Session = Depends(get_db), current_user: User = Depends(require_roles("admin", "coach"))
+):
     program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
     if not program:
         return error_response("Program not found", 404)
@@ -215,10 +223,12 @@ def complete_exercise(
     program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
     if not program:
         return error_response("Program not found", 404)
-    # Athletes complete only their own program; coaches only theirs; admins bypass
-    if current_user.role == "athlete" and program.athlete_id != current_user.id:
-        return error_response("Insufficient permissions", 403)
-    if current_user.role == "coach" and program.coach_id != current_user.id:
+    # Only the program's athlete (owner), the assigned coach, or an admin may
+    # mark exercises complete. Everyone else (other athletes/coaches,
+    # receptionists, ...) gets 403.
+    is_owner_athlete = current_user.role == "athlete" and program.athlete_id == current_user.id
+    is_assigned_coach = current_user.role == "coach" and program.coach_id == current_user.id
+    if not (is_owner_athlete or is_assigned_coach or current_user.role == "admin"):
         return error_response("Insufficient permissions", 403)
     pe = (
         db.query(ProgramExercise)
@@ -231,10 +241,8 @@ def complete_exercise(
     if not pe:
         return error_response("Exercise not found in program", 404)
 
-    from datetime import datetime, timezone
-
     pe.is_completed = True
-    pe.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    pe.completed_at = datetime.now(UTC).replace(tzinfo=None)
     if req.actual_sets is not None:
         pe.actual_sets = req.actual_sets
     if req.actual_reps is not None:

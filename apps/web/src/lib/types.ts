@@ -19,7 +19,7 @@ export interface PaginatedResponse<T> {
 }
 
 export type UserRole = "admin" | "coach" | "athlete" | "receptionist";
-export type UserStatus = "active" | "inactive" | "suspended" | "pending_verification";
+export type UserStatus = "active" | "inactive" | "suspended";
 
 export interface User {
   id: string;
@@ -64,7 +64,7 @@ export interface MembershipPlan {
   sessionsCount: number;
   price: number;
   discountPercent: number;
-  features: string[];
+  features: string[] | null;
   isActive: boolean;
   branchId?: string;
   createdAt: string;
@@ -180,6 +180,15 @@ export interface CheckIn {
   durationMinutes?: number;
   sessionDeducted: boolean;
   createdAt: string;
+}
+
+/** Shape of POST /api/v1/check-ins/qr/check-in (backend QRCheckInResponse). */
+export interface QRCheckInResponse {
+  id: string;
+  userId: string;
+  branchId: string;
+  checkInTime: string;
+  message: string;
 }
 
 export interface Payment {

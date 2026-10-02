@@ -1,5 +1,5 @@
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.database import Base, engine
-from app.responses import error_response, success_response
+from app.responses import success_response
 from app.routers import (
     auth,
     branches,
@@ -29,8 +29,10 @@ from app.seed import seed_database
 async def lifespan(app: FastAPI):
     # Startup
     Base.metadata.create_all(bind=engine)
-    # Seed only in non-production or when explicitly allowed
-    if not settings.is_production:
+    # Seed demo data in local dev (ENVIRONMENT=development) or when explicitly
+    # opted in via SEED_DEMO_DATA. Staging (non-dev, non-production) no longer
+    # gets default credentials unless the operator sets SEED_DEMO_DATA=true.
+    if (not settings.is_production) and (settings.ENVIRONMENT == "development" or settings.SEED_DEMO_DATA):
         try:
             seed_database()
         except Exception:
@@ -43,7 +45,7 @@ app = FastAPI(
     title="Gym Management API",
     description="Backend API for gym management application",
     version="1.0.0",
-    docs_url="/docs",
+    docs_url=None if settings.is_production else "/docs",
     lifespan=lifespan,
 )
 

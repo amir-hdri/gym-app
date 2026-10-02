@@ -1,28 +1,57 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { ReactNode } from "react";
+import {
+  Children,
+  cloneElement,
+  createContext,
+  isValidElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
-interface ScrollRevealProps {
+export type RevealDirection = "up" | "down" | "left" | "right" | "none";
+
+interface RevealProps {
   children: ReactNode;
   className?: string;
+  /** seconds */
   delay?: number;
-  direction?: "up" | "down" | "left" | "right" | "none";
+  direction?: RevealDirection;
+  /** seconds */
   duration?: number;
   scale?: boolean;
   once?: boolean;
+  /** IntersectionObserver threshold */
   amount?: number;
+  /** px translate distance for the hidden state */
+  offset?: number;
 }
 
-const directionVariants: Record<string, { hidden: Record<string, number>; visible: Record<string, number> }> = {
-  up: { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } },
-  down: { hidden: { opacity: 0, y: -40 }, visible: { opacity: 1, y: 0 } },
-  left: { hidden: { opacity: 0, x: 40 }, visible: { opacity: 1, x: 0 } },
-  right: { hidden: { opacity: 0, x: -40 }, visible: { opacity: 1, x: 0 } },
-  none: { hidden: { opacity: 0 }, visible: { opacity: 1 } },
-};
+const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
-export function ScrollReveal({
+function hiddenTransform(direction: RevealDirection, offset: number, scale: boolean): string {
+  const parts: string[] = [];
+  if (direction === "up") parts.push(`translateY(${offset}px)`);
+  else if (direction === "down") parts.push(`translateY(-${offset}px)`);
+  else if (direction === "left") parts.push(`translateX(${offset}px)`);
+  else if (direction === "right") parts.push(`translateX(-${offset}px)`);
+  if (scale) parts.push("scale(0.96)");
+  return parts.join(" ");
+}
+
+/**
+ * SSR-safe scroll reveal: IntersectionObserver + CSS opacity/translate.
+ * No animation library — the element renders hidden on the server and on the
+ * first client render (no hydration mismatch), then an effect observes it
+ * and flips it visible. Respects prefers-reduced-motion.
+ */
+export function Reveal({
   children,
   className,
   delay = 0,
@@ -31,36 +60,56 @@ export function ScrollReveal({
   scale = false,
   once = true,
   amount = 0.15,
-}: ScrollRevealProps) {
-  const shouldReduceMotion = useReducedMotion();
+  offset = 32,
+}: RevealProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
 
-  const hidden = shouldReduceMotion
-    ? { opacity: 1 }
-    : { ...directionVariants[direction].hidden, ...(scale ? { scale: 0.96 } : {}) };
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // Defer a frame: keeps content visible without a synchronous
+      // setState-in-effect (cascading render).
+      const raf = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(raf);
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            if (once) io.disconnect();
+          } else if (!once) {
+            setVisible(false);
+          }
+        }
+      },
+      { threshold: amount }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [once, amount]);
 
-  const visible = shouldReduceMotion
-    ? { opacity: 1 }
-    : { ...directionVariants[direction].visible, ...(scale ? { scale: 1 } : {}) };
-
-  const variants: Variants = { hidden, visible };
+  const style: CSSProperties = {
+    transitionProperty: "opacity, transform",
+    transitionDuration: `${duration}s`,
+    transitionDelay: `${delay}s`,
+    transitionTimingFunction: EASE,
+    ...(visible
+      ? { opacity: 1 }
+      : { opacity: 0, transform: hiddenTransform(direction, offset, scale) }),
+  };
 
   return (
-    <motion.div
-      variants={variants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, amount }}
-      transition={{
-        duration: shouldReduceMotion ? 0 : duration,
-        delay,
-        ease: [0.16, 1, 0.3, 1],
-      }}
-      className={className}
-    >
+    <div ref={ref} className={className} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 }
+
+/** Backwards-compatible alias — portal pages import ScrollReveal. */
+export const ScrollReveal = Reveal;
 
 interface StaggerScrollProps {
   children: ReactNode;
@@ -71,6 +120,23 @@ interface StaggerScrollProps {
   amount?: number;
 }
 
+interface StaggerContextValue {
+  stagger: number;
+  delayChildren: number;
+  once: boolean;
+  amount: number;
+}
+
+const StaggerContext = createContext<StaggerContextValue | null>(null);
+
+interface StaggerScrollItemProps {
+  children: ReactNode;
+  className?: string;
+  duration?: number;
+  /** Injected by StaggerScroll for direct children; defaults to 0. */
+  index?: number;
+}
+
 export function StaggerScroll({
   children,
   className,
@@ -79,52 +145,40 @@ export function StaggerScroll({
   once = true,
   amount = 0.1,
 }: StaggerScrollProps) {
-  const shouldReduceMotion = useReducedMotion();
-
-  const containerVariants: Variants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : stagger,
-        delayChildren: shouldReduceMotion ? 0 : delayChildren,
-      },
-    },
-  };
+  // Inject a stable per-item index into direct StaggerScrollItem children.
+  // Render-pure: no ref access during render.
+  let index = 0;
+  const items = Children.map(children, (child) => {
+    if (isValidElement(child) && child.type === StaggerScrollItem) {
+      return cloneElement(child as ReactElement<StaggerScrollItemProps>, { index: index++ });
+    }
+    return child;
+  });
+  const value = useMemo<StaggerContextValue>(
+    () => ({ stagger, delayChildren, once, amount }),
+    [stagger, delayChildren, once, amount]
+  );
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, amount }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <StaggerContext.Provider value={value}>
+      <div className={className}>{items}</div>
+    </StaggerContext.Provider>
   );
 }
 
-export function StaggerScrollItem({
-  children,
-  className,
-  duration = 0.4,
-}: {
-  children: ReactNode;
-  className?: string;
-  duration?: number;
-}) {
-  const shouldReduceMotion = useReducedMotion();
-
-  const itemVariants: Variants = {
-    hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 },
-    visible: shouldReduceMotion
-      ? { opacity: 1 }
-      : { opacity: 1, y: 0, transition: { duration, ease: [0.16, 1, 0.3, 1] } },
-  };
+export function StaggerScrollItem({ children, className, duration = 0.4, index = 0 }: StaggerScrollItemProps) {
+  const ctx = useContext(StaggerContext);
+  const delay = ctx ? ctx.delayChildren + index * ctx.stagger : 0;
 
   return (
-    <motion.div variants={itemVariants} className={className}>
+    <Reveal
+      className={className}
+      delay={delay}
+      duration={duration}
+      once={ctx?.once ?? true}
+      amount={ctx?.amount ?? 0.1}
+    >
       {children}
-    </motion.div>
+    </Reveal>
   );
 }

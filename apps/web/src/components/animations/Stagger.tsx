@@ -1,44 +1,65 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
-import { ReactNode } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
-const containerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.05,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
-  },
-};
-
-export function StaggerContainer({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
+interface StaggerItemProps {
+  children: ReactNode;
+  className?: string;
+  /** Injected by StaggerContainer for direct children; defaults to 0. */
+  index?: number;
 }
 
-export function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
+/**
+ * Mount-based stagger (no scroll observation, no animation library):
+ * each item fades/slides in once after mount with an incremental delay.
+ */
+export function StaggerContainer({ children, className }: { children: ReactNode; className?: string }) {
+  // Inject a stable per-item index into direct StaggerItem children.
+  // Render-pure: no ref access during render.
+  let index = 0;
+  const items = Children.map(children, (child) => {
+    if (isValidElement(child) && child.type === StaggerItem) {
+      return cloneElement(child as ReactElement<StaggerItemProps>, { index: index++ });
+    }
+    return child;
+  });
+
+  return <div className={className}>{items}</div>;
+}
+
+export function StaggerItem({ children, className, index = 0 }: StaggerItemProps) {
+  // Start hidden so SSR and the first client render match (no hydration
+  // mismatch); reveal on the next frame after mount.
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    // Reveal on the next frame after mount. A synchronous setState here
+    // would be a cascading render (react-hooks/set-state-in-effect).
+    const raf = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const style: CSSProperties = {
+    opacity: shown ? 1 : 0,
+    transform: shown ? "translateY(0)" : "translateY(12px)",
+    transitionProperty: "opacity, transform",
+    transitionDuration: "0.3s",
+    transitionDelay: `${0.05 + index * 0.05}s`,
+    transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+  };
+
   return (
-    <motion.div variants={itemVariants} className={className}>
+    <div className={className} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 }

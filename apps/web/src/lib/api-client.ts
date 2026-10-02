@@ -11,6 +11,7 @@ import type {
   ProgramExercise,
   Goal,
   CheckIn,
+  QRCheckInResponse,
   Payment,
   Notification,
   DashboardStats,
@@ -22,6 +23,33 @@ import type {
 export interface AuthPayload {
   user: User;
   tokens: AuthTokens;
+}
+
+function safeStringify(value: unknown): string {
+  try {
+    const serialized = JSON.stringify(value);
+    return typeof serialized === "string" ? serialized : String(value);
+  } catch {
+    return String(value);
+  }
+}
+
+/**
+ * FastAPI-native errors (422 validation, HTTPException 401/403, 429
+ * rate-limit) serialize as {"detail": ...} instead of the ApiResponse envelope
+ * ({success, error, message, statusCode}). When the body has `detail` but no
+ * `error`/`message`, derive them additively so downstream error handling keeps
+ * working. Existing fields are never removed or overwritten.
+ */
+function normalizeFastApiError(error: AxiosError): void {
+  const response = error.response;
+  if (!response) return;
+  const body = response.data as Record<string, unknown> | null | undefined;
+  if (!body || typeof body !== "object" || Array.isArray(body)) return;
+  if (!("detail" in body)) return;
+  if ("error" in body || "message" in body) return;
+  const text = typeof body.detail === "string" ? body.detail : safeStringify(body.detail);
+  response.data = { ...body, error: text, message: text };
 }
 
 const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -71,6 +99,8 @@ export class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       async (error: AxiosError) => {
+        normalizeFastApiError(error);
+
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
         if (error.response?.status === 401 && !originalRequest._retry) {
@@ -133,8 +163,10 @@ export class ApiClient {
     return res.data;
   }
 
-  async register(data: { email: string; password: string; firstName: string; lastName: string; phone: string; branchId?: string }): Promise<ApiResponse<AuthPayload>> {
-    const res = await this.client.post<ApiResponse<AuthPayload>>("/auth/register", data);
+  // Register never returns tokens (anti-enumeration): the response is identical
+  // whether or not the email already existed. The user must log in explicitly.
+  async register(data: { email: string; password: string; firstName: string; lastName: string; phone: string }): Promise<ApiResponse<null>> {
+    const res = await this.client.post<ApiResponse<null>>("/auth/register", data);
     return res.data;
   }
 
@@ -180,8 +212,9 @@ export class ApiClient {
   }
 
   // ---- Branches ----
-  async getBranches(): Promise<PaginatedResponse<Branch>> {
-    const res = await this.client.get<PaginatedResponse<Branch>>("/branches");
+  // Backend returns success_response(data=[...]) with no pagination meta.
+  async getBranches(): Promise<ApiResponse<Branch[]>> {
+    const res = await this.client.get<ApiResponse<Branch[]>>("/branches");
     return res.data;
   }
 
@@ -191,8 +224,9 @@ export class ApiClient {
   }
 
   // ---- Membership Plans ----
-  async getMembershipPlans(): Promise<PaginatedResponse<MembershipPlan>> {
-    const res = await this.client.get<PaginatedResponse<MembershipPlan>>("/membership-plans");
+  // Backend returns success_response(data=[...]) with no pagination meta.
+  async getMembershipPlans(): Promise<ApiResponse<MembershipPlan[]>> {
+    const res = await this.client.get<ApiResponse<MembershipPlan[]>>("/membership-plans");
     return res.data;
   }
 
@@ -320,8 +354,8 @@ export class ApiClient {
     return res.data;
   }
 
-  async qrCheckIn(data: { code: string }): Promise<ApiResponse<CheckIn>> {
-    const res = await this.client.post<ApiResponse<CheckIn>>("/check-ins/qr/check-in", data);
+  async qrCheckIn(data: { code: string }): Promise<ApiResponse<QRCheckInResponse>> {
+    const res = await this.client.post<ApiResponse<QRCheckInResponse>>("/check-ins/qr/check-in", data);
     return res.data;
   }
 
@@ -368,8 +402,9 @@ export class ApiClient {
     return res.data;
   }
 
-  async markNotificationRead(id: string): Promise<ApiResponse<Notification>> {
-    const res = await this.client.post<ApiResponse<Notification>>(`/notifications/${id}/read`);
+  // Backend returns success_response(message=...) with no `data` key.
+  async markNotificationRead(id: string): Promise<ApiResponse<null>> {
+    const res = await this.client.post<ApiResponse<null>>(`/notifications/${id}/read`);
     return res.data;
   }
 

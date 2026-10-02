@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import get_current_user, require_roles
 from app.database import get_db
-from app.models import CheckIn, Goal, Membership, Payment, TrainingProgram, User
+from app.models import Branch, CheckIn, Goal, Membership, Payment, TrainingProgram, User
 from app.responses import error_response, success_response
 from app.schemas import (
     CheckInResponse,
@@ -289,14 +289,21 @@ def coach_dashboard(
     current_user: User = Depends(get_current_user),
 ):
     # Authorization: admins may view any coach dashboard; coaches may only view
-    # their own dashboard, and only when they have a branch assigned. All data
-    # below is additionally scoped to the requesting coach's branch.
+    # their own dashboard. All data below is additionally scoped to the
+    # requesting coach's branch.
     if current_user.role == "coach":
         if current_user.id != coach_id:
             return error_response("Insufficient permissions", 403)
-        if not current_user.branch_id:
-            return error_response("Coach has no branch assigned", 403)
         scope_branch_id: str | None = current_user.branch_id
+        if scope_branch_id is None:
+            # Single-branch deployment (LUMI only — no other branches will be
+            # added): a coach without an explicit branch belongs to the sole
+            # branch, so fall back to it instead of locking them out.
+            sole_branch = db.query(Branch.id).all()
+            if len(sole_branch) == 1:
+                scope_branch_id = sole_branch[0][0]
+            # Otherwise (should not happen): leave unscoped; the coach_id
+            # filters below still limit data to this coach's own programs.
     elif current_user.role == "admin":
         scope_branch_id = None
     else:

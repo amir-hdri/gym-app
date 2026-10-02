@@ -4,8 +4,9 @@ Covers:
 1. Register anti-enumeration — responses are indistinguishable whether the
    email exists or not (same 200, byte-identical body), and no tokens are
    minted on the register path (explicit login required).
-2. Coach-dashboard branch scoping — coaches see only their own dashboard and
-   only when they have a branch; all aggregates scoped to that branch.
+2. Coach-dashboard branch scoping — coaches see only their own dashboard;
+   aggregates scoped to their branch; a branchless coach falls back to the
+   sole branch (single-branch LUMI deployment, no other branches planned).
 3. Exercise-completion authorization — only the program's athlete (owner),
    the assigned coach, or an admin may mark exercises complete.
 4. Goal-progress authorization — mirrors update_goal's assignment rule via
@@ -213,10 +214,12 @@ def test_register_duplicate_keeps_original_account(client):
 # ------------------------------------------------- 2. coach-dashboard branch scoping
 
 
-def test_coach_dashboard_branchless_coach_403(client, ids):
+def test_coach_dashboard_branchless_coach_uses_sole_branch(client, ids):
+    # Single-branch deployment (LUMI only): a coach without an explicit branch
+    # falls back to the sole branch instead of being locked out.
     r = client.get(f"/api/v1/dashboard/coach/{ids['coach_nb_id']}", headers=ids["CNH"])
-    assert r.status_code == 403, r.text
-    assert "branch" in r.json()["message"].lower()
+    assert r.status_code == 200, r.text
+    assert "athletes" in r.json()["data"]
 
 
 def test_coach_cannot_view_other_coach_dashboard(client, ids):

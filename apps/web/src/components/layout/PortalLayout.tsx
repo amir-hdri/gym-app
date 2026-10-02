@@ -2,7 +2,6 @@
 
 import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { AnimatePresence } from "framer-motion";
 import { Sidebar, type NavItem } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { TooltipProvider } from "@/components/ui/Tooltip";
@@ -33,9 +32,7 @@ export function PortalLayout({ children, navItems }: PortalLayoutProps) {
               onMenuToggle={() => setSidebarOpen((prev) => !prev)}
             />
             <main className="relative flex-1 px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-5 md:px-7 md:pb-8 lg:px-10 lg:pt-7" id="main">
-              <AnimatePresence mode="wait" initial={false}>
-                <PageTransition key={pathname}>{children}</PageTransition>
-              </AnimatePresence>
+              <PageTransition key={pathname}>{children}</PageTransition>
             </main>
             <MobileBottomNavigation items={navItems} />
           </div>

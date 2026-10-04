@@ -1,23 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { StaggerContainer, StaggerItem } from "@/components/animations/Stagger";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
-import { Progress } from "@/components/ui/Progress";
-import { Button } from "@/components/ui/Button";
-import { formatPersianNumber, calculateProgress, calculateDaysRemaining, cn } from "@/lib/utils";
+import { formatPersianNumber, calculateProgress, calculateDaysRemaining } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useGoals } from "@/hooks/use-api";
-import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
+import { Loading, ErrorDisplay } from "@/components/ui/DataState";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { StatCard, RowCard, EmptyState, CtaButton } from "@/components/twilight/controls";
 import { Target } from "lucide-react";
-
-const categoryColors: Record<string, string> = {
-  weight_loss: "bg-amber-500",
-  muscle_gain: "bg-activity-move",
-  strength: "bg-blue-500",
-  endurance: "bg-purple-500",
-};
 
 const categoryLabels: Record<string, string> = {
   weight_loss: "کاهش وزن",
@@ -29,6 +20,7 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function GoalsPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const athleteId = user?.id;
   const { data, isLoading, isError, error } = useGoals(athleteId);
@@ -37,66 +29,54 @@ export default function GoalsPage() {
   if (isError) return <ErrorDisplay message={error?.message} />;
 
   const goals = data?.data || [];
+  const achievedCount = goals.filter((g) => g.status === "achieved").length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight leading-10">اهداف</h1>
-          <p className="mt-1 text-muted-foreground leading-6">اهداف تمرینی خود را دنبال کنید</p>
-        </div>
-        <Button asChild className="w-full sm:w-auto"><Link href="/athlete/goals/new">هدف جدید</Link></Button>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="اهداف"
+        subtitle="اهداف تمرینی خود را دنبال کنید"
+        action={<CtaButton className="w-auto px-5" onClick={() => router.push("/athlete/goals/new")}>هدف جدید</CtaButton>}
+      />
 
       {goals.length === 0 ? (
         <EmptyState
-          icon={<Target className="h-8 w-8 text-muted-foreground" />}
+          icon={<Target className="h-6 w-6" strokeWidth={1.75} />}
           title="هیچ هدفی ثبت نشده است"
           description="شما هنوز هدف تمرینی ثبت نکرده‌اید"
-          action={<Button asChild><Link href="/athlete/goals/new">ثبت هدف جدید</Link></Button>}
+          action={<CtaButton onClick={() => router.push("/athlete/goals/new")}>ثبت هدف جدید</CtaButton>}
         />
       ) : (
-        <StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {goals.map((goal) => {
-            const statusVariant = goal.status === "achieved" ? ("success" as const) : ("warning" as const);
-            const statusLabel = goal.status === "achieved" ? "تکمیل شده" : "در حال انجام";
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard label="کل اهداف" value={formatPersianNumber(goals.length)} />
+            <StatCard label="تکمیل شده" value={formatPersianNumber(achievedCount)} />
+          </div>
 
-            return (
-              <StaggerItem key={goal.id}>
-                <Card glass hover>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{goal.title}</CardTitle>
+          <div className="flex flex-col gap-2.5">
+            {goals.map((goal) => {
+              const statusVariant = goal.status === "achieved" ? ("success" as const) : ("warning" as const);
+              const statusLabel = goal.status === "achieved" ? "تکمیل شده" : "در حال انجام";
+              const progress = Math.round(calculateProgress(goal.currentValue, goal.targetValue));
+
+              return (
+                <RowCard
+                  key={goal.id}
+                  className="cursor-default"
+                  icon={<Target className="h-5 w-5" strokeWidth={1.75} />}
+                  title={goal.title}
+                  subtitle={`${categoryLabels[goal.category] || goal.category} · ${formatPersianNumber(goal.currentValue)}/${formatPersianNumber(goal.targetValue)} ${goal.unit} · ${formatPersianNumber(progress)}٪ پیشرفت · ${formatPersianNumber(calculateDaysRemaining(goal.targetDate))} روز باقی‌مانده`}
+                  trailing={
                     <Badge variant={statusVariant as "success" | "warning"}>
                       {statusLabel}
                     </Badge>
-                  </div>
-                  <Badge className={cn(categoryColors[goal.category] || "bg-gray-500", "text-white bg-opacity-80 backdrop-blur-sm")}>
-                    {categoryLabels[goal.category] || goal.category}
-                  </Badge>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">پیشرفت</span>
-                    <span>
-                      {formatPersianNumber(goal.currentValue)}/{formatPersianNumber(goal.targetValue)} {goal.unit}
-                    </span>
-                  </div>
-                  <Progress
-                    value={calculateProgress(goal.currentValue, goal.targetValue)}
-                    indicatorClassName={categoryColors[goal.category] || "bg-gray-500"}
-                  />
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">زمان باقی‌مانده</span>
-                    <span>{formatPersianNumber(calculateDaysRemaining(goal.targetDate))} روز</span>
-                  </div>
-                </CardContent>
-              </Card>
-              </StaggerItem>
-            );
-          })}
-        </StaggerContainer>
+                  }
+                />
+              );
+            })}
+          </div>
+        </>
       )}
-    </div>
+    </PageShell>
   );
 }

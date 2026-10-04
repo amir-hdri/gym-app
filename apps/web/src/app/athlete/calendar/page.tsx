@@ -8,14 +8,14 @@ import {
   startOfMonth,
 } from "date-fns-jalali";
 import { ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
-import { FadeIn } from "@/components/animations/FadeIn";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { cn, formatPersianNumber } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useCheckIns } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { getJalaliMonth, groupCheckinsByJalaliDay, moveJalaliMonth } from "./calendar-utils";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { TwilightCard, CircleIconButton, RowCard } from "@/components/twilight/controls";
 
 const weekDays = [
   { full: "شنبه", short: "ش" },
@@ -55,98 +55,97 @@ export default function CalendarPage() {
   if (isError) return <ErrorDisplay message={error?.message} />;
 
   return (
-    <div className="space-y-6">
-      <div><h1 className="text-3xl font-bold tracking-tight">تقویم تمرینی</h1><p className="mt-1 text-muted-foreground">برنامه هفتگی و ماهانه</p></div>
+    <PageShell className="mx-auto max-w-4xl">
+      <PageHeader
+        title="تقویم تمرینی"
+        subtitle="برنامه هفتگی و ماهانه"
+      />
 
-      <FadeIn>
-        <Card glass>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <button type="button" onClick={() => changeMonth(-1)} aria-label="ماه قبل" className="ring-focus flex h-11 w-11 items-center justify-center rounded-xl hover:bg-muted"><ChevronRight className="h-5 w-5" /></button>
-              <CardTitle>{monthTitle}</CardTitle>
-              <button type="button" onClick={() => changeMonth(1)} aria-label="ماه بعد" className="ring-focus flex h-11 w-11 items-center justify-center rounded-xl hover:bg-muted"><ChevronLeft className="h-5 w-5" /></button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-7 gap-0.5 sm:gap-2" role="grid" aria-label={`تقویم ${monthTitle}`}>
-              {weekDays.map((day) => (
-                <div key={day.full} className="py-2 text-center text-xs font-bold text-muted-foreground sm:text-sm">
-                  <span className="sm:hidden" aria-hidden="true">{day.short}</span>
-                  <span className="hidden sm:inline">{day.full}</span>
-                  <span className="sr-only sm:hidden">{day.full}</span>
-                </div>
-              ))}
-              {Array.from({ length: persianFirstDay }).map((_, i) => (
-                <div key={`empty-${i}`} />
-              ))}
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const dayNum = i + 1;
-                const isToday = isSameMonth(displayedMonth, today) && dayNum === getDate(today);
-                const hasCheckin = checkinDays[dayNum];
-                return (
-                  <button
-                    type="button"
-                    key={dayNum}
-                    onClick={() => setSelectedDay(dayNum)}
-                    aria-label={`${formatPersianNumber(dayNum)} ${monthTitle}${hasCheckin ? `، ${formatPersianNumber(hasCheckin)} حضور` : ""}`}
-                    aria-pressed={selectedDay === dayNum}
-                    className={cn(
-                      "ring-focus relative flex min-h-14 min-w-0 flex-col items-center rounded-lg px-0.5 py-2 transition-colors sm:min-h-20 sm:p-2",
-                      selectedDay === dayNum ? "bg-primary/10 ring-2 ring-primary/50" : "hover:bg-muted",
-                      isToday && selectedDay !== dayNum && "ring-1 ring-primary/40"
-                    )}
-                  >
-                    <span className={cn("text-sm font-medium", isToday && "text-primary")}>{formatPersianNumber(dayNum)}</span>
-                    {hasCheckin && (
-                      <div className="mt-1 flex flex-col items-center gap-0.5">
-                        <Dumbbell className="h-3.5 w-3.5 text-primary" />
-                        <span className="hidden text-xs leading-tight text-primary sm:inline">حضور</span>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="mt-5 rounded-2xl border border-border/70 bg-muted/50 p-4" aria-live="polite">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-bold">روز {formatPersianNumber(selectedDay)} {monthTitle}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {checkinDays[selectedDay]
-                      ? `${formatPersianNumber(checkinDays[selectedDay])} چک‌این برای این روز ثبت شده است.`
-                      : "برای این روز حضوری ثبت نشده است."}
-                  </p>
-                </div>
-                {checkinDays[selectedDay] ? <Badge variant="success">حضور</Badge> : <Badge variant="secondary">بدون حضور</Badge>}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </FadeIn>
+      <TwilightCard>
+        <div className="flex items-center justify-between">
+          <CircleIconButton label="ماه قبل" onClick={() => changeMonth(-1)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/60">
+            <ChevronRight className="h-5 w-5" strokeWidth={1.75} />
+          </CircleIconButton>
+          <h2 className="font-serif text-lg font-normal text-white">{monthTitle}</h2>
+          <CircleIconButton label="ماه بعد" onClick={() => changeMonth(1)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/60">
+            <ChevronLeft className="h-5 w-5" strokeWidth={1.75} />
+          </CircleIconButton>
+        </div>
 
-      <FadeIn delay={0.1}>
-        <Card glass>
-          <CardHeader><CardTitle>برنامه امروز</CardTitle></CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {todayCheckinCount > 0 ? (
-                <div className="flex items-center justify-between rounded-lg bg-white/40 p-4">
-                  <div className="flex items-center gap-3">
-                    <Dumbbell className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium">حضور</p>
-                      <p className="text-sm text-muted-foreground">{formatPersianNumber(todayCheckinCount)} چک‌این</p>
-                    </div>
+        <div className="mt-4 grid grid-cols-7 gap-0.5 sm:gap-2" role="grid" aria-label={`تقویم ${monthTitle}`}>
+          {weekDays.map((day) => (
+            <div key={day.full} className="py-2 text-center text-xs font-bold text-[#8e98a8] sm:text-sm">
+              <span className="sm:hidden" aria-hidden="true">{day.short}</span>
+              <span className="hidden sm:inline">{day.full}</span>
+              <span className="sr-only sm:hidden">{day.full}</span>
+            </div>
+          ))}
+          {Array.from({ length: persianFirstDay }).map((_, i) => (
+            <div key={`empty-${i}`} />
+          ))}
+          {Array.from({ length: daysInMonth }).map((_, i) => {
+            const dayNum = i + 1;
+            const isToday = isSameMonth(displayedMonth, today) && dayNum === getDate(today);
+            const hasCheckin = checkinDays[dayNum];
+            return (
+              <button
+                type="button"
+                key={dayNum}
+                onClick={() => setSelectedDay(dayNum)}
+                aria-label={`${formatPersianNumber(dayNum)} ${monthTitle}${hasCheckin ? `، ${formatPersianNumber(hasCheckin)} حضور` : ""}`}
+                aria-pressed={selectedDay === dayNum}
+                className={cn(
+                  "relative flex min-h-14 min-w-0 flex-col items-center rounded-lg px-0.5 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/60 sm:min-h-20 sm:p-2",
+                  selectedDay === dayNum
+                    ? "bg-[#d2c0a5]/15 ring-2 ring-[#d2c0a5]/60"
+                    : "hover:bg-[#1a202a]",
+                  isToday && selectedDay !== dayNum && "ring-1 ring-[#d2c0a5]/40"
+                )}
+              >
+                <span className={cn("text-sm font-medium", isToday ? "text-[#d2c0a5]" : "text-white")}>
+                  {formatPersianNumber(dayNum)}
+                </span>
+                {hasCheckin && (
+                  <div className="mt-1 flex flex-col items-center gap-0.5">
+                    <Dumbbell className="h-3.5 w-3.5 text-[#d2c0a5]" strokeWidth={1.75} />
+                    <span className="hidden text-xs leading-tight text-[#d2c0a5] sm:inline">حضور</span>
                   </div>
-                  <Badge variant="success">امروز</Badge>
-                </div>
-              ) : (
-                <p className="py-4 text-center text-muted-foreground">برنامه‌ای برای امروز ثبت نشده است</p>
-              )}
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-[#232934] bg-[#1a202a] p-4" aria-live="polite">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-white">روز {formatPersianNumber(selectedDay)} {monthTitle}</p>
+              <p className="mt-1 text-sm text-[#8e98a8]">
+                {checkinDays[selectedDay]
+                  ? `${formatPersianNumber(checkinDays[selectedDay])} چک‌این برای این روز ثبت شده است.`
+                  : "برای این روز حضوری ثبت نشده است."}
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </FadeIn>
-    </div>
+            {checkinDays[selectedDay] ? <Badge variant="success">حضور</Badge> : <Badge variant="secondary">بدون حضور</Badge>}
+          </div>
+        </div>
+      </TwilightCard>
+
+      <TwilightCard>
+        <h2 className="font-serif text-lg font-normal text-white">برنامه امروز</h2>
+        <div className="mt-3">
+          {todayCheckinCount > 0 ? (
+            <RowCard
+              icon={<Dumbbell className="h-5 w-5" strokeWidth={1.75} />}
+              title="حضور"
+              subtitle={`${formatPersianNumber(todayCheckinCount)} چک‌این`}
+              trailing={<Badge variant="success">امروز</Badge>}
+            />
+          ) : (
+            <p className="py-4 text-center text-[#8e98a8]">برنامه‌ای برای امروز ثبت نشده است</p>
+          )}
+        </div>
+      </TwilightCard>
+    </PageShell>
   );
 }

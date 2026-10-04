@@ -2,18 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/Card";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/Table";
 import { formatPersianNumber, formatDate } from "@/lib/utils";
-import { Search, Plus, Users } from "lucide-react";
-import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
-import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { Plus, Users } from "lucide-react";
+import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { useUsers } from "@/hooks/use-api";
 import type { User } from "@/lib/types";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { CtaButton, SearchInput, FilterChips, EmptyState } from "@/components/twilight/controls";
 
 type MemberRow = User & { plan?: string };
 
@@ -23,17 +21,23 @@ const statusMap: Record<string, { label: string; variant: "success" | "secondary
   suspended: { label: "تعلیق شده", variant: "destructive" },
 };
 
-const statusFilters: { value: string; label: string }[] = [
-  { value: "all", label: "همه" },
-  { value: "active", label: "فعال" },
-  { value: "inactive", label: "غیرفعال" },
-  { value: "suspended", label: "تعلیق شده" },
-];
+const statusFilterOptions = ["all", "active", "inactive", "suspended"] as const;
+type StatusFilter = (typeof statusFilterOptions)[number];
+const statusFilterLabels: Record<StatusFilter, string> = {
+  all: "همه",
+  active: "فعال",
+  inactive: "غیرفعال",
+  suspended: "تعلیق شده",
+};
+
+const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-[#8e98a8]";
+const tdClass = "px-4 py-3 text-[#c8cdd6]";
 
 export default function MembersPage() {
+  const router = useRouter();
   const { data, isLoading, isError, refetch } = useUsers("athlete");
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<StatusFilter>("all");
 
   if (isLoading) return <Loading />;
   if (isError) return <ErrorDisplay onRetry={refetch} />;
@@ -46,129 +50,95 @@ export default function MembersPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <ScrollReveal direction="none">
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold leading-8">مدیریت اعضا</h1>
-          <p className="mt-1 text-muted-foreground leading-6">لیست تمام اعضای باشگاه</p>
-        </div>
-        <Button asChild className="w-full sm:w-auto">
-          <Link href="/admin/members/new">
-            <Plus className="ml-2 h-4 w-4" />
+    <PageShell>
+      <PageHeader
+        title="مدیریت اعضا"
+        subtitle="لیست تمام اعضای باشگاه"
+        action={
+          <CtaButton onClick={() => router.push("/admin/members/new")} className="w-auto px-5">
+            <Plus className="h-4 w-4" strokeWidth={1.75} />
             افزودن عضو جدید
-          </Link>
-        </Button>
-      </div>
-      </ScrollReveal>
+          </CtaButton>
+        }
+      />
 
-      <ScrollReveal delay={0.05}>
-      <Card glass>
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                aria-label="جستجوی عضو"
-                placeholder="جستجوی عضو..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pr-10 bg-white/70 backdrop-blur-sm border-white/30"
-              />
-            </div>
-            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger aria-label="فیلتر وضعیت" className="w-40 bg-white/70 backdrop-blur-sm border-white/30">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {statusFilters.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-      </ScrollReveal>
+      <SearchInput value={search} onChange={setSearch} placeholder="جستجوی عضو..." />
 
-      <ScrollReveal delay={0.1}>
-      <Card glass>
-        <CardContent className="p-0">
-          {filtered.length === 0 ? (
-            <EmptyState
-              icon={<Users className="h-12 w-12 text-muted-foreground" />}
-              title="هیچ عضوی یافت نشد"
-              description={search || filter !== "all" ? "هیچ نتیجه‌ای با فیلترهای فعلی مطابقت ندارد" : "هنوز عضوی ثبت‌نام نکرده است"}
-            />
-          ) : (
-            <>
-            <div className="grid gap-3 p-3 sm:hidden">
-              {filtered.map((member) => (
-                <article key={member.id} className="rounded-2xl border border-border/60 bg-card/70 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h2 className="truncate font-bold leading-6">{member.firstName} {member.lastName}</h2>
-                      <p dir="ltr" className="mt-1 truncate text-left text-xs text-muted-foreground">{member.email}</p>
-                    </div>
-                    <Badge variant={statusMap[member.status].variant}>{statusMap[member.status].label}</Badge>
+      <FilterChips
+        options={statusFilterOptions}
+        value={filter}
+        onChange={setFilter}
+        labels={statusFilterLabels}
+        pillId="admin-members-filter"
+      />
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<Users className="h-6 w-6" strokeWidth={1.75} />}
+          title="هیچ عضوی یافت نشد"
+          description={search || filter !== "all" ? "هیچ نتیجه‌ای با فیلترهای فعلی مطابقت ندارد" : "هنوز عضوی ثبت‌نام نکرده است"}
+        />
+      ) : (
+        <>
+          <div className="grid gap-3 sm:hidden">
+            {filtered.map((member) => (
+              <article key={member.id} className="rounded-2xl border border-[#232934] bg-[#161a22] p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="truncate font-sans text-sm font-medium text-white">{member.firstName} {member.lastName}</h2>
+                    <p dir="ltr" className="mt-1 truncate text-left text-xs text-[#8e98a8]">{member.email}</p>
                   </div>
-                  <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-border/50 py-3 text-xs">
-                    <div><dt className="text-muted-foreground">شماره تماس</dt><dd dir="ltr" className="mt-1 text-right font-medium">{member.phone}</dd></div>
-                    <div><dt className="text-muted-foreground">طرح اشتراک</dt><dd className="mt-1 font-medium">{member.plan || "بدون طرح"}</dd></div>
-                    <div className="col-span-2"><dt className="text-muted-foreground">تاریخ ثبت‌نام</dt><dd className="mt-1 font-medium">{formatDate(member.createdAt)}</dd></div>
-                  </dl>
-                  <Button asChild variant="outline" size="sm" className="mt-3 w-full">
-                    <Link href={`/admin/members/${member.id}`}>مشاهده و ویرایش</Link>
-                  </Button>
-                </article>
-              ))}
-            </div>
-            <div className="hidden sm:block">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">ردیف</TableHead>
-                  <TableHead>نام</TableHead>
-                  <TableHead>ایمیل</TableHead>
-                  <TableHead>تلفن</TableHead>
-                  <TableHead>وضعیت</TableHead>
-                  <TableHead>طرح اشتراک</TableHead>
-                  <TableHead>تاریخ ثبت‌نام</TableHead>
-                  <TableHead className="w-28">عملیات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+                  <Badge variant={statusMap[member.status].variant}>{statusMap[member.status].label}</Badge>
+                </div>
+                <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-[#1e2430] py-3 text-xs">
+                  <div><dt className="text-[#8e98a8]">شماره تماس</dt><dd dir="ltr" className="mt-1 text-right font-medium text-white">{member.phone}</dd></div>
+                  <div><dt className="text-[#8e98a8]">طرح اشتراک</dt><dd className="mt-1 font-medium text-white">{member.plan || "بدون طرح"}</dd></div>
+                  <div className="col-span-2"><dt className="text-[#8e98a8]">تاریخ ثبت‌نام</dt><dd className="mt-1 font-medium text-white">{formatDate(member.createdAt)}</dd></div>
+                </dl>
+                <CtaButton variant="outline" onClick={() => router.push(`/admin/members/${member.id}`)} className="mt-3 w-full">
+                  مشاهده و ویرایش
+                </CtaButton>
+              </article>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto rounded-2xl border border-[#232934] bg-[#161a22] sm:block">
+            <table className="w-full min-w-[760px] text-sm">
+              <thead>
+                <tr>
+                  <th scope="col" className={thClass}>ردیف</th>
+                  <th scope="col" className={thClass}>نام</th>
+                  <th scope="col" className={thClass}>ایمیل</th>
+                  <th scope="col" className={thClass}>تلفن</th>
+                  <th scope="col" className={thClass}>وضعیت</th>
+                  <th scope="col" className={thClass}>طرح اشتراک</th>
+                  <th scope="col" className={thClass}>تاریخ ثبت‌نام</th>
+                  <th scope="col" className={thClass}>عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
                 {filtered.map((member, idx) => (
-                  <TableRow key={member.id} className="transition-colors hover:bg-accent/50">
-                    <TableCell>{formatPersianNumber(idx + 1)}</TableCell>
-                    <TableCell className="font-medium">{member.firstName} {member.lastName}</TableCell>
-                    <TableCell dir="ltr" className="text-left">{member.email}</TableCell>
-                    <TableCell dir="ltr" className="text-left">{member.phone}</TableCell>
-                    <TableCell>
+                  <tr key={member.id} className="border-t border-[#1e2430] hover:bg-[#1a202a]">
+                    <td className={tdClass}>{formatPersianNumber(idx + 1)}</td>
+                    <td className={`${tdClass} font-medium text-white`}>{member.firstName} {member.lastName}</td>
+                    <td dir="ltr" className={`${tdClass} text-left`}>{member.email}</td>
+                    <td dir="ltr" className={`${tdClass} text-left`}>{member.phone}</td>
+                    <td className={tdClass}>
                       <Badge variant={statusMap[member.status].variant}>
                         {statusMap[member.status].label}
                       </Badge>
-                    </TableCell>
-                    <TableCell>{member.plan}</TableCell>
-                    <TableCell>{formatDate(member.createdAt)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button asChild variant="outline" size="sm"><Link href={`/admin/members/${member.id}`}>ویرایش</Link></Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                    <td className={tdClass}>{member.plan}</td>
+                    <td className={tdClass}>{formatDate(member.createdAt)}</td>
+                    <td className={tdClass}>
+                      <Button asChild variant="outline" size="sm"><Link href={`/admin/members/${member.id}`}>ویرایش</Link></Button>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
-            </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-      </ScrollReveal>
-    </div>
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </PageShell>
   );
 }

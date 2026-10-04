@@ -8,16 +8,17 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Mail, ArrowRight, CheckCircle2 } from "lucide-react";
+import { CtaButton } from "@/components/twilight/controls";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 const forgotSchema = z.object({
   email: z.string().min(1, "ایمیل را وارد کنید").email("ایمیل نامعتبر است"),
 });
 
 type ForgotFormData = z.infer<typeof forgotSchema>;
+
+const inputClassName =
+  "h-11 w-full rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
 
 export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,66 +52,64 @@ export default function ForgotPasswordPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="rounded-[32px] border border-white/10 bg-[#10141a] p-8 text-white shadow-2xl shadow-black/50"
       >
-        <Card className="border-border/60 shadow-lg shadow-black/5 dark:shadow-black/20">
-          <CardContent className="p-8">
-            <div className="mb-8 text-center">
-              <h1 className="text-2xl font-bold tracking-tight">بازیابی رمز عبور</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                ایمیل خود را وارد کنید تا لینک بازیابی ارسال شود
-              </p>
+        <div className="mb-8 text-center">
+          <h1 className="font-serif text-2xl font-medium tracking-tight text-white">بازیابی رمز عبور</h1>
+          <p className="mt-2 text-sm text-[#8e98a8]">
+            ایمیل خود را وارد کنید تا لینک بازیابی ارسال شود
+          </p>
+        </div>
+
+        {isSent ? (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-4 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-[#4ade80]/30 bg-[#4ade80]/10">
+              <CheckCircle2 className="h-7 w-7 text-[#4ade80]" strokeWidth={1.75} />
             </div>
+            <p className="text-sm leading-relaxed text-[#8e98a8]">
+              لینک بازیابی به ایمیل شما ارسال شد. لطفاً صندوق ورودی خود را بررسی کنید.
+            </p>
+            <Link
+              href="/auth/login"
+              className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#d2c0a5] transition-colors hover:text-[#ded1bc]"
+            >
+              بازگشت به ورود
+              <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} />
+            </Link>
+          </motion.div>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+              <label htmlFor="email" className="mb-2 block text-xs text-[#8e98a8]">
+                ایمیل
+              </label>
+              <input
+                id="email"
+                type="email"
+                dir="ltr"
+                placeholder="your@email.com"
+                autoComplete="email"
+                inputMode="email"
+                className={inputClassName}
+                {...register("email")}
+              />
+              {errors.email?.message && <p className="mt-1 text-xs text-[#f87171]">{errors.email.message}</p>}
+            </motion.div>
 
-            {isSent ? (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-4">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success/10">
-                  <CheckCircle2 className="h-7 w-7 text-success" />
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  لینک بازیابی به ایمیل شما ارسال شد. لطفاً صندوق ورودی خود را بررسی کنید.
-                </p>
-                <Link
-                  href="/auth/login"
-                  className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  بازگشت به ورود
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-                  <div className="relative">
-                    <Mail className="absolute right-3.5 top-[2.7rem] h-4.5 w-4.5 text-muted-foreground/40 pointer-events-none z-10" />
-                    <Input
-                      label="ایمیل"
-                      type="email"
-                      placeholder="your@email.com"
-                      error={errors.email?.message}
-                      className="pr-10"
-                      autoComplete="email"
-                      inputMode="email"
-                      {...register("email")}
-                    />
-                  </div>
-                </motion.div>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              <CtaButton type="submit" disabled={isSubmitting} className="w-full text-sm">
+                {isSubmitting ? "در حال ارسال…" : "ارسال لینک بازیابی"}
+              </CtaButton>
+            </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                  <Button type="submit" loading={isSubmitting} className="w-full h-11 text-base font-semibold shadow-lg shadow-primary/20">
-                    ارسال لینک بازیابی
-                  </Button>
-                </motion.div>
-
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-center">
-                  <Link href="/auth/login" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
-                    <ArrowRight className="h-3.5 w-3.5" />
-                    بازگشت به صفحه ورود
-                  </Link>
-                </motion.div>
-              </form>
-            )}
-          </CardContent>
-        </Card>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-center">
+              <Link href="/auth/login" className="inline-flex items-center gap-1 text-sm text-[#8e98a8] transition-colors hover:text-[#d2c0a5]">
+                <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} />
+                بازگشت به صفحه ورود
+              </Link>
+            </motion.div>
+          </form>
+        )}
       </motion.div>
     </AuthLayout>
   );

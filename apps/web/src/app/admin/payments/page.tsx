@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { PageShell, PageHeader, SectionTitle } from "@/components/twilight/Page";
+import { TwilightCard, StatCard, EmptyState } from "@/components/twilight/controls";
 import { Badge } from "@/components/ui/Badge";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/Table";
 import { formatPersianNumber, formatCurrency, formatDateTime } from "@/lib/utils";
-import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
+import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { usePayments } from "@/hooks/use-api";
 import { RevenueChart } from "@/components/analytics/Charts";
-import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { ReceiptText } from "lucide-react";
 
 const methodLabels: Record<string, string> = {
   card: "کارت",
@@ -31,6 +31,9 @@ const statusLabels: Record<string, { label: string; variant: "success" | "warnin
   refunded: { label: "بازگشت داده شده", variant: "secondary" },
 };
 
+const tableHeadCell = "whitespace-nowrap px-4 py-3 text-right align-middle text-[10px] font-semibold text-[#8e98a8]";
+const tableCell = "px-4 py-3 align-middle";
+
 export default function PaymentsPage() {
   const { data, isLoading, isError, refetch } = usePayments();
   if (isLoading) return <Loading />;
@@ -39,98 +42,86 @@ export default function PaymentsPage() {
   const totalRevenue = payments.reduce((sum: number, p) => sum + (p.status === "completed" ? p.amount : 0), 0);
   const totalPending = payments.reduce((sum: number, p) => sum + (p.status === "pending" ? p.amount : 0), 0);
   return (
-    <div className="space-y-6">
-      <ScrollReveal direction="none">
-      <div>
-        <h1 className="text-2xl font-bold">پرداخت‌ها</h1>
-        <p className="text-muted-foreground">مدیریت تراکنش‌های مالی باشگاه</p>
-      </div>
-      </ScrollReveal>
+    <PageShell>
+      <PageHeader
+        title="پرداخت‌ها"
+        subtitle="مدیریت تراکنش‌های مالی باشگاه"
+      />
 
-      <ScrollReveal delay={0.05}>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card glass>
-          <CardContent className="p-6">
-            <p className="text-sm text-muted-foreground">کل درآمد (موفق)</p>
-            <p className="inline-block rounded-lg bg-white/70 backdrop-blur-sm border border-white/20 px-3 py-1 text-2xl font-bold text-success">{formatCurrency(totalRevenue)}</p>
-          </CardContent>
-        </Card>
-        <Card glass>
-          <CardContent className="p-6">
-            <p className="text-sm text-muted-foreground">درآمد در انتظار</p>
-            <p className="inline-block rounded-lg bg-white/70 backdrop-blur-sm border border-white/20 px-3 py-1 text-2xl font-bold text-warning">{formatCurrency(totalPending)}</p>
-          </CardContent>
-        </Card>
-        <Card glass>
-          <CardContent className="p-6">
-            <p className="text-sm text-muted-foreground">تعداد تراکنش‌ها</p>
-            <p className="inline-block rounded-lg bg-white/70 backdrop-blur-sm border border-white/20 px-3 py-1 text-2xl font-bold">{formatPersianNumber(payments.length)}</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <StatCard
+          label="کل درآمد (موفق)"
+          value={<span className="text-[#d2c0a5]">{formatCurrency(totalRevenue)}</span>}
+        />
+        <StatCard
+          label="درآمد در انتظار"
+          value={<span className="text-[#d2c0a5]">{formatCurrency(totalPending)}</span>}
+        />
+        <StatCard
+          label="تعداد تراکنش‌ها"
+          value={formatPersianNumber(payments.length)}
+        />
       </div>
-      </ScrollReveal>
 
-      <ScrollReveal delay={0.1}>
-      <Card glass>
-        <CardHeader>
-          <div>
-            <CardTitle>روند درآمد موفق</CardTitle>
-            <p className="mt-1 text-xs text-muted-foreground">بر اساس تاریخ پرداخت‌های تکمیل‌شده</p>
+      <section className="flex flex-col gap-3">
+        <SectionTitle>روند درآمد موفق</SectionTitle>
+        <TwilightCard>
+          <p className="mb-4 text-xs text-[#8e98a8]">بر اساس تاریخ پرداخت‌های تکمیل‌شده</p>
+          <RevenueChart payments={payments} />
+        </TwilightCard>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <SectionTitle>لیست تراکنش‌ها</SectionTitle>
+        {payments.length === 0 ? (
+          <EmptyState
+            icon={<ReceiptText strokeWidth={1.75} className="h-5 w-5" />}
+            title="هیچ تراکنشی یافت نشد"
+            description="هنوز هیچ پرداختی ثبت نشده است"
+          />
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-sm leading-6">
+                <thead>
+                  <tr>
+                    <th className={tableHeadCell}>ردیف</th>
+                    <th className={tableHeadCell}>کاربر</th>
+                    <th className={tableHeadCell}>مبلغ</th>
+                    <th className={tableHeadCell}>روش پرداخت</th>
+                    <th className={tableHeadCell}>وضعیت</th>
+                    <th className={tableHeadCell}>تاریخ</th>
+                    <th className={tableHeadCell}>عملیات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map((payment, idx) => (
+                    <tr key={payment.id} className="border-t border-[#1e2430] transition-colors hover:bg-[#1a202a]">
+                      <td className={tableCell}>{formatPersianNumber(idx + 1)}</td>
+                      <td className={`${tableCell} font-medium text-white`}>{payment.user ? `${payment.user.firstName} ${payment.user.lastName}` : payment.userId}</td>
+                      <td className={`${tableCell} font-medium tabular-nums text-white`}>{formatCurrency(payment.amount)}</td>
+                      <td className={tableCell}>
+                        <Badge variant={methodVariants[payment.method]}>
+                          {methodLabels[payment.method]}
+                        </Badge>
+                      </td>
+                      <td className={tableCell}>
+                        <Badge variant={statusLabels[payment.status].variant}>
+                          {statusLabels[payment.status].label}
+                        </Badge>
+                      </td>
+                      <td className={`${tableCell} whitespace-nowrap text-[#c3cad6]`}>{formatDateTime(payment.paidAt || payment.createdAt)}</td>
+                      <td className={tableCell}>
+                        <Link href={`/admin/payments/${payment.id}`} className="text-sm font-medium text-primary hover:underline">جزئیات</Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </CardHeader>
-        <CardContent><RevenueChart payments={payments} /></CardContent>
-      </Card>
-      </ScrollReveal>
-
-      <ScrollReveal delay={0.15}>
-      <Card glass>
-        <CardHeader>
-          <CardTitle>لیست تراکنش‌ها</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {payments.length === 0 ? (
-            <EmptyState title="هیچ تراکنشی یافت نشد" description="هنوز هیچ پرداختی ثبت نشده است" />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">ردیف</TableHead>
-                  <TableHead>کاربر</TableHead>
-                  <TableHead>مبلغ</TableHead>
-                  <TableHead>روش پرداخت</TableHead>
-                  <TableHead>وضعیت</TableHead>
-                  <TableHead>تاریخ</TableHead>
-                  <TableHead className="w-24">عملیات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payments.map((payment, idx) => (
-                  <TableRow key={payment.id} className="transition-colors hover:bg-white/30">
-                    <TableCell>{formatPersianNumber(idx + 1)}</TableCell>
-                    <TableCell className="font-medium">{payment.user ? `${payment.user.firstName} ${payment.user.lastName}` : payment.userId}</TableCell>
-                    <TableCell className="font-medium">{formatCurrency(payment.amount)}</TableCell>
-                    <TableCell>
-                      <Badge variant={methodVariants[payment.method]}>
-                        {methodLabels[payment.method]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={statusLabels[payment.status].variant}>
-                        {statusLabels[payment.status].label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatDateTime(payment.paidAt || payment.createdAt)}</TableCell>
-                    <TableCell>
-                      <Link href={`/admin/payments/${payment.id}`} className="text-sm text-primary hover:underline">جزئیات</Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-      </ScrollReveal>
-    </div>
+        )}
+      </section>
+    </PageShell>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -9,11 +9,11 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Label } from "@/components/ui/Label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { ChevronRight, Save } from "lucide-react";
-import { FadeIn } from "@/components/animations/FadeIn";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { TwilightCard } from "@/components/twilight/controls";
 import { useCreateUser, useBranches } from "@/hooks/use-api";
 
 const athleteSchema = z.object({
@@ -32,7 +32,7 @@ export default function NewAthletePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createUser = useCreateUser();
   const { data: branchesData } = useBranches();
-  const branches = branchesData?.data || [];
+  const branches = useMemo(() => branchesData?.data ?? [], [branchesData]);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<AthleteFormData>({
     resolver: zodResolver(athleteSchema),
@@ -40,6 +40,14 @@ export default function NewAthletePage() {
   });
 
   const selectedBranch = watch("branch");
+
+  // Single-branch rule: gym-app has only the LUMI branch, so hide the branch
+  // field and bind it automatically when exactly one branch exists.
+  useEffect(() => {
+    if (branches.length === 1) {
+      setValue("branch", branches[0].id);
+    }
+  }, [branches, setValue]);
 
   const onSubmit = async (formData: AthleteFormData) => {
     setIsSubmitting(true);
@@ -63,49 +71,51 @@ export default function NewAthletePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Button variant="ghost" size="sm" asChild className="mb-2">
-          <Link href="/coach/athletes"><ChevronRight className="h-4 w-4" /> بازگشت به لیست شاگردان</Link>
-        </Button>
-        <h1 className="text-2xl font-bold">ثبت شاگرد جدید</h1>
-        <p className="text-muted-foreground">ثبت اطلاعات شاگرد جدید</p>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="ثبت شاگرد جدید"
+        subtitle="ثبت اطلاعات شاگرد جدید"
+        action={
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/coach/athletes">
+              <ChevronRight className="h-4 w-4" />
+              بازگشت
+            </Link>
+          </Button>
+        }
+      />
 
-      <FadeIn>
-        <Card glass>
-          <CardHeader><CardTitle>اطلاعات شخصی</CardTitle></CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Input label="نام" placeholder="نگار" error={errors.firstName?.message} {...register("firstName")} />
-                <Input label="نام خانوادگی" placeholder="محمدی" error={errors.lastName?.message} {...register("lastName")} />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Input label="ایمیل" type="email" placeholder="ali@example.com" error={errors.email?.message} {...register("email")} />
-                <Input label="شماره موبایل" type="tel" placeholder="۰۹۱۲۱۱۱۲۲۳۳" error={errors.phone?.message} {...register("phone")} />
-              </div>
-              <Input label="رمز عبور" type="password" placeholder="••••••••" error={errors.password?.message} {...register("password")} />
-              <div className="space-y-1.5">
-                <Label>شعبه</Label>
-                <Select value={selectedBranch} onValueChange={(v) => setValue("branch", v)}>
-                  <SelectTrigger><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
-                  <SelectContent>
-                    {branches.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.branch && <p className="text-sm text-destructive">{errors.branch.message}</p>}
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" type="button" onClick={() => router.push("/coach/athletes")}>انصراف</Button>
-                <Button type="submit" loading={isSubmitting}><Save className="ml-2 h-4 w-4" />ثبت شاگرد</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </FadeIn>
-    </div>
+      <TwilightCard className="!p-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input label="نام" placeholder="نگار" error={errors.firstName?.message} {...register("firstName")} />
+            <Input label="نام خانوادگی" placeholder="محمدی" error={errors.lastName?.message} {...register("lastName")} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input label="ایمیل" type="email" placeholder="ali@example.com" error={errors.email?.message} {...register("email")} />
+            <Input label="شماره موبایل" type="tel" placeholder="09121112233" error={errors.phone?.message} {...register("phone")} />
+          </div>
+          <Input label="رمز عبور" type="password" placeholder="••••••••" error={errors.password?.message} {...register("password")} />
+          {branches.length !== 1 && (
+            <div className="space-y-1.5">
+              <Label>شعبه</Label>
+              <Select value={selectedBranch} onValueChange={(v) => setValue("branch", v)}>
+                <SelectTrigger><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
+                <SelectContent>
+                  {branches.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.branch && <p className="text-sm text-destructive">{errors.branch.message}</p>}
+            </div>
+          )}
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="ghost" type="button" onClick={() => router.push("/coach/athletes")}>انصراف</Button>
+            <Button type="submit" loading={isSubmitting}><Save className="ml-2 h-4 w-4" />ثبت شاگرد</Button>
+          </div>
+        </form>
+      </TwilightCard>
+    </PageShell>
   );
 }

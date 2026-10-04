@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { useParams } from "next/navigation";
-import { Phone, Mail, Calendar, Award, ChevronRight } from "lucide-react";
+import { Phone, Mail, Calendar, Award, ChevronRight, Dumbbell } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { PageShell, PageHeader, SectionTitle } from "@/components/twilight/Page";
+import { TwilightCard, EmptyState } from "@/components/twilight/controls";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
@@ -13,7 +14,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { formatPersianNumber, getInitials, generateAvatarColor, formatDate, calculateProgress } from "@/lib/utils";
 import { useUser, useGoals, useTrainingPrograms, useCheckIns } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
-import { FadeIn } from "@/components/animations/FadeIn";
 import { SessionDurationChart } from "@/components/analytics/Charts";
 
 const persianDays = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"];
@@ -56,168 +56,153 @@ export default function AthleteDetailPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <FadeIn direction="none">
-      <div>
-        <Button variant="ghost" size="sm" asChild className="mb-2">
-          <Link href="/coach/athletes">
-            <ChevronRight className="h-4 w-4" />
-            بازگشت به شاگردان
-          </Link>
-        </Button>
-      </div>
-      </FadeIn>
+    <PageShell>
+      <PageHeader
+        title={name}
+        subtitle={`${athlete.role === "athlete" ? "ورزشکار" : "کاربر"} · عضویت از ${formatDate(athlete.createdAt)}`}
+        action={
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/coach/athletes">
+              <ChevronRight className="h-4 w-4" />
+              بازگشت
+            </Link>
+          </Button>
+        }
+      />
 
-      <FadeIn delay={0.1}>
-      <Card glass>
-        <CardContent className="flex items-center gap-6 p-6">
-          <Avatar className="h-20 w-20">
-            <AvatarFallback className={"text-2xl " + generateAvatarColor(name)}>
+      <div className="flex flex-col items-center pt-2">
+        <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[#d2c0a5] bg-gradient-to-br from-[#2a3444] to-[#141a22] shadow-xl">
+          <Avatar className="h-full w-full">
+            <AvatarFallback className={`text-2xl ${generateAvatarColor(name)}`}>
               {getInitials(name)}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1 space-y-2">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">{name}</h1>
-              <Badge variant={athlete.status === "active" ? "success" : "secondary"}>
-                {athlete.status === "active" ? "فعال" : "غیرفعال"}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Phone className="h-4 w-4" />
-                {athlete.phone}
-              </span>
-              <span className="flex items-center gap-1">
-                <Mail className="h-4 w-4" />
-                {athlete.email}
-              </span>
-              <span className="flex items-center gap-1">
-                <Award className="h-4 w-4" />
-                {athlete.role === "athlete" ? "ورزشکار" : "کاربر"}
-              </span>
-              <span className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                عضویت از {formatDate(athlete.createdAt)}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      </FadeIn>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <Badge variant={athlete.status === "active" ? "success" : "secondary"}>
+            {athlete.status === "active" ? "فعال" : "غیرفعال"}
+          </Badge>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8e98a8]">
+          <span className="flex items-center gap-1.5" dir="ltr">
+            <Phone className="h-3.5 w-3.5" strokeWidth={1.75} />
+            {athlete.phone}
+          </span>
+          <span className="flex items-center gap-1.5" dir="ltr">
+            <Mail className="h-3.5 w-3.5" strokeWidth={1.75} />
+            {athlete.email}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Award className="h-3.5 w-3.5" strokeWidth={1.75} />
+            {athlete.role === "athlete" ? "ورزشکار" : "کاربر"}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5" strokeWidth={1.75} />
+            عضویت از {formatDate(athlete.createdAt)}
+          </span>
+        </div>
+      </div>
 
-      <FadeIn delay={0.15}>
       <Tabs defaultValue="program" dir="rtl">
-        <TabsList>
-          <TabsTrigger value="program">برنامه تمرینی</TabsTrigger>
-          <TabsTrigger value="progress">پیشرفت</TabsTrigger>
-          <TabsTrigger value="history">تاریخچه</TabsTrigger>
+        <TabsList className="w-full justify-start overflow-x-auto rounded-xl border border-[#232934] bg-[#161a22] p-1">
+          <TabsTrigger value="program" className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">برنامه تمرینی</TabsTrigger>
+          <TabsTrigger value="progress" className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">پیشرفت</TabsTrigger>
+          <TabsTrigger value="history" className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">تاریخچه</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="program" className="space-y-4">
+        <TabsContent value="program" className="mt-4 space-y-4">
           {programsLoading ? (
             <Loading message="در حال بارگذاری برنامه..." />
           ) : groupedPrograms.length === 0 ? (
-            <Card glass>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                هیچ برنامه تمرینی ثبت نشده است
-              </CardContent>
-            </Card>
+            <EmptyState title="برنامه‌ای ثبت نشده" description="هیچ برنامه تمرینی برای این شاگرد ثبت نشده است" />
           ) : (
             groupedPrograms.map((day) => (
-              <Card key={day.day} glass>
-                <CardHeader>
-                  <CardTitle className="text-lg">{day.day}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="divide-y">
-                    {day.exercises.map((ex, i) => (
-                      <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                        <div className="flex-1">
-                          <p className="font-medium">{ex.name}</p>
-                          <p className="text-sm text-muted-foreground">
+              <div key={day.day}>
+                <SectionTitle className="mb-3">{day.day}</SectionTitle>
+                <TwilightCard className="divide-y divide-[#1e2430] p-0">
+                  {day.exercises.map((ex, i) => (
+                    <div key={i} className="flex items-center justify-between gap-3 px-4 py-3.5 first:pt-3.5 last:pb-3.5">
+                      <div className="flex min-w-0 flex-1 items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#2c3444] bg-[#202632] text-[#d2c0a5]">
+                          <Dumbbell className="h-5 w-5" strokeWidth={1.75} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-white">{ex.name}</p>
+                          <p className="mt-0.5 text-[11px] text-[#8e98a8]">
                             {formatPersianNumber(ex.sets)} ست × {formatPersianNumber(ex.reps)} تکرار
                             {ex.weight > 0 && ` | ${formatPersianNumber(ex.weight)} کیلوگرم`}
                           </p>
                         </div>
-                        <Badge variant="outline">{ex.rest}</Badge>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <Badge variant="outline" className="shrink-0">{ex.rest}</Badge>
+                    </div>
+                  ))}
+                </TwilightCard>
+              </div>
             ))
           )}
         </TabsContent>
 
-        <TabsContent value="progress" className="space-y-4">
+        <TabsContent value="progress" className="mt-4 space-y-4">
           {goalsLoading ? (
             <Loading message="در حال بارگذاری اهداف..." />
           ) : athleteGoals.length === 0 ? (
-            <Card glass>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                هیچ هدفی ثبت نشده است
-              </CardContent>
-            </Card>
+            <EmptyState title="هدفی ثبت نشده" description="هیچ هدفی برای این شاگرد ثبت نشده است" />
           ) : (
             athleteGoals.map((goal) => (
-              <Card key={goal.id} glass>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{goal.title}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {formatPersianNumber(goal.currentValue)} / {formatPersianNumber(goal.targetValue)} {goal.unit}
-                    </span>
-                  </div>
-                  <Progress value={calculateProgress(goal.currentValue, goal.targetValue)} />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {formatPersianNumber(Math.round(calculateProgress(goal.currentValue, goal.targetValue)))}% تکمیل شده
-                  </p>
-                </CardContent>
-              </Card>
+              <TwilightCard key={goal.id}>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium text-white">{goal.title}</span>
+                  <span className="text-xs tabular-nums text-[#8e98a8]">
+                    {formatPersianNumber(goal.currentValue)} / {formatPersianNumber(goal.targetValue)} {goal.unit}
+                  </span>
+                </div>
+                <Progress value={calculateProgress(goal.currentValue, goal.targetValue)} indicatorClassName="bg-none bg-[#d2c0a5]" className="bg-white/10" />
+                <p className="mt-1.5 text-[11px] text-[#8e98a8]">
+                  {formatPersianNumber(Math.round(calculateProgress(goal.currentValue, goal.targetValue)))}٪ تکمیل شده
+                </p>
+              </TwilightCard>
             ))
           )}
         </TabsContent>
 
-        <TabsContent value="history" className="space-y-4">
+        <TabsContent value="history" className="mt-4 space-y-4">
           {checkinsLoading ? (
             <Loading message="در حال بارگذاری تاریخچه..." />
           ) : athleteHistory.length === 0 ? (
-            <Card glass>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                هیچ چک‌اینی ثبت نشده است
-              </CardContent>
-            </Card>
+            <EmptyState title="چک‌اینی ثبت نشده" description="هیچ چک‌اینی برای این شاگرد ثبت نشده است" />
           ) : (
             <>
-              <Card glass>
-                <CardHeader><div><CardTitle>ریتم تمرین</CardTitle><p className="mt-1 text-xs text-muted-foreground">مدت جلسات تکمیل‌شده شاگرد</p></div></CardHeader>
-                <CardContent><SessionDurationChart checkIns={athleteHistory} /></CardContent>
-              </Card>
-              {athleteHistory.map((checkin) => {
-              const duration = checkin.durationMinutes ? `${checkin.durationMinutes} دقیقه` : "–";
-              return (
-                <Card key={checkin.id} glass>
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="space-y-1">
-                      <p className="font-medium">تمرین</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(checkin.checkInTime)}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-muted-foreground">{duration}</span>
-                      <Badge variant={checkin.sessionDeducted ? "success" : "secondary"}>
-                        {checkin.sessionDeducted ? "انجام شده" : "ثبت شده"}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-              })}
+              <div>
+                <SectionTitle className="mb-3">ریتم تمرین</SectionTitle>
+                <TwilightCard>
+                  <p className="mb-3 text-[11px] text-[#8e98a8]">مدت جلسات تکمیل‌شده شاگرد</p>
+                  <SessionDurationChart checkIns={athleteHistory} />
+                </TwilightCard>
+              </div>
+              <div className="flex flex-col gap-2">
+                {athleteHistory.map((checkin) => {
+                  const duration = checkin.durationMinutes ? `${checkin.durationMinutes} دقیقه` : "–";
+                  return (
+                    <TwilightCard key={checkin.id} className="flex items-center justify-between !p-4">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-white">تمرین</p>
+                        <p className="text-[11px] text-[#8e98a8]">{formatDate(checkin.checkInTime)}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs tabular-nums text-[#8e98a8]">{duration}</span>
+                        <Badge variant={checkin.sessionDeducted ? "success" : "secondary"}>
+                          {checkin.sessionDeducted ? "انجام شده" : "ثبت شده"}
+                        </Badge>
+                      </div>
+                    </TwilightCard>
+                  );
+                })}
+              </div>
             </>
           )}
         </TabsContent>
       </Tabs>
-      </FadeIn>
-    </div>
+    </PageShell>
   );
 }

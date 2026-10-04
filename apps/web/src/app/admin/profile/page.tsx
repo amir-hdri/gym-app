@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { FadeIn } from "@/components/animations/FadeIn";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
-import { getInitials, generateAvatarColor } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 import { toast } from "sonner";
 import { Save, Lock } from "lucide-react";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { TwilightCard, CtaButton } from "@/components/twilight/controls";
+
+/** Twilight input override (ui/Input base carries old theme tokens + a dark: variant). */
+const inputClassName =
+  "h-11 rounded-xl border-[#232934] bg-[#161a22] text-white placeholder:text-[#6b7280] focus-visible:ring-0 focus-visible:border-[#d2c0a5]/50";
 
 export default function AdminProfilePage() {
   const [profile, setProfile] = useState({ firstName: "مدیر", lastName: "سیستم", email: "admin@gymapp.ir", phone: "۰۲۱-۱۲۳۴۵۶۷۸" });
@@ -29,86 +31,94 @@ export default function AdminProfilePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">پروفایل مدیر</h1>
-        <p className="text-muted-foreground">مدیریت حساب کاربری شما</p>
-      </div>
+    <PageShell>
+      <PageHeader title="پروفایل مدیر" subtitle="مدیریت حساب کاربری شما" />
 
-      <FadeIn>
-        <Card glass>
-          <CardContent className="flex flex-col items-center gap-4 py-8">
-            <Avatar className="h-24 w-24 ring-4 ring-white/50">
-              <AvatarFallback className={`text-2xl ${generateAvatarColor(fullName)} text-white`}>{getInitials(fullName)}</AvatarFallback>
-            </Avatar>
-            <div className="text-center">
-              <h2 className="text-2xl font-bold">{fullName}</h2>
-              <p className="text-muted-foreground">مدیر باشگاه</p>
-            </div>
-          </CardContent>
-        </Card>
-      </FadeIn>
+      <TwilightCard className="flex flex-col items-center gap-4 py-8">
+        <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#d2c0a5] bg-gradient-to-br from-[#2a3444] to-[#141a22]">
+          <span className="font-serif text-2xl text-[#d2c0a5]">{getInitials(fullName)}</span>
+        </div>
+        <div className="text-center">
+          <h2 className="font-serif text-2xl font-normal text-white">{fullName}</h2>
+          <p className="mt-1 text-xs text-[#8e98a8]">مدیر باشگاه</p>
+        </div>
+      </TwilightCard>
 
       <Tabs defaultValue="info" dir="rtl">
-        <TabsList className="bg-white/40 backdrop-blur-xl border border-white/30">
-          <TabsTrigger value="info">اطلاعات شخصی</TabsTrigger>
-          <TabsTrigger value="security">امنیت</TabsTrigger>
+        <TabsList className="rounded-xl border border-[#232934] bg-[#161a22] p-1">
+          <TabsTrigger
+            value="info"
+            className="rounded-lg text-[#8e98a8] data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417]"
+          >
+            اطلاعات شخصی
+          </TabsTrigger>
+          <TabsTrigger
+            value="security"
+            className="rounded-lg text-[#8e98a8] data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417]"
+          >
+            امنیت
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
-          <FadeIn>
-            <Card glass>
-              <CardHeader><CardTitle>اطلاعات شخصی</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Input label="نام" value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} className="bg-white/70 backdrop-blur-sm border-white/30" />
-                  <Input label="نام خانوادگی" value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} className="bg-white/70 backdrop-blur-sm border-white/30" />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Input label="ایمیل" type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="bg-white/70 backdrop-blur-sm border-white/30" />
-                  <Input label="تلفن" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="bg-white/70 backdrop-blur-sm border-white/30" />
-                </div>
-                <div className="flex justify-end">
-                  <Button onClick={handleSaveProfile}><Save className="ml-2 h-4 w-4" />ذخیره تغییرات</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </FadeIn>
+          <TwilightCard>
+            <h3 className="font-serif text-lg font-normal text-white">اطلاعات شخصی</h3>
+            <div className="mt-4 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Input label="نام" value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} className={inputClassName} />
+                <Input label="نام خانوادگی" value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} className={inputClassName} />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Input label="ایمیل" type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className={inputClassName} />
+                <Input label="تلفن" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className={inputClassName} />
+              </div>
+              <div className="flex justify-end">
+                <CtaButton onClick={handleSaveProfile} className="w-auto px-6">
+                  <Save className="h-4 w-4" strokeWidth={1.75} />
+                  ذخیره تغییرات
+                </CtaButton>
+              </div>
+            </div>
+          </TwilightCard>
         </TabsContent>
 
         <TabsContent value="security">
-          <FadeIn>
-            <Card glass>
-              <CardHeader><CardTitle>تغییر رمز عبور</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
+          <TwilightCard>
+            <h3 className="font-serif text-lg font-normal text-white">تغییر رمز عبور</h3>
+            <div className="mt-4 space-y-4">
+              <Input
+                label="رمز عبور فعلی"
+                type="password"
+                value={password.current}
+                onChange={(e) => setPassword({ ...password, current: e.target.value })}
+                className={inputClassName}
+              />
+              <div className="grid gap-4 sm:grid-cols-2">
                 <Input
-                  label="رمز عبور فعلی"
+                  label="رمز عبور جدید"
                   type="password"
-                  value={password.current}
-                  onChange={(e) => setPassword({ ...password, current: e.target.value })}
+                  value={password.newPass}
+                  onChange={(e) => setPassword({ ...password, newPass: e.target.value })}
+                  className={inputClassName}
                 />
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Input
-                    label="رمز عبور جدید"
-                    type="password"
-                    value={password.newPass}
-                    onChange={(e) => setPassword({ ...password, newPass: e.target.value })}
-                  />
-                  <Input
-                    label="تکرار رمز عبور جدید"
-                    type="password"
-                    value={password.confirm}
-                    onChange={(e) => setPassword({ ...password, confirm: e.target.value })}
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <Button onClick={handleChangePassword}><Lock className="ml-2 h-4 w-4" />تغییر رمز عبور</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </FadeIn>
+                <Input
+                  label="تکرار رمز عبور جدید"
+                  type="password"
+                  value={password.confirm}
+                  onChange={(e) => setPassword({ ...password, confirm: e.target.value })}
+                  className={inputClassName}
+                />
+              </div>
+              <div className="flex justify-end">
+                <CtaButton onClick={handleChangePassword} className="w-auto px-6">
+                  <Lock className="h-4 w-4" strokeWidth={1.75} />
+                  تغییر رمز عبور
+                </CtaButton>
+              </div>
+            </div>
+          </TwilightCard>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

@@ -24,7 +24,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-foreground/80"
+            className="block text-xs font-medium text-[#8e98a8]"
           >
             {label}
             {props.required && <span className="text-destructive mx-1">*</span>}
@@ -35,17 +35,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={type}
             id={inputId}
             className={cn(
-              "flex h-12 w-full rounded-2xl border px-4 py-2.5 text-sm",
-              "bg-white/65 dark:bg-white/5 file:border-0 file:bg-transparent file:text-sm file:font-medium",
-              "placeholder:text-muted-foreground/60",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/40",
+              "flex h-11 w-full rounded-xl border border-[#232934] bg-[#161a22] px-4 py-2.5 text-sm text-white",
+              "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+              "placeholder:text-[#6b7280]",
+              "focus-visible:outline-none focus-visible:ring-0 focus-visible:border-[#d2c0a5]/50",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              "shadow-inner shadow-black/[0.02] transition-all duration-300",
-              "border-border/80",
+              "transition-colors",
               startAdornment && "ps-11",
               endAdornment && "pe-11",
               error
-                ? "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive/40"
+                ? "border-destructive focus-visible:border-destructive/60"
                 : "",
               className
             )}
@@ -55,7 +54,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {startAdornment && (
-            <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-muted-foreground/50" aria-hidden="true">
+            <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-[#6b7280]" aria-hidden="true">
               {startAdornment}
             </span>
           )}
@@ -72,7 +71,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </p>
         )}
         {hint && !error && (
-          <p id={hintId} className="text-xs text-muted-foreground">
+          <p id={hintId} className="text-xs text-[#8e98a8]">
             {hint}
           </p>
         )}

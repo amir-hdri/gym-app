@@ -2,21 +2,25 @@
 
 import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Progress } from "@/components/ui/Progress";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import { Button } from "@/components/ui/Button";
 import { formatPersianNumber, formatDate, calculateProgress, cn } from "@/lib/utils";
 import { useTrainingProgram } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
-import { FadeIn } from "@/components/animations/FadeIn";
+import { PageShell, PageHeader, SectionTitle, MicroLabelFa } from "@/components/twilight/Page";
+import { TwilightCard, FilterChips } from "@/components/twilight/controls";
 
-const dayNames = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"];
+const dayNames = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"] as const;
+type DayName = (typeof dayNames)[number];
 
 export default function ProgramDetailPage() {
   const params = useParams();
   const { data, isLoading, isError, error, refetch } = useTrainingProgram(params.id as string);
   const [completedExercises, setCompletedExercises] = useState<Record<string, number[]>>({});
+  const [activeDay, setActiveDay] = useState<DayName>(dayNames[0]);
 
   const program = data?.data;
 
@@ -54,76 +58,91 @@ export default function ProgramDetailPage() {
   const totalCompleted = Object.values(completedExercises).reduce((sum, arr) => sum + arr.length, 0);
   const overallProgress = calculateProgress(totalCompleted, totalExercises);
 
+  const activeDayData = weeklyProgram.find((d) => d.day === activeDay) || weeklyProgram[0];
+  const activeDayCompleted = (completedExercises[activeDayData?.day || ""] || []).length;
+
   return (
-    <div className="space-y-6">
-      <FadeIn direction="none">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{program.name}</h1>
-        <p className="mt-1 text-muted-foreground">
-          مربی: {program.coach?.firstName || ""} {program.coach?.lastName || ""} | {formatDate(program.startDate)} - {formatDate(program.endDate)} | {formatPersianNumber(program.frequencyPerWeek)} روز در هفته
-        </p>
-      </div>
-      </FadeIn>
+    <PageShell>
+      <Button variant="ghost" size="sm" asChild className="self-start">
+        <Link href="/athlete/programs">
+          <ChevronRight className="h-4 w-4" strokeWidth={1.75} /> بازگشت به برنامه‌ها
+        </Link>
+      </Button>
 
-      <FadeIn delay={0.1}>
-      <div className="flex items-center gap-4 rounded-xl border bg-white/30 backdrop-blur-sm p-4">
-        <Progress value={overallProgress} className="flex-1" />
-        <span className="text-sm font-medium">{formatPersianNumber(Math.round(overallProgress))}%</span>
-      </div>
-      </FadeIn>
+      <PageHeader
+        title={program.name}
+        subtitle={`${program.coach?.firstName || ""} ${program.coach?.lastName || ""} | ${formatDate(program.startDate)} - ${formatDate(program.endDate)} | ${formatPersianNumber(program.frequencyPerWeek)} روز در هفته`}
+        action={
+          <span className="rounded-full border border-[#2b313d] bg-[#181c22] px-3 py-1.5 text-[11px] text-[#e5d9c5]">
+            {formatPersianNumber(Math.round(overallProgress))}٪ تکمیل
+          </span>
+        }
+      />
 
-      <FadeIn delay={0.15}>
-      <Tabs defaultValue={dayNames[0]} dir="rtl">
-        <TabsList className="w-full flex-wrap bg-white/40 backdrop-blur-xl border border-white/30">
-          {dayNames.map((day) => (
-            <TabsTrigger key={day} value={day} className="flex-1">
-              {day}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        {weeklyProgram.map((dayData) => (
-          <TabsContent key={dayData.day} value={dayData.day}>
-            <Card glass>
-              <CardHeader>
-                <CardTitle>تمرینات {dayData.day}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {dayData.exercises.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">روز استراحت</p>
-                ) : (
-                  dayData.exercises.map((exercise, idx) => {
-                    const isCompleted = (completedExercises[dayData.day] || []).includes(idx);
-                    return (
-                      <div
-                        key={exercise.id || idx}
-                        className={cn(
-                          "flex items-center gap-4 rounded-lg border p-4 transition-all duration-300 hover:shadow-sm transition-all duration-200",
-                          isCompleted ? "opacity-50" : "bg-white/30 backdrop-blur-sm"
-                        )}
-                      >
-                        <Checkbox
-                          checked={isCompleted}
-                          onCheckedChange={() => toggleExercise(dayData.day, idx)}
-                        />
-                        <div className={`flex-1 ${isCompleted ? "line-through text-muted-foreground" : ""}`}>
-                          <p className="font-medium">{exercise.exercise?.name || exercise.exerciseId}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatPersianNumber(exercise.sets)} × {exercise.reps}
-                            {exercise.weight ? ` - ${formatPersianNumber(exercise.weight)} کیلوگرم` : ""}
-                            {" - "}
-                            {formatPersianNumber(exercise.restSeconds)} ثانیه استراحت
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
-      </Tabs>
-      </FadeIn>
-    </div>
+      <TwilightCard>
+        <div className="mb-3 flex items-center justify-between">
+          <MicroLabelFa>پیشرفت کلی برنامه</MicroLabelFa>
+          <span className="font-sans text-sm font-medium tabular-nums text-white">
+            {formatPersianNumber(Math.round(overallProgress))}٪
+          </span>
+        </div>
+        <Progress
+          value={overallProgress}
+          className="bg-white/10"
+          indicatorClassName="bg-[#d2c0a5] shadow-none"
+        />
+      </TwilightCard>
+
+      <FilterChips
+        pillId="athlete-program-days"
+        options={dayNames}
+        value={activeDay}
+        onChange={setActiveDay}
+        labels={Object.fromEntries(dayNames.map((d) => [d, d])) as Record<DayName, string>}
+      />
+
+      {activeDayData && (
+        <TwilightCard className="p-0">
+          <div className="flex items-center justify-between px-4 pt-4">
+            <SectionTitle>تمرینات {activeDayData.day}</SectionTitle>
+            <span className="text-[11px] text-[#8e98a8]">
+              {formatPersianNumber(activeDayCompleted)}/{formatPersianNumber(activeDayData.exercises.length)} تکمیل
+            </span>
+          </div>
+          <div className="flex flex-col gap-2.5 p-4">
+            {activeDayData.exercises.length === 0 ? (
+              <p className="py-4 text-center text-sm text-[#8e98a8]">روز استراحت</p>
+            ) : (
+              activeDayData.exercises.map((exercise, idx) => {
+                const isCompleted = (completedExercises[activeDayData.day] || []).includes(idx);
+                return (
+                  <div
+                    key={exercise.id || idx}
+                    className={cn(
+                      "flex items-center gap-4 rounded-xl border border-[#232934] bg-[#161a22] p-4 transition-colors",
+                      isCompleted && "opacity-50"
+                    )}
+                  >
+                    <Checkbox
+                      checked={isCompleted}
+                      onCheckedChange={() => toggleExercise(activeDayData.day, idx)}
+                    />
+                    <div className={cn("flex-1", isCompleted && "line-through text-[#8e98a8]")}>
+                      <p className="text-sm font-medium text-white">{exercise.exercise?.name || exercise.exerciseId}</p>
+                      <p className="mt-0.5 text-[11px] text-[#8e98a8]">
+                        {formatPersianNumber(exercise.sets)} × {exercise.reps}
+                        {exercise.weight ? ` - ${formatPersianNumber(exercise.weight)} کیلوگرم` : ""}
+                        {" - "}
+                        {formatPersianNumber(exercise.restSeconds)} ثانیه استراحت
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </TwilightCard>
+      )}
+    </PageShell>
   );
 }

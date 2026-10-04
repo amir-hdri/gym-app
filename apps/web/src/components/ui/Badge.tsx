@@ -6,14 +6,16 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 function Badge({ className, variant = "default", ...props }: BadgeProps) {
+  // Reference pill language (GymCheckinScreen «ACTIVE» pill):
+  // cream-tinted for positive states, muted for neutral, tinted for warn/error.
   const variants = {
-    default: "bg-primary-solid text-primary-foreground",
-    secondary: "bg-secondary text-secondary-foreground",
-    destructive: "bg-destructive text-destructive-foreground",
-    outline: "text-foreground border",
-    success: "text-success bg-success/10",
-    warning: "text-warning bg-warning/10",
-    info: "text-activity-stand bg-activity-stand/10",
+    default: "border-transparent bg-[#d2c0a5] text-[#121417]",
+    secondary: "border-[#2b3342] bg-[#1e2430] text-[#9ca3af]",
+    destructive: "border-[#f87171]/40 bg-[#f87171]/10 text-[#f87171]",
+    outline: "border-[#2b3342] text-[#8e98a8]",
+    success: "border-[#d2c0a5]/40 bg-[#d2c0a5]/10 text-[#d2c0a5]",
+    warning: "border-[#fbbf24]/40 bg-[#fbbf24]/10 text-[#fbbf24]",
+    info: "border-white/10 bg-[#202632] text-[#9ca3af]",
   };
 
   return (

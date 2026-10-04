@@ -8,7 +8,7 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function CardSkeleton() {
   return (
-    <div className="liquid-glass-card space-y-4 rounded-2xl p-6">
+    <div className="rounded-2xl border border-[#232934] bg-[#161a22] space-y-4 rounded-2xl p-6">
       <div className="flex items-center justify-between">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-8 w-8 rounded-full" />
@@ -34,7 +34,7 @@ export function ListSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="liquid-glass-card flex items-center gap-4 rounded-2xl p-4">
+        <div key={i} className="rounded-2xl border border-[#232934] bg-[#161a22] flex items-center gap-4 rounded-2xl p-4">
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-3/4" />
@@ -60,7 +60,7 @@ export function PageSkeleton() {
           <CardSkeleton key={i} />
         ))}
       </div>
-      <div className="liquid-glass-card space-y-4 rounded-2xl p-5">
+      <div className="rounded-2xl border border-[#232934] bg-[#161a22] space-y-4 rounded-2xl p-5">
         <Skeleton className="h-5 w-36" />
         <TableSkeleton rows={4} />
       </div>

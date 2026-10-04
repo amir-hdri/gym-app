@@ -1,23 +1,29 @@
 "use client";
 
 import * as React from "react";
-import { Users, ClipboardList, CalendarCheck, Sparkles, Target, Clock3 } from "lucide-react";
-import { ScrollReveal } from "@/components/animations/ScrollReveal";
-import { StaggerScroll, StaggerScrollItem } from "@/components/animations/ScrollReveal";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import Link from "next/link";
+import { ClipboardList, Plus, Dumbbell, MessageSquare, ChevronLeft } from "lucide-react";
+import { PageShell, PageHeader, SectionTitle } from "@/components/twilight/Page";
+import { RowCard, StatCard, TwilightCard } from "@/components/twilight/controls";
 import { Progress } from "@/components/ui/Progress";
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
-import { formatPersianNumber, getInitials, generateAvatarColor, formatRelativeTime, cn } from "@/lib/utils";
+import { formatPersianNumber, getInitials, formatRelativeTime } from "@/lib/utils";
 import { useCoachDashboard } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AthleteProgressChart } from "@/components/analytics/Charts";
 
-function getProgressColor(progress: number) {
-  if (progress >= 80) return "bg-activity-move";
-  if (progress >= 50) return "bg-amber-500";
-  return "bg-blue-500";
+function getProgressClass(progress: number) {
+  if (progress >= 80) return "bg-none bg-[#d2c0a5]";
+  if (progress >= 50) return "bg-none bg-[#9a8f78]";
+  return "bg-none bg-[#5b6472]";
 }
+
+const quickActions = [
+  { label: "شاگرد جدید", icon: Plus, href: "/coach/athletes/new" },
+  { label: "برنامه جدید", icon: ClipboardList, href: "/coach/programs/new" },
+  { label: "حرکت جدید", icon: Dumbbell, href: "/coach/exercises/new" },
+  { label: "پیام‌ها", icon: MessageSquare, href: "/coach/messages" },
+];
 
 export default function CoachDashboard() {
   const { user } = useAuth();
@@ -31,110 +37,90 @@ export default function CoachDashboard() {
   if (!dashboard) return null;
 
   const athletes = dashboard.athletes ?? [];
-  const totalAthletes = dashboard.totalAthletes ?? dashboard.athletesCount ?? athletes.length;
-
-  const statCards = [
-    { label: "تعداد شاگردان", value: dashboard.totalAthletes ?? dashboard.athletesCount ?? 0, icon: Users, color: "text-activity-stand", bg: "bg-activity-stand/10" },
-    { label: "برنامه‌های فعال", value: dashboard.activePrograms, icon: ClipboardList, color: "text-activity-move", bg: "bg-activity-move/10" },
-    { label: "جلسات امروز", value: dashboard.todaySessions ?? 0, icon: Clock3, color: "text-success", bg: "bg-success/10" },
-    { label: "اهداف در انتظار", value: dashboard.pendingGoals ?? 0, icon: Target, color: "text-warning", bg: "bg-warning/10" },
-  ];
 
   return (
-    <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-l from-activity-stand via-primary to-activity-move p-7 text-white shadow-[0_25px_70px_-30px_rgba(155,92,255,.8)] md:p-9">
-        <div className="absolute -left-12 -top-20 h-64 w-64 rounded-full bg-white/15 blur-[70px]" />
-        <div className="relative flex items-center justify-between gap-5">
-          <div>
-            <p className="latin-kicker mb-2 flex items-center gap-2 text-white/70"><Sparkles className="h-4 w-4" /> COACH STUDIO</p>
-            <h1 className="text-3xl font-black tracking-tight md:text-4xl">اثر تو، قدرت آن‌هاست.</h1>
-            <p className="mt-2 text-sm text-white/65">جلسه‌ها، بازبینی‌ها و پیشرفت شاگردانت در یک نگاه.</p>
-          </div>
-          <div className="hidden rounded-[1.5rem] border border-white/20 bg-white/10 px-6 py-4 text-center backdrop-blur-xl sm:block"><p className="text-3xl font-black">{formatPersianNumber(totalAthletes)}</p><p className="text-xs text-white/75">شاگرد</p></div>
+    <PageShell>
+      <PageHeader
+        title={`سلام، ${user?.firstName ?? "مربی"}`}
+        subtitle="جلسه‌ها، بازبینی‌ها و پیشرفت شاگردانت در یک نگاه."
+      />
+
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard label="شاگردان" value={formatPersianNumber(dashboard.totalAthletes ?? dashboard.athletesCount ?? 0)} />
+        <StatCard label="برنامه‌های فعال" value={formatPersianNumber(dashboard.activePrograms ?? 0)} />
+        <StatCard label="جلسات امروز" value={formatPersianNumber(dashboard.todaySessions ?? 0)} />
+        <StatCard label="اهداف در انتظار" value={formatPersianNumber(dashboard.pendingGoals ?? 0)} />
+      </div>
+
+      <div>
+        <SectionTitle className="mb-3">اقدامات سریع</SectionTitle>
+        <div className="flex items-center justify-around py-1">
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <Link key={action.href} href={action.href} className="group flex shrink-0 flex-col items-center gap-2 focus:outline-none">
+                <div className="flex h-[58px] w-[58px] items-center justify-center rounded-full border border-[#262c37] bg-[#181d24] text-[#9ca3af] shadow-sm transition-colors group-hover:border-[#d2c0a5]/50 group-hover:bg-[#1f2530] group-hover:text-[#d2c0a5]">
+                  <Icon className="h-5 w-5" strokeWidth={1.75} />
+                </div>
+                <span className="text-[11px] text-[#9ca3af] transition-colors group-hover:text-white">
+                  {action.label}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
-      <StaggerScroll className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" stagger={0.08}>
-        {statCards.map((stat) => (
-          <StaggerScrollItem key={stat.label}>
-            <Card glass hover>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-                <div className={stat.bg + " rounded-lg p-2"}>
-                  <stat.icon className={"h-5 w-5 " + stat.color} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{formatPersianNumber(stat.value)}</div>
-              </CardContent>
-            </Card>
-          </StaggerScrollItem>
-        ))}
-      </StaggerScroll>
-
-      <ScrollReveal delay={0.15}>
-        <Card glass>
-          <CardHeader>
-            <div><CardTitle>نبض پیشرفت شاگردان</CardTitle><p className="mt-1 text-xs text-muted-foreground">درصد تکمیل فعلی حرکت‌های هر برنامه</p></div>
-          </CardHeader>
-          <CardContent><AthleteProgressChart athletes={athletes} /></CardContent>
-        </Card>
-      </ScrollReveal>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ScrollReveal>
-          <Card glass>
-            <CardHeader>
-              <CardTitle>شاگردان من</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <StaggerScroll stagger={0.06}>
-                {athletes.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-muted-foreground">هنوز شاگردی به شما منتسب نشده است.</p>
-                ) : athletes.map((athlete) => (
-                  <StaggerScrollItem key={athlete.id}>
-                    <div className={cn("flex items-center gap-4 rounded-lg p-4")}>
-                      <Avatar className="h-12 w-12">
-                        <AvatarFallback className={generateAvatarColor(athlete.name)}>
-                          {getInitials(athlete.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
-                          <span className="font-medium truncate max-w-full">{athlete.name}</span>
-                          <span className="shrink-0 text-xs text-muted-foreground">
-                            آخرین چک‌این: {athlete.lastCheckIn ? formatRelativeTime(athlete.lastCheckIn) : "-"}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">{athlete.currentProgram?.name || "بدون برنامه"}</p>
-                        <div className="flex items-center gap-2 pt-1">
-                          <Progress value={athlete.progress} indicatorClassName={getProgressColor(athlete.progress)} />
-                          <span className="text-xs font-medium tabular-nums">{formatPersianNumber(athlete.progress)}%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </StaggerScrollItem>
-                ))}
-              </StaggerScroll>
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-
-        <ScrollReveal delay={0.2}>
-          <Card glass>
-            <CardHeader>
-              <CardTitle>برنامه امروز</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-5 py-10 text-center">
-                <CalendarCheck className="mx-auto mb-3 h-8 w-8 text-muted-foreground/60" />
-                <p className="text-sm font-bold">زمان‌بندی جلسه‌ای ثبت نشده است</p>
-                <p className="mt-1 text-xs leading-6 text-muted-foreground">پس از اتصال برنامه جلسات، زمان و وضعیت هر جلسه در این بخش نمایش داده می‌شود.</p>
-              </div>
-            </CardContent>
-          </Card>
-        </ScrollReveal>
+      <div>
+        <SectionTitle className="mb-3">نبض پیشرفت شاگردان</SectionTitle>
+        <TwilightCard>
+          <p className="mb-3 text-[11px] text-[#8e98a8]">درصد تکمیل فعلی حرکت‌های هر برنامه</p>
+          <AthleteProgressChart athletes={athletes} />
+        </TwilightCard>
       </div>
-    </div>
+
+      <div>
+        <SectionTitle
+          className="mb-3"
+          action={
+            <Link href="/coach/athletes" className="flex items-center gap-1 text-xs text-[#d2c0a5]">
+              همه شاگردان
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Link>
+          }
+        >
+          شاگردان من
+        </SectionTitle>
+        {athletes.length === 0 ? (
+          <p className="py-6 text-center text-sm text-[#8e98a8]">هنوز شاگردی به شما منتسب نشده است.</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {athletes.map((athlete) => (
+              <Link key={athlete.id} href={`/coach/athletes/${athlete.id}`} className="block">
+                <RowCard
+                  icon={<span className="font-serif text-sm text-[#d2c0a5]">{getInitials(athlete.name)}</span>}
+                  title={athlete.name}
+                  subtitle={
+                    <>
+                      {athlete.currentProgram?.name || "بدون برنامه"}
+                      {" · "}
+                      آخرین چک‌این: {athlete.lastCheckIn ? formatRelativeTime(athlete.lastCheckIn) : "-"}
+                    </>
+                  }
+                  trailing={
+                    <div className="flex w-24 flex-col items-end gap-1.5">
+                      <span className="text-xs font-medium tabular-nums text-white">
+                        {formatPersianNumber(athlete.progress)}٪
+                      </span>
+                      <Progress value={athlete.progress} indicatorClassName={getProgressClass(athlete.progress)} className="h-1.5 bg-white/10" />
+                    </div>
+                  }
+                />
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </PageShell>
   );
 }

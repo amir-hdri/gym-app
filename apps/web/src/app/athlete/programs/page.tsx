@@ -1,15 +1,21 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { StaggerContainer, StaggerItem } from "@/components/animations/Stagger";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Dumbbell, ChevronLeft, Play } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { Progress } from "@/components/ui/Progress";
+import { Button } from "@/components/ui/Button";
 import { formatPersianNumber, formatDate, calculateProgress } from "@/lib/utils";
 import { useTrainingPrograms } from "@/hooks/use-api";
-import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
-import { Dumbbell } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Loading, ErrorDisplay } from "@/components/ui/DataState";
+import { PageShell, PageHeader, SectionTitle, MicroLabel } from "@/components/twilight/Page";
+import {
+  SearchInput,
+  FilterChips,
+  RowCard,
+  EmptyState,
+} from "@/components/twilight/controls";
+import { GymBackdrop } from "@/components/twilight/GymBackdrop";
 
 const statusConfig: Record<string, { label: string; variant: "secondary" | "success" | "info" | "outline" }> = {
   draft: { label: "پیش‌نویس", variant: "secondary" },
@@ -18,78 +24,150 @@ const statusConfig: Record<string, { label: string; variant: "secondary" | "succ
   archived: { label: "بایگانی", variant: "outline" },
 };
 
+const statusFilters = ["all", "draft", "active", "completed", "archived"] as const;
+type StatusFilter = (typeof statusFilters)[number];
+
+const statusFilterLabels: Record<StatusFilter, string> = {
+  all: "همه",
+  draft: "پیش‌نویس",
+  active: "فعال",
+  completed: "تکمیل شده",
+  archived: "بایگانی",
+};
+
 export default function ProgramsPage() {
   const { data, isLoading, isError, error } = useTrainingPrograms();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+
+  const programs = useMemo(() => data?.data ?? [], [data]);
+
+  const filteredPrograms = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return programs.filter((program) => {
+      if (statusFilter !== "all" && program.status !== statusFilter) return false;
+      if (!q) return true;
+      const coachName = `${program.coach?.firstName || ""} ${program.coach?.lastName || ""}`.toLowerCase();
+      return program.name.toLowerCase().includes(q) || coachName.includes(q);
+    });
+  }, [programs, searchQuery, statusFilter]);
 
   if (isLoading) return <Loading />;
   if (isError) return <ErrorDisplay message={error?.message} />;
 
-  const programs = data?.data || [];
-
   if (programs.length === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">برنامه‌های تمرینی</h1>
-          <p className="mt-1 text-muted-foreground">برنامه‌های تمرینی شما</p>
-        </div>
+      <PageShell>
+        <PageHeader title="برنامه‌های تمرینی" subtitle="برنامه‌های تمرینی شما" />
         <EmptyState
-          icon={<Dumbbell className="h-8 w-8 text-muted-foreground" />}
+          icon={<Dumbbell className="h-6 w-6" strokeWidth={1.75} />}
           title="برنامه تمرینی وجود ندارد"
           description="هنوز برنامه تمرینی برای شما ثبت نشده است"
-          action={<Button asChild><Link href="/athlete">بازگشت به داشبورد</Link></Button>}
+          action={
+            <Button asChild>
+              <Link href="/athlete">بازگشت به داشبورد</Link>
+            </Button>
+          }
         />
-      </div>
+      </PageShell>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">برنامه‌های تمرینی</h1>
-        <p className="mt-1 text-muted-foreground">برنامه‌های تمرینی شما</p>
-      </div>
+  const featured = programs.find((p) => p.status === "active") || programs[0];
+  const featuredCompleted = featured.exercises?.filter((e) => e.isCompleted).length || 0;
+  const featuredTotal = featured.exercises?.length || 1;
+  const featuredProgress = calculateProgress(featuredCompleted, featuredTotal);
+  const listPrograms = filteredPrograms.filter((p) => p.id !== featured.id);
 
-      <StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {programs.map((program) => {
-          const status = statusConfig[program.status] || statusConfig.draft;
-          const completedCount = program.exercises?.filter((e) => e.isCompleted).length || 0;
-          const totalCount = program.exercises?.length || 1;
-          const progressPercent = calculateProgress(completedCount, totalCount);
-          return (
-            <StaggerItem key={program.id}>
-              <Link href={`/athlete/programs/${program.id}`}>
-                <Card
-                  glass
-                  hover
-                  className={`cursor-pointer transition-all ${
-                    program.status === "active" ? "ring-2 ring-primary/50" : ""
-                  }`}
-                >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{program.name}</CardTitle>
-                    <Badge variant={status.variant}>{status.label}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>مربی: {program.coach?.firstName || ""} {program.coach?.lastName || ""}</p>
-                    <p>
-                      {formatDate(program.startDate)} - {formatDate(program.endDate)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Progress value={progressPercent} className="flex-1" />
-                    <span className="text-sm font-medium">{formatPersianNumber(Math.round(progressPercent))}%</span>
-                  </div>
-                </CardContent>
-                </Card>
-              </Link>
-            </StaggerItem>
-          );
-        })}
-      </StaggerContainer>
-    </div>
+  return (
+    <PageShell>
+      <PageHeader
+        title="برنامه‌های تمرینی"
+        subtitle="برنامه‌های تمرینی شما"
+        action={
+          <span className="rounded-full border border-[#2b313d] bg-[#181c22] px-3 py-1.5 text-[11px] text-[#e5d9c5]">
+            {formatPersianNumber(programs.length)} برنامه
+          </span>
+        }
+      />
+
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="جستجوی برنامه یا مربی..."
+      />
+
+      <FilterChips
+        pillId="athlete-programs-filter"
+        options={statusFilters}
+        value={statusFilter}
+        onChange={setStatusFilter}
+        labels={statusFilterLabels}
+      />
+
+      {/* Featured program hero */}
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <SectionTitle>برنامه شاخص</SectionTitle>
+          <Badge variant={(statusConfig[featured.status] || statusConfig.draft).variant}>
+            {(statusConfig[featured.status] || statusConfig.draft).label}
+          </Badge>
+        </div>
+        <Link href={`/athlete/programs/${featured.id}`} className="group block">
+          <div className="relative h-48 cursor-pointer overflow-hidden rounded-[26px] border border-white/10 shadow-xl">
+            <GymBackdrop />
+            <div className="absolute inset-0 z-10 flex flex-col justify-end p-6">
+              <MicroLabel className="mb-1">Featured Program</MicroLabel>
+              <h3 className="font-serif text-[26px] font-medium text-white transition-colors group-hover:text-[#f8f5f0]">
+                {featured.name}
+              </h3>
+              <p className="mt-1 text-[11px] text-[#8e98a8]">
+                {formatPersianNumber(featuredTotal)} حرکت · {formatPersianNumber(Math.round(featuredProgress))}٪ تکمیل · {formatDate(featured.startDate)} - {formatDate(featured.endDate)}
+              </p>
+            </div>
+            <div className="absolute left-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-colors group-hover:bg-[#d2c0a5] group-hover:text-black">
+              <Play className="h-3.5 w-3.5 fill-current" strokeWidth={1.75} />
+            </div>
+          </div>
+        </Link>
+      </section>
+
+      {/* All programs list */}
+      <section className="flex flex-col gap-3">
+        <SectionTitle>همه برنامه‌ها</SectionTitle>
+        {listPrograms.length === 0 ? (
+          <EmptyState
+            icon={<Dumbbell className="h-6 w-6" strokeWidth={1.75} />}
+            title="برنامه‌ای یافت نشد"
+            description="با این جستجو یا فیلتر، برنامه‌ای پیدا نشد"
+          />
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            {listPrograms.map((program) => {
+              const status = statusConfig[program.status] || statusConfig.draft;
+              const completedCount = program.exercises?.filter((e) => e.isCompleted).length || 0;
+              const totalCount = program.exercises?.length || 1;
+              const progressPercent = calculateProgress(completedCount, totalCount);
+              return (
+                <Link key={program.id} href={`/athlete/programs/${program.id}`}>
+                  <RowCard
+                    icon={<Dumbbell className="h-4 w-4" strokeWidth={1.75} />}
+                    title={program.name}
+                    subtitle={`${program.coach?.firstName || ""} ${program.coach?.lastName || ""} · ${formatPersianNumber(completedCount)}/${formatPersianNumber(totalCount)} حرکت · ${formatPersianNumber(Math.round(progressPercent))}٪`}
+                    trailing={
+                      <span className="flex items-center gap-2">
+                        <Badge variant={status.variant}>{status.label}</Badge>
+                        <ChevronLeft className="h-4 w-4 text-[#606a78]" strokeWidth={1.75} />
+                      </span>
+                    }
+                    className={program.status === "active" ? "ring-2 ring-[#d2c0a5]/40" : undefined}
+                  />
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </PageShell>
   );
 }

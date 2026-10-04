@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { FadeIn } from "@/components/animations/FadeIn";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { formatRelativeTime } from "@/lib/utils";
 import { toast } from "sonner";
 import { MessageSquare, Send, User, CheckCheck } from "lucide-react";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { EmptyState } from "@/components/twilight/controls";
 
 type ChatMessage = { id: number; sender: "coach" | "athlete"; text: string; createdAt: string; unread?: boolean };
 
@@ -41,58 +41,67 @@ export default function AthleteMessagesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">پیام‌ها</h1>
-        <p className="mt-1 text-muted-foreground">گفت‌وگوی مستقیم با مربی شما</p>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="پیام‌ها"
+        subtitle="گفت‌وگوی مستقیم با مربی شما"
+      />
 
-      <FadeIn>
-        <Card glass>
-          <CardHeader className="border-b border-border/60">
-            <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary"><User className="h-5 w-5" /></div><div><CardTitle>دکتر مهسا احمدی</CardTitle><p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2 w-2 rounded-full bg-success" />مربی شما</p></div></div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {messages.length === 0 ? (
-              <div className="py-8 text-center text-muted-foreground">
-                <MessageSquare className="mx-auto mb-3 h-12 w-12 opacity-50" />
-                <p>هنوز پیامی از مربی خود دریافت نکرده‌اید</p>
-              </div>
-            ) : (
-              <div className="flex max-h-[28rem] flex-col gap-3 overflow-y-auto py-2" role="log" aria-live="polite" aria-label="تاریخچه گفت‌وگو">
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`flex ${msg.sender === "athlete" ? "justify-start" : "justify-end"}`}>
-                    <div className={`max-w-[86%] rounded-2xl px-4 py-3 sm:max-w-[72%] ${msg.sender === "athlete" ? "rounded-br-md bg-primary-solid text-primary-foreground" : "rounded-bl-md border border-border/70 bg-muted"}`}>
-                      <p className="text-sm leading-7">{msg.text}</p>
-                      <div className={`mt-1.5 flex items-center gap-1.5 text-xs ${msg.sender === "athlete" ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
-                        <time dateTime={msg.createdAt}>{formatRelativeTime(msg.createdAt)}</time>
-                        {msg.sender === "athlete" && <CheckCheck className="h-3.5 w-3.5" aria-label="ارسال شده" />}
-                        {msg.unread && <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-label="خوانده نشده" />}
-                      </div>
+      <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+        <div className="border-b border-[#1e2430] px-4 py-3.5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#2c3444] bg-[#202632] text-[#d2c0a5]">
+              <User className="h-5 w-5" strokeWidth={1.75} />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-white">دکتر مهسا احمدی</h2>
+              <p className="mt-1 flex items-center gap-1.5 text-xs text-[#8e98a8]">
+                <span className="h-2 w-2 rounded-full bg-[#d2c0a5]" />مربی شما
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4 p-4">
+          {messages.length === 0 ? (
+            <EmptyState
+              icon={<MessageSquare className="h-6 w-6" strokeWidth={1.75} />}
+              title="هنوز پیامی از مربی خود دریافت نکرده‌اید"
+            />
+          ) : (
+            <div className="flex max-h-[28rem] flex-col gap-3 overflow-y-auto py-2" role="log" aria-live="polite" aria-label="تاریخچه گفت‌وگو">
+              {messages.map((msg) => (
+                <div key={msg.id} className={`flex ${msg.sender === "athlete" ? "justify-start" : "justify-end"}`}>
+                  <div className={`max-w-[86%] rounded-2xl px-4 py-3 sm:max-w-[72%] ${msg.sender === "athlete" ? "rounded-br-md bg-primary text-[#121417]" : "rounded-bl-md border border-[#232934] bg-[#1a202a] text-white"}`}>
+                    <p className="text-sm leading-7">{msg.text}</p>
+                    <div className={`mt-1.5 flex items-center gap-1.5 text-xs ${msg.sender === "athlete" ? "text-[#121417]/75" : "text-[#8e98a8]"}`}>
+                      <time dateTime={msg.createdAt}>{formatRelativeTime(msg.createdAt)}</time>
+                      {msg.sender === "athlete" && <CheckCheck className="h-3.5 w-3.5" strokeWidth={1.75} aria-label="ارسال شده" />}
+                      {msg.unread && <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-label="خوانده نشده" />}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-
-            <div className="space-y-2 pt-2">
-              <Textarea
-                aria-label="متن پیام"
-                placeholder="پاسخ خود را بنویسید..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={3}
-                className="bg-white/70 backdrop-blur-sm border-white/30"
-              />
-              <div className="flex justify-start">
-                <Button onClick={handleSend} loading={isSending} disabled={!message.trim()}>
-                  <Send className="ml-2 h-4 w-4" />ارسال پیام
-                </Button>
-              </div>
+                </div>
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      </FadeIn>
-    </div>
+          )}
+
+          <div className="space-y-2 pt-2">
+            <Textarea
+              aria-label="متن پیام"
+              placeholder="پاسخ خود را بنویسید..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={3}
+              className="rounded-xl border border-[#232934] bg-[#1a202a] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none"
+            />
+            <div className="flex justify-start">
+              <Button onClick={handleSend} loading={isSending} disabled={!message.trim()}>
+                <Send className="ml-2 h-4 w-4" strokeWidth={1.75} />ارسال پیام
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </PageShell>
   );
 }

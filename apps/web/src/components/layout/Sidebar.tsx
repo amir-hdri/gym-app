@@ -4,8 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Sparkles, X } from "lucide-react";
-import { LumiLogo } from "@/components/ui/LumiLogo";
+import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface NavItem {
@@ -23,6 +22,10 @@ interface SidebarProps {
   onClose: () => void;
 }
 
+/**
+ * Twilight Meditation sidebar — dark panel in the reference language:
+ * hairline borders, cream active treatment, muted rows.
+ */
 export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
@@ -51,7 +54,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
             onClick={onClose}
           />
         )}
@@ -59,18 +62,22 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
       <aside
         id="portal-sidebar"
         className={cn(
-          "fixed inset-y-3 right-3 z-50 flex w-[264px] flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-white/78 shadow-[0_24px_80px_-28px_rgba(71,22,66,.35)] backdrop-blur-2xl transition-transform duration-500 ease-out lg:translate-x-0 dark:border-white/10 dark:bg-brand-surface/90",
+          "fixed inset-y-3 right-3 z-50 flex w-[264px] flex-col overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#0c0e12] shadow-[0_24px_80px_-28px_rgba(0,0,0,0.8)] transition-transform duration-300 ease-out lg:translate-x-0",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        {/* Logo */}
-        <div className="flex h-20 items-center justify-between px-5">
-          <Link href="/" className="flex items-center text-foreground" aria-label="Lumi Wellness">
-            <LumiLogo size="sm" variant="auto" showSubtitle showDivider />
+        {/* Logo — reference wordmark */}
+        <div className="flex h-20 items-center justify-between border-b border-white/[0.04] px-5">
+          <Link href="/" className="flex items-center gap-2" aria-label="Lumi Wellness">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#d2c0a5] shadow-[0_0_8px_rgba(210,192,165,0.8)]" />
+            <span className="font-serif text-lg font-semibold tracking-tight text-white">لومی</span>
+            <span dir="ltr" className="pt-0.5 text-[10px] font-normal tracking-widest text-[#8e98a8]">
+              LUMI
+            </span>
           </Link>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+            className="rounded-lg p-1.5 text-[#8e98a8] transition-colors hover:bg-[#1a202a] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
             aria-label="بستن منو"
           >
             <X className="h-5 w-5" />
@@ -78,19 +85,20 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <div className="mx-4 mb-3 rounded-2xl bg-gradient-to-l from-activity-move to-activity-stand p-[1px]">
-          <div className="flex items-center gap-3 rounded-[15px] bg-card px-3 py-3 dark:bg-card/90">
-            <Sparkles className="h-4 w-4 text-primary" />
-             <div><p className="text-xs font-extrabold">امروز برای تو</p><p className="text-xs text-muted-foreground">حرکت کن، بدرخش</p></div>
-          </div>
-        </div>
-        <nav className="flex-1 overflow-y-auto px-3 py-2">
+        <nav className="flex-1 overflow-y-auto px-3 py-3">
           <ul className="space-y-0.5">
             {items.map((item, index) => {
               const active = isActive(item);
               const hasSubItems = item.subItems && item.subItems.length > 0;
               const expanded = expandedItems.includes(item.label);
               const submenuId = `sidebar-sub-${index}`;
+
+              const rowClass = cn(
+                "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-sans text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                active
+                  ? "border border-[#d2c0a5]/25 bg-[#1a202a] text-white"
+                  : "border border-transparent text-[#8e98a8] hover:bg-[#1a202a] hover:text-white"
+              );
 
               return (
                 <li key={item.label}>
@@ -100,26 +108,18 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                         onClick={() => toggleExpanded(item.label)}
                         aria-expanded={expanded}
                         aria-controls={submenuId}
-                        className={cn(
-                          "relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                          active
-                            ? "bg-foreground text-background shadow-lg shadow-purple-950/10"
-                            : "text-muted-foreground hover:bg-primary/10 hover:text-foreground"
-                        )}
+                        className={rowClass}
                       >
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+                        <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center", active ? "text-[#d2c0a5]" : "")}>
                           {item.icon}
                         </span>
                         <span className="flex-1 text-right">{item.label}</span>
                         {item.badge !== undefined && (
-                          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary-solid px-1.5 text-xs font-bold text-primary-foreground">
+                          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#d2c0a5] px-1.5 font-sans text-xs font-bold text-[#121417]">
                             {item.badge}
                           </span>
                         )}
-                        <motion.span
-                          animate={{ rotate: expanded ? 180 : 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
+                        <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
                           <ChevronDown className="h-4 w-4" />
                         </motion.span>
                       </button>
@@ -131,7 +131,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.2, ease: "easeInOut" }}
-                            className="mr-4 mt-0.5 space-y-0.5 overflow-hidden border-r border-border/60 pr-2"
+                            className="mr-4 mt-0.5 space-y-0.5 overflow-hidden border-r border-[#232934] pr-2"
                           >
                             {item.subItems!.map((sub) => {
                               const subActive = sub.href === pathname || pathname.startsWith(`${sub.href}/`) || sub.active;
@@ -141,10 +141,10 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                                     href={sub.href}
                                     onClick={onClose}
                                     className={cn(
-                                      "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                      "relative flex items-center gap-3 rounded-lg px-3 py-2 font-sans text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                                       subActive
-                                        ? "text-primary bg-primary/5"
-                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        ? "text-[#d2c0a5]"
+                                        : "text-[#8e98a8] hover:bg-[#1a202a] hover:text-white"
                                     )}
                                   >
                                     <span className="text-right">{sub.label}</span>
@@ -157,22 +157,13 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                       </AnimatePresence>
                     </div>
                   ) : (
-                    <Link
-                      href={item.href}
-                      onClick={onClose}
-                      className={cn(
-                        "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        active
-                          ? "bg-foreground text-background shadow-lg shadow-purple-950/10"
-                          : "text-muted-foreground hover:bg-primary/10 hover:text-foreground"
-                      )}
-                    >
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+                    <Link href={item.href} onClick={onClose} className={rowClass}>
+                      <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center", active ? "text-[#d2c0a5]" : "")}>
                         {item.icon}
                       </span>
                       <span className="flex-1 text-right">{item.label}</span>
                       {item.badge !== undefined && (
-                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary-solid px-1.5 text-xs font-bold text-primary-foreground">
+                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#d2c0a5] px-1.5 font-sans text-xs font-bold text-[#121417]">
                           {item.badge}
                         </span>
                       )}
@@ -185,8 +176,10 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="p-4">
-          <p className="latin-kicker text-center text-muted-foreground">FITNESS FOR EVERY WOMAN</p>
+        <div className="border-t border-white/[0.04] p-4">
+          <p dir="ltr" className="text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-[#606a78]">
+            Lumi Wellness
+          </p>
         </div>
       </aside>
     </>

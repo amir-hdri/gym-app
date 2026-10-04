@@ -78,13 +78,21 @@ export const mockGoals: Goal[] = [
   { id: "g6", athleteId: "u10", coachId: "u4", title: "افزایش ددلیفت به ۱۵۰ کیلو", targetValue: 150, currentValue: 100, unit: "کیلوگرم", category: "strength", startDate: "2025-06-01T00:00:00Z", targetDate: "2025-11-01T00:00:00Z", status: "in_progress", progressPercentage: 25, createdAt: "2025-06-01T00:00:00Z", updatedAt: "2025-07-10T00:00:00Z" },
 ];
 
+/** Mock check-in timestamps are relative to "now" so weekly views (capsule chart) always have current-week data. */
+const daysAgoAt = (daysAgo: number, hour: number, minute: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+};
+
 export const mockCheckIns: CheckIn[] = [
-  { id: "c1", userId: "u5", branchId: "b1", checkInTime: "2025-07-20T07:30:00Z", checkOutTime: "2025-07-20T09:15:00Z", durationMinutes: 105, sessionDeducted: true, createdAt: "2025-07-20T07:30:00Z" },
-  { id: "c2", userId: "u6", branchId: "b1", checkInTime: "2025-07-20T08:00:00Z", checkOutTime: "2025-07-20T09:45:00Z", durationMinutes: 105, sessionDeducted: true, createdAt: "2025-07-20T08:00:00Z" },
-  { id: "c3", userId: "u7", branchId: "b1", checkInTime: "2025-07-20T06:45:00Z", checkOutTime: "2025-07-20T08:00:00Z", durationMinutes: 75, sessionDeducted: true, createdAt: "2025-07-20T06:45:00Z" },
-  { id: "c4", userId: "u5", branchId: "b1", checkInTime: "2025-07-19T07:30:00Z", checkOutTime: "2025-07-19T09:00:00Z", durationMinutes: 90, sessionDeducted: true, createdAt: "2025-07-19T07:30:00Z" },
-  { id: "c5", userId: "u8", branchId: "b2", checkInTime: "2025-07-19T10:00:00Z", checkOutTime: "2025-07-19T11:30:00Z", durationMinutes: 90, sessionDeducted: true, createdAt: "2025-07-19T10:00:00Z" },
-  { id: "c6", userId: "u5", branchId: "b1", checkInTime: "2025-07-18T07:00:00Z", checkOutTime: "2025-07-18T08:45:00Z", durationMinutes: 105, sessionDeducted: true, createdAt: "2025-07-18T07:00:00Z" },
+  { id: "c1", userId: "u5", branchId: "b1", checkInTime: daysAgoAt(0, 7, 30), checkOutTime: daysAgoAt(0, 9, 15), durationMinutes: 105, sessionDeducted: true, createdAt: daysAgoAt(0, 7, 30) },
+  { id: "c2", userId: "u6", branchId: "b1", checkInTime: daysAgoAt(0, 8, 0), checkOutTime: daysAgoAt(0, 9, 45), durationMinutes: 105, sessionDeducted: true, createdAt: daysAgoAt(0, 8, 0) },
+  { id: "c3", userId: "u7", branchId: "b1", checkInTime: daysAgoAt(1, 6, 45), checkOutTime: daysAgoAt(1, 8, 0), durationMinutes: 75, sessionDeducted: true, createdAt: daysAgoAt(1, 6, 45) },
+  { id: "c4", userId: "u5", branchId: "b1", checkInTime: daysAgoAt(1, 7, 30), checkOutTime: daysAgoAt(1, 9, 0), durationMinutes: 90, sessionDeducted: true, createdAt: daysAgoAt(1, 7, 30) },
+  { id: "c5", userId: "u8", branchId: "b2", checkInTime: daysAgoAt(2, 10, 0), checkOutTime: daysAgoAt(2, 11, 30), durationMinutes: 90, sessionDeducted: true, createdAt: daysAgoAt(2, 10, 0) },
+  { id: "c6", userId: "u5", branchId: "b1", checkInTime: daysAgoAt(3, 7, 0), checkOutTime: daysAgoAt(3, 8, 45), durationMinutes: 105, sessionDeducted: true, createdAt: daysAgoAt(3, 7, 0) },
 ];
 
 export const mockPayments: Payment[] = [

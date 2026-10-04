@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Vazirmatn } from "next/font/google";
+import { Vazirmatn, Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { PwaRegister } from "@/components/PwaRegister";
@@ -10,6 +10,24 @@ const vazirmatn = Vazirmatn({
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "600", "700", "900"],
   variable: "--font-vazirmatn",
+  display: "swap",
+  preload: true,
+});
+
+// Twilight Meditation reference typefaces — Playfair Display (serif display)
+// and Plus Jakarta Sans (sans body). Persian glyphs fall through to Vazirmatn.
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-playfair",
+  display: "swap",
+  preload: true,
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-jakarta",
   display: "swap",
   preload: true,
 });
@@ -66,10 +84,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F6F7F9" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
-  ],
+  themeColor: "#0c0e12",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -81,9 +96,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" suppressHydrationWarning className={vazirmatn.variable}>
-      <body className="min-h-screen bg-background antialiased">
-        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:right-4 focus:top-4 focus:rounded-lg focus:bg-primary-solid focus:px-4 focus:py-2 focus:text-white">پرش به محتوا</a>
+    <html lang="fa" dir="rtl" suppressHydrationWarning className={`${vazirmatn.variable} ${playfair.variable} ${jakarta.variable}`}>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:right-4 focus:top-4 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">پرش به محتوا</a>
         <Providers>{children}</Providers>
         <PwaRegister />
       </body>

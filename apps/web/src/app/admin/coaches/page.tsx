@@ -2,16 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/Card";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/Table";
 import { formatPersianNumber } from "@/lib/utils";
-import { Search, Plus, UserCircle } from "lucide-react";
-import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
-import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { Plus, UserCircle } from "lucide-react";
+import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { useUsers } from "@/hooks/use-api";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { CtaButton, SearchInput, EmptyState } from "@/components/twilight/controls";
 
 const statusMap: Record<string, { label: string; variant: "success" | "secondary" | "destructive" }> = {
   active: { label: "فعال", variant: "success" },
@@ -19,7 +18,11 @@ const statusMap: Record<string, { label: string; variant: "success" | "secondary
   suspended: { label: "تعلیق شده", variant: "destructive" },
 };
 
+const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-[#8e98a8]";
+const tdClass = "px-4 py-3 text-[#c8cdd6]";
+
 export default function CoachesPage() {
+  const router = useRouter();
   const { data, isLoading, isError, refetch } = useUsers("coach");
   const [search, setSearch] = useState("");
 
@@ -32,87 +35,62 @@ export default function CoachesPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <ScrollReveal direction="none">
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold leading-8">مدیریت مربیان</h1>
-          <p className="mt-1 text-muted-foreground leading-6">لیست تمام مربیان باشگاه</p>
-        </div>
-        <Button asChild className="w-full sm:w-auto">
-          <Link href="/admin/coaches/new">
-            <Plus className="ml-2 h-4 w-4" />
+    <PageShell>
+      <PageHeader
+        title="مدیریت مربیان"
+        subtitle="لیست تمام مربیان باشگاه"
+        action={
+          <CtaButton onClick={() => router.push("/admin/coaches/new")} className="w-auto px-5">
+            <Plus className="h-4 w-4" strokeWidth={1.75} />
             افزودن مربی جدید
-          </Link>
-        </Button>
-      </div>
-      </ScrollReveal>
+          </CtaButton>
+        }
+      />
 
-      <ScrollReveal delay={0.05}>
-      <Card glass>
-        <CardContent className="p-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="جستجوی مربی..."
-              aria-label="جستجوی مربی"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pr-10 bg-white/70 backdrop-blur-sm border-white/30"
-            />
-          </div>
-        </CardContent>
-      </Card>
-      </ScrollReveal>
+      <SearchInput value={search} onChange={setSearch} placeholder="جستجوی مربی..." />
 
-      <ScrollReveal delay={0.1}>
-      <Card glass>
-        <CardContent className="p-0">
-          {filtered.length === 0 ? (
-            <EmptyState
-              icon={<UserCircle className="h-12 w-12 text-muted-foreground" />}
-              title="هیچ مربی‌ای یافت نشد"
-              description={search ? "هیچ نتیجه‌ای با جستجوی فعلی مطابقت ندارد" : "هنوز مربی‌ای ثبت نشده است"}
-            />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">ردیف</TableHead>
-                  <TableHead>نام</TableHead>
-                  <TableHead>ایمیل</TableHead>
-                  <TableHead>تلفن</TableHead>
-                  <TableHead>تعداد شاگردان</TableHead>
-                  <TableHead>وضعیت</TableHead>
-                  <TableHead className="w-28">عملیات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((coach, idx) => (
-                  <TableRow key={coach.id} className="transition-colors hover:bg-white/30">
-                    <TableCell>{formatPersianNumber(idx + 1)}</TableCell>
-                    <TableCell className="font-medium">{coach.firstName} {coach.lastName}</TableCell>
-                    <TableCell dir="ltr" className="text-left">{coach.email}</TableCell>
-                    <TableCell dir="ltr" className="text-left">{coach.phone}</TableCell>
-                    <TableCell>{formatPersianNumber((coach as any).students)}</TableCell>
-                    <TableCell>
-                      <Badge variant={statusMap[coach.status].variant}>
-                        {statusMap[coach.status].label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button asChild variant="outline" size="sm"><Link href={`/admin/coaches/${coach.id}`}>ویرایش</Link></Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-      </ScrollReveal>
-    </div>
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<UserCircle className="h-6 w-6" strokeWidth={1.75} />}
+          title="هیچ مربی‌ای یافت نشد"
+          description={search ? "هیچ نتیجه‌ای با جستجوی فعلی مطابقت ندارد" : "هنوز مربی‌ای ثبت نشده است"}
+        />
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-[#232934] bg-[#161a22]">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr>
+                <th scope="col" className={thClass}>ردیف</th>
+                <th scope="col" className={thClass}>نام</th>
+                <th scope="col" className={thClass}>ایمیل</th>
+                <th scope="col" className={thClass}>تلفن</th>
+                <th scope="col" className={thClass}>تعداد شاگردان</th>
+                <th scope="col" className={thClass}>وضعیت</th>
+                <th scope="col" className={thClass}>عملیات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((coach, idx) => (
+                <tr key={coach.id} className="border-t border-[#1e2430] hover:bg-[#1a202a]">
+                  <td className={tdClass}>{formatPersianNumber(idx + 1)}</td>
+                  <td className={`${tdClass} font-medium text-white`}>{coach.firstName} {coach.lastName}</td>
+                  <td dir="ltr" className={`${tdClass} text-left`}>{coach.email}</td>
+                  <td dir="ltr" className={`${tdClass} text-left`}>{coach.phone}</td>
+                  <td className={tdClass}>{formatPersianNumber((coach as any).students)}</td>
+                  <td className={tdClass}>
+                    <Badge variant={statusMap[coach.status].variant}>
+                      {statusMap[coach.status].label}
+                    </Badge>
+                  </td>
+                  <td className={tdClass}>
+                    <Button asChild variant="outline" size="sm"><Link href={`/admin/coaches/${coach.id}`}>ویرایش</Link></Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </PageShell>
   );
 }

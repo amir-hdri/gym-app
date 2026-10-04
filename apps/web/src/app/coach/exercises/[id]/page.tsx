@@ -9,12 +9,12 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
-import { FadeIn } from "@/components/animations/FadeIn";
 import { ChevronRight, Save } from "lucide-react";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { TwilightCard } from "@/components/twilight/controls";
 import { useExercise } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 
@@ -77,45 +77,49 @@ export default function EditExercisePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <Button variant="ghost" size="sm" asChild className="mb-2">
-        <Link href="/coach/exercises"><ChevronRight className="h-4 w-4" /> بازگشت به کتابخانه</Link>
-      </Button>
+    <PageShell>
+      <PageHeader
+        title="ویرایش حرکت"
+        subtitle={exercise.name}
+        action={
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/coach/exercises">
+              <ChevronRight className="h-4 w-4" />
+              بازگشت
+            </Link>
+          </Button>
+        }
+      />
 
-      <FadeIn>
-        <Card glass>
-          <CardHeader><CardTitle>ویرایش حرکت</CardTitle></CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <Input label="نام حرکت" error={errors.name?.message} {...register("name")} />
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-1.5"><Label>عضله هدف</Label>
-                  <Select value={selectedMuscle} onValueChange={(v) => setValue("muscle", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{muscleOptions.map((m) => (<SelectItem key={m} value={m}>{m}</SelectItem>))}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5"><Label>وسیله</Label>
-                  <Select value={selectedEquipment} onValueChange={(v) => setValue("equipment", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{equipmentOptions.map((e) => (<SelectItem key={e} value={e}>{e}</SelectItem>))}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5"><Label>سطح</Label>
-                  <Select value={selectedDifficulty} onValueChange={(v) => setValue("difficulty", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{difficultyOptions.map((d) => (<SelectItem key={d} value={d}>{d}</SelectItem>))}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-1.5"><Label>توضیحات</Label>
-                <Textarea rows={4} className="bg-white/70 backdrop-blur-sm border-white/30" error={errors.description?.message} {...register("description")} />
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" type="button" onClick={() => router.push("/coach/exercises")}>انصراف</Button>
-                <Button type="submit" loading={isSubmitting}><Save className="ml-2 h-4 w-4" />ذخیره</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </FadeIn>
-    </div>
+      <TwilightCard className="!p-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Input label="نام حرکت" error={errors.name?.message} {...register("name")} />
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-1.5"><Label>عضله هدف</Label>
+              <Select value={selectedMuscle} onValueChange={(v) => setValue("muscle", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{muscleOptions.map((m) => (<SelectItem key={m} value={m}>{m}</SelectItem>))}</SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5"><Label>وسیله</Label>
+              <Select value={selectedEquipment} onValueChange={(v) => setValue("equipment", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{equipmentOptions.map((e) => (<SelectItem key={e} value={e}>{e}</SelectItem>))}</SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5"><Label>سطح</Label>
+              <Select value={selectedDifficulty} onValueChange={(v) => setValue("difficulty", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{difficultyOptions.map((d) => (<SelectItem key={d} value={d}>{d}</SelectItem>))}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-1.5"><Label>توضیحات</Label>
+            <Textarea rows={4} error={errors.description?.message} {...register("description")} />
+          </div>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="ghost" type="button" onClick={() => router.push("/coach/exercises")}>انصراف</Button>
+            <Button type="submit" loading={isSubmitting}><Save className="ml-2 h-4 w-4" />ذخیره</Button>
+          </div>
+        </form>
+      </TwilightCard>
+    </PageShell>
   );
 }

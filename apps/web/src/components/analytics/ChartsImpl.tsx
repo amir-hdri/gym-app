@@ -16,7 +16,7 @@ function EmptyChart({ message, className }: { message: string; className?: strin
   return (
     <div
       className={cn(
-        "flex h-64 items-center justify-center rounded-xl border border-dashed border-white/[0.08] bg-[#1C1C1E] px-6 text-center text-sm text-[#98989D]",
+        "flex h-64 items-center justify-center rounded-xl border border-dashed border-[#232934] bg-[#161a22] px-6 text-center text-sm text-[#8e98a8]",
         className
       )}
     >
@@ -25,28 +25,28 @@ function EmptyChart({ message, className }: { message: string; className?: strin
   );
 }
 
-// Apple Fitness Trends — shared tooltip style
-const appleTooltip = {
-  cursor: { fill: "rgba(255,255,255,0.04)" },
+// Twilight — shared tooltip style
+const twilightTooltip = {
+  cursor: { fill: "rgba(210,192,165,0.08)" },
   contentStyle: {
     direction: "rtl" as const,
     maxWidth: 220,
     borderRadius: "12px",
-    border: "1px solid rgba(56,56,58,0.8)",
-    background: "#2C2C2E",
-    color: "#F5F5F7",
+    border: "1px solid #232934",
+    background: "#161a22",
+    color: "#f5f3ef",
     boxShadow: "0 12px 32px rgba(0,0,0,0.6)",
     whiteSpace: "normal" as const,
     lineHeight: 1.5,
     fontFamily: "var(--font-vazirmatn), system-ui, sans-serif",
     fontSize: "12px",
   },
-  labelStyle: { color: "#F5F5F7", fontWeight: 600 },
-  itemStyle: { color: "#98989D" },
+  labelStyle: { color: "#f5f3ef", fontWeight: 600 },
+  itemStyle: { color: "#8e98a8" },
 };
 
-const appleGrid = "rgba(56,56,58,0.5)";
-const appleTick = { fill: "#98989D", fontSize: 11, fontFamily: "var(--font-vazirmatn), system-ui, sans-serif" };
+const twilightGrid = "#1e2430";
+const twilightTick = { fill: "#8e98a8", fontSize: 11, fontFamily: "var(--font-vazirmatn), system-ui, sans-serif" };
 
 export function RevenueChart({ payments, compact = false }: { payments: Payment[]; compact?: boolean }) {
   const reduceMotion = useReducedMotion();
@@ -74,16 +74,16 @@ export function RevenueChart({ payments, compact = false }: { payments: Payment[
     <div className={cn(compact ? "h-44" : "h-72")} dir="ltr" role="img" aria-label="نمودار درآمد پرداخت‌های موفق به تفکیک ماه">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 12, right: 4, left: -12, bottom: 0 }} barCategoryGap={compact ? "30%" : "24%"}>
-          <CartesianGrid vertical={false} stroke={appleGrid} strokeDasharray="3 6" />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={appleTick} />
+          <CartesianGrid vertical={false} stroke={twilightGrid} strokeDasharray="3 6" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={twilightTick} />
           <YAxis hide />
           <Tooltip
-            cursor={appleTooltip.cursor}
-            contentStyle={appleTooltip.contentStyle as any}
+            cursor={twilightTooltip.cursor}
+            contentStyle={twilightTooltip.contentStyle as any}
             formatter={(value, _name, item) => [formatCurrency(value as number), `${formatPersianNumber(item.payload.transactions)} تراکنش موفق`] as any}
             labelFormatter={(label) => `درآمد ${label}`}
           />
-          <Bar dataKey="revenue" fill="#FF2D55" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Bar dataKey="revenue" fill="#d2c0a5" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -110,16 +110,16 @@ export function SessionDurationChart({ checkIns, compact = false }: { checkIns: 
     <div className={cn(compact ? "h-44" : "h-72")} dir="ltr" role="img" aria-label="نمودار مدت جلسات تکمیل‌شده به تفکیک تاریخ">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 12, right: 4, left: -12, bottom: 0 }} barCategoryGap={compact ? "30%" : "24%"}>
-          <CartesianGrid vertical={false} stroke={appleGrid} strokeDasharray="3 6" />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={appleTick} />
+          <CartesianGrid vertical={false} stroke={twilightGrid} strokeDasharray="3 6" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={twilightTick} />
           <YAxis hide />
           <Tooltip
-            cursor={{ fill: "rgba(48,209,88,0.08)" }}
-            contentStyle={appleTooltip.contentStyle as any}
+            cursor={twilightTooltip.cursor}
+            contentStyle={twilightTooltip.contentStyle as any}
             formatter={(value) => [`${formatPersianNumber(value as number)} دقیقه`, "مدت تمرین"] as any}
             labelFormatter={(label) => `جلسه ${label}`}
           />
-          <Bar dataKey="duration" fill="#30D158" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Bar dataKey="duration" fill="#8e98a8" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -143,15 +143,15 @@ export function AthleteProgressChart({ athletes }: { athletes: CoachAthlete[] })
     <div className="h-72" dir="ltr" role="img" aria-label="نمودار مقایسه درصد تکمیل برنامه شاگردان">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 10, left: 4, bottom: 0 }}>
-          <CartesianGrid horizontal={false} stroke={appleGrid} strokeDasharray="3 6" />
+          <CartesianGrid horizontal={false} stroke={twilightGrid} strokeDasharray="3 6" />
           <XAxis type="number" domain={[0, 100]} hide />
-          <YAxis dataKey="name" type="category" width={90} tickLine={false} axisLine={false} tick={appleTick} />
+          <YAxis dataKey="name" type="category" width={90} tickLine={false} axisLine={false} tick={twilightTick} />
           <Tooltip
-            cursor={{ fill: "rgba(10,132,255,0.08)" }}
-            contentStyle={appleTooltip.contentStyle as any}
+            cursor={twilightTooltip.cursor}
+            contentStyle={twilightTooltip.contentStyle as any}
             formatter={(value, _name, item) => [`${formatPersianNumber(value as number)}٪`, (item.payload as any).program ?? "بدون برنامه فعال"] as any}
           />
-          <Bar dataKey="progress" fill="#0A84FF" radius={[0, 6, 6, 0]} maxBarSize={20} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
+          <Bar dataKey="progress" fill="#d2c0a5" radius={[0, 6, 6, 0]} maxBarSize={20} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>

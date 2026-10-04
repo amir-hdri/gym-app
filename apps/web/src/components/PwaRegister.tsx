@@ -95,13 +95,13 @@ export function PwaRegister() {
   return (
     <>
       {showInstall && (
-        <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-3 rounded-2xl border border-primary/20 bg-card p-3 shadow-xl backdrop-blur-xl md:inset-x-auto md:left-1/2 md:w-[420px] md:-translate-x-1/2 lg:bottom-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
+        <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-3 rounded-2xl border border-[#d2c0a5]/20 bg-[#10141a] p-3 shadow-xl backdrop-blur-xl md:inset-x-auto md:left-1/2 md:w-[420px] md:-translate-x-1/2 lg:bottom-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d2c0a5] text-[#121417]">
             <Download className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold">نصب Lumi Wellness</p>
-            <p className="text-xs text-muted-foreground">دسترسی سریع مثل اپ نیتیو — بدون نیاز به استور</p>
+            <p className="text-sm font-semibold text-white">نصب Lumi Wellness</p>
+            <p className="text-xs text-[#8e98a8]">دسترسی سریع مثل اپ نیتیو — بدون نیاز به استور</p>
           </div>
           <Button size="sm" onClick={handleInstall} className="shrink-0">
             نصب
@@ -109,25 +109,25 @@ export function PwaRegister() {
           <button
             onClick={() => setShowInstall(false)}
             aria-label="بستن"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#8e98a8] hover:bg-[#1a202a] hover:text-white"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
       )}
       {needRefresh && (
-        <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-3 shadow-xl dark:border-amber-900 dark:bg-amber-950 md:inset-x-auto md:left-1/2 md:w-[420px] md:-translate-x-1/2 lg:bottom-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
+        <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-3 rounded-2xl border border-[#d2c0a5]/30 bg-[#10141a] p-3 shadow-xl md:inset-x-auto md:left-1/2 md:w-[420px] md:-translate-x-1/2 lg:bottom-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d2c0a5] text-[#121417]">
             <RefreshCw className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">نسخه جدید در دسترس است</p>
-            <p className="text-xs text-amber-700 dark:text-amber-300">برای دریافت آخرین تغییرات بروزرسانی کنید</p>
+            <p className="text-sm font-semibold text-white">نسخه جدید در دسترس است</p>
+            <p className="text-xs text-[#8e98a8]">برای دریافت آخرین تغییرات بروزرسانی کنید</p>
           </div>
-          <Button size="sm" onClick={handleUpdate} className="shrink-0 bg-amber-600 hover:bg-amber-700">
+          <Button size="sm" onClick={handleUpdate} className="shrink-0">
             بروزرسانی
           </Button>
-          <button onClick={() => setNeedRefresh(false)} aria-label="بستن" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-amber-700 hover:bg-amber-100 dark:text-amber-300">
+          <button onClick={() => setNeedRefresh(false)} aria-label="بستن" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#8e98a8] hover:bg-[#1a202a] hover:text-white">
             <X className="h-4 w-4" />
           </button>
         </div>

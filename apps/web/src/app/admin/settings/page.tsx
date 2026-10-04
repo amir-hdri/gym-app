@@ -1,13 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import type { ReactNode } from "react";
 import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { toast } from "sonner";
-import { Save } from "lucide-react";
-import { FadeIn } from "@/components/animations/FadeIn";
+import { Save, Building2, Phone, MapPin, Mail, Tag, Sparkles } from "lucide-react";
+import { PageShell, PageHeader, SectionTitle } from "@/components/twilight/Page";
+import { CtaButton } from "@/components/twilight/controls";
+
+/** Twilight input override (ui/Input base carries old theme tokens + a dark: variant). */
+const inputClassName =
+  "h-10 rounded-xl border-[#232934] bg-[#12151b] text-sm text-white placeholder:text-[#6b7280] focus-visible:ring-0 focus-visible:border-[#d2c0a5]/50";
+
+function SettingsRow({
+  id,
+  icon,
+  label,
+  value,
+  onChange,
+  type,
+}: {
+  id: string;
+  icon: ReactNode;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-[#1a202a]">
+      <div className="flex shrink-0 items-center gap-3">
+        <span className="text-[#8e98a8]">{icon}</span>
+        <Label htmlFor={id} className="text-xs font-medium text-white">
+          {label}
+        </Label>
+      </div>
+      <div className="w-44 shrink-0 sm:w-60">
+        <Input id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)} className={inputClassName} />
+      </div>
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const [form, setForm] = useState({
@@ -24,99 +58,70 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">تنظیمات</h1>
-        <p className="text-muted-foreground">مدیریت تنظیمات باشگاه</p>
-      </div>
+    <PageShell>
+      <PageHeader title="تنظیمات" subtitle="مدیریت تنظیمات باشگاه" />
 
-      <FadeIn>
-      <Card glass>
-        <CardHeader>
-          <CardTitle>بخش باشگاه</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="branchName">نام باشگاه</Label>
-              <Input
-                id="branchName"
-                value={form.branchName}
-                onChange={(e) => updateField("branchName", e.target.value)}
-                className="bg-white/70 backdrop-blur-sm border-white/30"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">تلفن</Label>
-              <Input
-                id="phone"
-                value={form.phone}
-                onChange={(e) => updateField("phone", e.target.value)}
-                className="bg-white/70 backdrop-blur-sm border-white/30"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="address">آدرس</Label>
-            <Input
-              id="address"
-              value={form.address}
-              onChange={(e) => updateField("address", e.target.value)}
-              className="bg-white/70 backdrop-blur-sm border-white/30"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">ایمیل</Label>
-            <Input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={(e) => updateField("email", e.target.value)}
-              className="bg-white/70 backdrop-blur-sm border-white/30"
-            />
-          </div>
-        </CardContent>
-      </Card>
-      </FadeIn>
+      <section>
+        <SectionTitle>بخش باشگاه</SectionTitle>
+        <div className="mt-3 divide-y divide-[#1e2430] overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+          <SettingsRow
+            id="branchName"
+            icon={<Building2 className="h-4 w-4" strokeWidth={1.75} />}
+            label="نام باشگاه"
+            value={form.branchName}
+            onChange={(v) => updateField("branchName", v)}
+          />
+          <SettingsRow
+            id="phone"
+            icon={<Phone className="h-4 w-4" strokeWidth={1.75} />}
+            label="تلفن"
+            value={form.phone}
+            onChange={(v) => updateField("phone", v)}
+          />
+          <SettingsRow
+            id="address"
+            icon={<MapPin className="h-4 w-4" strokeWidth={1.75} />}
+            label="آدرس"
+            value={form.address}
+            onChange={(v) => updateField("address", v)}
+          />
+          <SettingsRow
+            id="email"
+            icon={<Mail className="h-4 w-4" strokeWidth={1.75} />}
+            label="ایمیل"
+            type="email"
+            value={form.email}
+            onChange={(v) => updateField("email", v)}
+          />
+        </div>
+      </section>
 
-      <FadeIn delay={0.1}>
-      <Card glass>
-        <CardHeader>
-          <CardTitle>بخش قیمت‌گذاری</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="sessionPrice">قیمت هر جلسه عادی (تومان)</Label>
-              <Input
-                id="sessionPrice"
-                value={form.sessionPrice}
-                onChange={(e) => updateField("sessionPrice", e.target.value)}
-                className="bg-white/70 backdrop-blur-sm border-white/30"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="personalSessionPrice">قیمت هر جلسه شخصی (تومان)</Label>
-              <Input
-                id="personalSessionPrice"
-                value={form.personalSessionPrice}
-                onChange={(e) => updateField("personalSessionPrice", e.target.value)}
-                className="bg-white/70 backdrop-blur-sm border-white/30"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      </FadeIn>
+      <section>
+        <SectionTitle>بخش قیمت‌گذاری</SectionTitle>
+        <div className="mt-3 divide-y divide-[#1e2430] overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+          <SettingsRow
+            id="sessionPrice"
+            icon={<Tag className="h-4 w-4" strokeWidth={1.75} />}
+            label="قیمت هر جلسه عادی (تومان)"
+            value={form.sessionPrice}
+            onChange={(v) => updateField("sessionPrice", v)}
+          />
+          <SettingsRow
+            id="personalSessionPrice"
+            icon={<Sparkles className="h-4 w-4" strokeWidth={1.75} />}
+            label="قیمت هر جلسه شخصی (تومان)"
+            value={form.personalSessionPrice}
+            onChange={(v) => updateField("personalSessionPrice", v)}
+          />
+        </div>
+      </section>
 
-      <FadeIn delay={0.2}>
       <div className="flex justify-end">
-        <Button onClick={() => toast.success("تنظیمات با موفقیت ذخیره شد")} className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg shadow-green-500/10 hover:bg-white/80">
-          <Save className="ml-2 h-4 w-4" />
+        <CtaButton onClick={() => toast.success("تنظیمات با موفقیت ذخیره شد")} className="w-auto px-6">
+          <Save className="h-4 w-4" strokeWidth={1.75} />
           ذخیره تنظیمات
-        </Button>
+        </CtaButton>
       </div>
-      </FadeIn>
-    </div>
+    </PageShell>
   );
 }

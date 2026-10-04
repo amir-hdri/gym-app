@@ -75,29 +75,19 @@ export function getInitials(name: string): string {
 }
 
 export function generateAvatarColor(name: string): string {
-  const colors = [
-    "bg-red-500",
-    "bg-orange-500",
-    "bg-amber-500",
-    "bg-green-500",
-    "bg-emerald-500",
-    "bg-teal-500",
-    "bg-cyan-500",
-    "bg-sky-500",
-    "bg-blue-500",
-    "bg-indigo-500",
-    "bg-violet-500",
-    "bg-purple-500",
-    "bg-fuchsia-500",
-    "bg-pink-500",
-    "bg-rose-500",
+  // Twilight: monochrome avatars — dark tile with cream initials.
+  // Subtle variants (by name hash) keep users distinguishable without color.
+  const variants = [
+    "bg-[#202634] text-[#d2c0a5]",
+    "bg-[#1e2430] text-[#e0d3bc]",
+    "bg-[#232b38] text-[#c9cfd9]",
   ];
-  
+
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return colors[Math.abs(hash) % colors.length];
+  return variants[Math.abs(hash) % variants.length];
 }
 
 export function truncate(str: string, length: number): string {

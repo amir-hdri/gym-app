@@ -1,24 +1,37 @@
 "use client";
 
-import * as React from "react";
+import type { ReactNode } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Phone, Mail, Calendar, Award, ChevronRight, Edit, Trash2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { Progress } from "@/components/ui/Progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/Table";
-import { FadeIn } from "@/components/animations/FadeIn";
-import { formatPersianNumber, formatCurrency, formatDate, formatDateTime, getInitials, generateAvatarColor } from "@/lib/utils";
+import { formatPersianNumber, formatCurrency, formatDate, formatDateTime, getInitials } from "@/lib/utils";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { useUser } from "@/hooks/use-api";
+import { PageShell, SectionTitle } from "@/components/twilight/Page";
+import { StatCard, TwilightCard } from "@/components/twilight/controls";
 
 const statusMap: Record<string, { label: string; variant: "success" | "secondary" | "destructive" }> = {
   active: { label: "فعال", variant: "success" }, inactive: { label: "غیرفعال", variant: "secondary" }, suspended: { label: "تعلیق شده", variant: "destructive" },
 };
+
+function InfoRow({ icon, label, value, ltr }: { icon: ReactNode; label: string; value: ReactNode; ltr?: boolean }) {
+  return (
+    <div className="flex items-center justify-between px-4 py-3.5 hover:bg-[#1a202a]">
+      <span className="flex items-center gap-3">
+        <span className="text-[#8e98a8]">{icon}</span>
+        <span className="text-xs text-[#8e98a8]">{label}</span>
+      </span>
+      <span dir={ltr ? "ltr" : undefined} className="text-sm text-white">{value}</span>
+    </div>
+  );
+}
+
+const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-[#8e98a8]";
+const tdClass = "px-4 py-3 text-[#c8cdd6]";
 
 export default function MemberProfilePage() {
   const params = useParams<{ id: string }>();
@@ -29,68 +42,58 @@ export default function MemberProfilePage() {
   if (!member) return <ErrorDisplay message="کاربر یافت نشد" />;
 
   return (
-    <div className="space-y-6">
+    <PageShell>
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-2">
           <Link href="/admin/members">
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
             بازگشت به لیست اعضا
           </Link>
         </Button>
       </div>
 
-      <FadeIn>
-        <Card glass>
-          <CardContent className="flex items-center gap-6 p-6">
-            <Avatar className="h-20 w-20 ring-4 ring-white/50">
-              <AvatarFallback className={"text-2xl " + generateAvatarColor(`${member.firstName} ${member.lastName}`)}>
-                {getInitials(`${member.firstName} ${member.lastName}`)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 space-y-2">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold">{member.firstName} {member.lastName}</h1>
-                <Badge variant={statusMap[member.status].variant}>{statusMap[member.status].label}</Badge>
-              </div>
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1"><Phone className="h-4 w-4" />{member.phone}</span>
-                <span className="flex items-center gap-1"><Mail className="h-4 w-4" />{member.email}</span>
-                <span className="flex items-center gap-1"><Award className="h-4 w-4" />{member.plan}</span>
-                <span className="flex items-center gap-1"><Calendar className="h-4 w-4" />عضویت از {formatDate(member.createdAt)}</span>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm"><Edit className="h-4 w-4" /> ویرایش</Button>
-              <Button variant="destructive" size="sm"><Trash2 className="h-4 w-4" /></Button>
-            </div>
-          </CardContent>
-        </Card>
-      </FadeIn>
-
-      <FadeIn delay={0.1}>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card glass>
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">اشتراک</p>
-              <p className="text-lg font-semibold">{member.plan}</p>
-              <p className="text-xs text-muted-foreground">{formatDate(member.createdAt)}</p>
-            </CardContent>
-          </Card>
-          <Card glass>
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">جلسات</p>
-              <p className="text-lg font-semibold">{formatPersianNumber(member.sessionsUsed)} / {formatPersianNumber(member.sessionsTotal)}</p>
-              <Progress value={((member.sessionsUsed || 0) / (member.sessionsTotal || 1)) * 100} className="mt-2" />
-            </CardContent>
-          </Card>
-          <Card glass>
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">مربی</p>
-              <p className="text-lg font-semibold">{member.coach}</p>
-            </CardContent>
-          </Card>
+      <div className="flex flex-col gap-5 rounded-2xl border border-[#232934] bg-[#161a22] p-5 sm:flex-row sm:items-center">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 border-[#d2c0a5] bg-gradient-to-br from-[#2a3444] to-[#141a22]">
+          <span className="font-serif text-2xl text-[#d2c0a5]">
+            {getInitials(`${member.firstName} ${member.lastName}`)}
+          </span>
         </div>
-      </FadeIn>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-serif text-2xl font-normal text-white">{member.firstName} {member.lastName}</h1>
+            <Badge variant={statusMap[member.status].variant}>{statusMap[member.status].label}</Badge>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm"><Edit className="h-4 w-4" strokeWidth={1.75} /> ویرایش</Button>
+          <Button variant="destructive" size="sm"><Trash2 className="h-4 w-4" strokeWidth={1.75} /></Button>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22] divide-y divide-[#1e2430]">
+        <InfoRow icon={<Phone className="h-4 w-4" strokeWidth={1.75} />} label="تلفن" value={member.phone} ltr />
+        <InfoRow icon={<Mail className="h-4 w-4" strokeWidth={1.75} />} label="ایمیل" value={member.email} ltr />
+        <InfoRow icon={<Award className="h-4 w-4" strokeWidth={1.75} />} label="طرح اشتراک" value={member.plan} />
+        <InfoRow icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />} label="عضویت از" value={formatDate(member.createdAt)} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard label="اشتراک" value={member.plan} suffix={formatDate(member.createdAt)} />
+        <StatCard label="مربی" value={member.coach} />
+        <TwilightCard className="col-span-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8e98a8]">جلسات</span>
+          <div className="mt-3">
+            <span className="font-sans text-2xl font-normal tabular-nums tracking-tight text-white">
+              {formatPersianNumber(member.sessionsUsed)} / {formatPersianNumber(member.sessionsTotal)}
+            </span>
+            <Progress
+              value={((member.sessionsUsed || 0) / (member.sessionsTotal || 1)) * 100}
+              className="mt-3"
+              indicatorClassName="bg-[#d2c0a5]"
+            />
+          </div>
+        </TwilightCard>
+      </div>
 
       <Tabs defaultValue="goals" dir="rtl">
         <TabsList>
@@ -98,48 +101,44 @@ export default function MemberProfilePage() {
           <TabsTrigger value="payments">پرداخت‌ها</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="goals" className="space-y-4">
+        <TabsContent value="goals" className="space-y-3">
           {(member.goals || []).map((goal: any, i: number) => (
-            <Card key={i} glass>
-              <CardContent className="p-6">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="font-medium">{goal.title}</span>
-                  <span className="text-sm text-muted-foreground">{formatPersianNumber(goal.current)}/{formatPersianNumber(goal.target)} {goal.unit}</span>
-                </div>
-                <Progress value={(goal.current / goal.target) * 100} />
-              </CardContent>
-            </Card>
+            <TwilightCard key={i}>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm font-medium text-white">{goal.title}</span>
+                <span className="text-xs text-[#8e98a8]">{formatPersianNumber(goal.current)}/{formatPersianNumber(goal.target)} {goal.unit}</span>
+              </div>
+              <Progress value={(goal.current / goal.target) * 100} indicatorClassName="bg-[#d2c0a5]" />
+            </TwilightCard>
           ))}
         </TabsContent>
 
         <TabsContent value="payments">
-          <Card glass>
-            <CardHeader><CardTitle>تاریخچه پرداخت‌ها</CardTitle></CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>مبلغ</TableHead>
-                    <TableHead>روش پرداخت</TableHead>
-                    <TableHead>وضعیت</TableHead>
-                    <TableHead>تاریخ</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(member.payments || []).map((p: any) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-medium">{formatCurrency(p.amount)}</TableCell>
-                      <TableCell>{p.method}</TableCell>
-                      <TableCell><Badge variant={p.status === "completed" ? "success" : "warning"}>{p.status === "completed" ? "موفق" : "معلق"}</Badge></TableCell>
-                      <TableCell>{formatDateTime(p.date)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <SectionTitle className="mb-3">تاریخچه پرداخت‌ها</SectionTitle>
+          <div className="overflow-x-auto rounded-2xl border border-[#232934] bg-[#161a22]">
+            <table className="w-full min-w-[560px] text-sm">
+              <thead>
+                <tr>
+                  <th scope="col" className={thClass}>مبلغ</th>
+                  <th scope="col" className={thClass}>روش پرداخت</th>
+                  <th scope="col" className={thClass}>وضعیت</th>
+                  <th scope="col" className={thClass}>تاریخ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(member.payments || []).map((p: any) => (
+                  <tr key={p.id} className="border-t border-[#1e2430] hover:bg-[#1a202a]">
+                    <td className={`${tdClass} font-medium text-white`}>{formatCurrency(p.amount)}</td>
+                    <td className={tdClass}>{p.method}</td>
+                    <td className={tdClass}><Badge variant={p.status === "completed" ? "success" : "warning"}>{p.status === "completed" ? "موفق" : "معلق"}</Badge></td>
+                    <td className={tdClass}>{formatDateTime(p.date)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

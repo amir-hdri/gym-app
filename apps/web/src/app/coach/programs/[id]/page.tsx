@@ -3,13 +3,13 @@
 import * as React from "react";
 import { useParams } from "next/navigation";
 import { ChevronRight, Plus, Save, CheckCircle, Dumbbell, Pencil } from "lucide-react";
-import { FadeIn } from "@/components/animations/FadeIn";
-import { StaggerContainer, StaggerItem } from "@/components/animations/Stagger";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { StatCard, TwilightCard } from "@/components/twilight/controls";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { formatPersianNumber, formatDate } from "@/lib/utils";
@@ -66,204 +66,160 @@ export default function ProgramDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <Button variant="ghost" size="sm" asChild className="mb-2">
-            <Link href="/coach/programs">
-              <ChevronRight className="h-4 w-4" />
-              بازگشت به برنامه‌ها
-            </Link>
-          </Button>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">{program.name}</h1>
-            <Badge variant={statusConfig[program.status]?.variant || "outline"}>
-              {statusConfig[program.status]?.label || program.status}
-            </Badge>
+    <PageShell>
+      <PageHeader
+        title={program.name}
+        subtitle={athleteName}
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm">
+              <Pencil className="h-4 w-4" />
+              ویرایش
+            </Button>
+            {program.status === "draft" && (
+              <Button variant="success" size="sm">
+                <CheckCircle className="h-4 w-4" />
+                فعال‌سازی
+              </Button>
+            )}
+            {program.status === "active" && (
+              <Button variant="default" size="sm">
+                <Save className="h-4 w-4" />
+                ذخیره
+              </Button>
+            )}
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline">
-            <Pencil className="h-4 w-4" />
-            ویرایش
-          </Button>
-          {program.status === "draft" && (
-            <Button variant="success">
-              <CheckCircle className="h-4 w-4" />
-              فعال‌سازی
-            </Button>
-          )}
-          {program.status === "active" && (
-            <Button variant="default">
-              <Save className="h-4 w-4" />
-              ذخیره
-            </Button>
-          )}
-        </div>
+        }
+      />
+
+      <div className="flex items-center gap-3">
+        <Badge variant={statusConfig[program.status]?.variant || "outline"}>
+          {statusConfig[program.status]?.label || program.status}
+        </Badge>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/coach/programs">
+            <ChevronRight className="h-4 w-4" />
+            بازگشت به برنامه‌ها
+          </Link>
+        </Button>
       </div>
 
-      <StaggerContainer className="grid gap-4 md:grid-cols-4">
-        <StaggerItem>
-          <Card glass>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">ورزشکار</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-semibold">{athleteName}</p>
-            </CardContent>
-          </Card>
-        </StaggerItem>
-        <StaggerItem>
-          <Card glass>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">تاریخ شروع</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-semibold">{formatDate(program.startDate)}</p>
-            </CardContent>
-          </Card>
-        </StaggerItem>
-        <StaggerItem>
-          <Card glass>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">تاریخ پایان</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-semibold">{formatDate(program.endDate)}</p>
-            </CardContent>
-          </Card>
-        </StaggerItem>
-        <StaggerItem>
-          <Card glass>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">تعداد جلسات</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-semibold">{frequencyLabel}</p>
-            </CardContent>
-          </Card>
-        </StaggerItem>
-      </StaggerContainer>
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard label="ورزشکار" value={<span className="text-lg">{athleteName}</span>} />
+        <StatCard label="تاریخ شروع" value={<span className="text-lg">{formatDate(program.startDate)}</span>} />
+        <StatCard label="تاریخ پایان" value={<span className="text-lg">{formatDate(program.endDate)}</span>} />
+        <StatCard label="تعداد جلسات" value={<span className="text-lg">{frequencyLabel}</span>} />
+      </div>
 
       <Tabs value={String(activeDay)} onValueChange={(v) => setActiveDay(Number(v))} dir="rtl">
-        <TabsList className="w-full justify-start overflow-x-auto">
+        <TabsList className="w-full justify-start overflow-x-auto rounded-xl border border-[#232934] bg-[#161a22] p-1">
           {days.map((day, i) => (
-            <TabsTrigger key={i} value={String(i)}>{day.day}</TabsTrigger>
+            <TabsTrigger key={i} value={String(i)} className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">{day.day}</TabsTrigger>
           ))}
         </TabsList>
 
         {days.map((day, i) => (
-          <TabsContent key={i} value={String(i)} className="space-y-4">
-            <Card glass>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg">{day.day}</CardTitle>
-                <Button variant="outline" size="sm" onClick={() => { setActiveDay(i); setShowAddForm(true); }}>
+          <TabsContent key={i} value={String(i)} className="mt-4 space-y-4">
+            <TwilightCard className="!p-0">
+              <div className="flex items-center justify-between px-4 py-3.5">
+                <h3 className="font-serif text-lg font-normal text-white">{day.day}</h3>
+                <Button variant="ghost" size="sm" onClick={() => { setActiveDay(i); setShowAddForm(true); }}>
                   <Plus className="h-4 w-4" />
                   افزودن تمرین
                 </Button>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div className="divide-y divide-[#1e2430] border-t border-[#1e2430]">
                 {day.exercises.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-4">هیچ تمرینی برای این روز ثبت نشده است</p>
+                  <p className="px-4 py-6 text-center text-sm text-[#8e98a8]">هیچ تمرینی برای این روز ثبت نشده است</p>
                 ) : (
-                  <StaggerContainer className="divide-y">
-                    {day.exercises.map((ex, j) => (
-                      <StaggerItem key={j}>
-                        <div className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <Dumbbell className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{ex.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {formatPersianNumber(ex.sets)} ست × {formatPersianNumber(ex.reps)} تکرار
-                              {ex.weight > 0 && ` | ${formatPersianNumber(ex.weight)} کیلوگرم`}
-                            </p>
-                          </div>
-                          <Badge variant="outline" className="shrink-0">
-                            استراحت: {ex.rest}
-                          </Badge>
-                        </div>
-                      </StaggerItem>
-                    ))}
-                  </StaggerContainer>
+                  day.exercises.map((ex, j) => (
+                    <div key={j} className="flex items-center gap-4 px-4 py-3.5">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#2c3444] bg-[#202632] text-[#d2c0a5]">
+                        <Dumbbell className="h-5 w-5" strokeWidth={1.75} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-white">{ex.name}</p>
+                        <p className="mt-0.5 text-[11px] text-[#8e98a8]">
+                          {formatPersianNumber(ex.sets)} ست × {formatPersianNumber(ex.reps)} تکرار
+                          {ex.weight > 0 && ` | ${formatPersianNumber(ex.weight)} کیلوگرم`}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="shrink-0">
+                        استراحت: {ex.rest}
+                      </Badge>
+                    </div>
+                  ))
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </TwilightCard>
 
             {showAddForm && activeDay === i && (
-              <FadeIn>
-                <Card glass>
-                <CardHeader>
-                  <CardTitle className="text-lg">افزودن تمرین جدید</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-5">
-                    <div>
-                      <label className="mb-1.5 block text-sm font-medium">نام تمرین</label>
-                      <Select
-                        value={newExercise.name}
-                        onValueChange={(v) => setNewExercise((prev) => ({ ...prev, name: v }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="انتخاب کنید" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {exerciseOptions.map((ex) => (
-                            <SelectItem key={ex} value={ex}>{ex}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Input
-                        label="ست"
-                        type="number"
-                        value={newExercise.sets}
-                        onChange={(e) => setNewExercise((prev) => ({ ...prev, sets: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label="تکرار"
-                        type="number"
-                        value={newExercise.reps}
-                        onChange={(e) => setNewExercise((prev) => ({ ...prev, reps: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label="وزن (کیلوگرم)"
-                        type="number"
-                        value={newExercise.weight}
-                        onChange={(e) => setNewExercise((prev) => ({ ...prev, weight: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label="استراحت"
-                        value={newExercise.rest}
-                        placeholder="مثلاً ۶۰ ثانیه"
-                        onChange={(e) => setNewExercise((prev) => ({ ...prev, rest: e.target.value }))}
-                      />
-                    </div>
+              <TwilightCard className="!p-5">
+                <h3 className="mb-4 font-serif text-lg font-normal text-white">افزودن تمرین جدید</h3>
+                <div className="grid gap-4 md:grid-cols-5">
+                  <div className="space-y-1.5">
+                    <Label className="mb-1.5 block text-sm font-medium">نام تمرین</Label>
+                    <Select
+                      value={newExercise.name}
+                      onValueChange={(v) => setNewExercise((prev) => ({ ...prev, name: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="انتخاب کنید" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {exerciseOptions.map((ex) => (
+                          <SelectItem key={ex} value={ex}>{ex}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="mt-4 flex items-center gap-2">
-                    <Button onClick={handleAddExercise} disabled={!newExercise.name}>
-                      <Plus className="h-4 w-4" />
-                      افزودن
-                    </Button>
-                    <Button variant="ghost" onClick={() => setShowAddForm(false)}>
-                      انصراف
-                    </Button>
+                  <div>
+                    <Input
+                      label="ست"
+                      type="number"
+                      value={newExercise.sets}
+                      onChange={(e) => setNewExercise((prev) => ({ ...prev, sets: e.target.value }))}
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            </FadeIn>
+                  <div>
+                    <Input
+                      label="تکرار"
+                      type="number"
+                      value={newExercise.reps}
+                      onChange={(e) => setNewExercise((prev) => ({ ...prev, reps: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      label="وزن (کیلوگرم)"
+                      type="number"
+                      value={newExercise.weight}
+                      onChange={(e) => setNewExercise((prev) => ({ ...prev, weight: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      label="استراحت"
+                      value={newExercise.rest}
+                      placeholder="مثلاً ۶۰ ثانیه"
+                      onChange={(e) => setNewExercise((prev) => ({ ...prev, rest: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2">
+                  <Button onClick={handleAddExercise} disabled={!newExercise.name}>
+                    <Plus className="h-4 w-4" />
+                    افزودن
+                  </Button>
+                  <Button variant="ghost" onClick={() => setShowAddForm(false)}>
+                    انصراف
+                  </Button>
+                </div>
+              </TwilightCard>
             )}
           </TabsContent>
         ))}
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

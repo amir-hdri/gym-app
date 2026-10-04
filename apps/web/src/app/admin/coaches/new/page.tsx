@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -8,12 +9,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Label } from "@/components/ui/Label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
-import { ChevronRight, Save } from "lucide-react";
-import { FadeIn } from "@/components/animations/FadeIn";
+import { ChevronRight, Save, Loader2 } from "lucide-react";
+import { PageShell, PageHeader, SectionTitle } from "@/components/twilight/Page";
+import { TwilightCard, CtaButton } from "@/components/twilight/controls";
 
 const coachSchema = z.object({
   firstName: z.string().min(1, "نام را وارد کنید"),
@@ -29,6 +29,24 @@ type CoachFormData = z.infer<typeof coachSchema>;
 
 const specialties = ["بدنسازی و فیتنس", "قدرتی و حرفه‌ای", "هوازی و استقامتی", "فانکشنال", "کراس‌فیت", "یوگا و پیلاتس"];
 const experienceOptions = ["۱-۳ سال", "۳-۵ سال", "۵-۱۰ سال", "بیش از ۱۰ سال"];
+
+const inputClass =
+  "h-11 w-full rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
+
+function Field({ label, error, htmlFor, children }: { label: string; error?: string; htmlFor?: string; children: ReactNode }) {
+  return (
+    <div className="w-full space-y-2">
+      <Label htmlFor={htmlFor}>{label}</Label>
+      {children}
+      {error ? (
+        <p className="flex items-center gap-1 text-xs text-destructive" role="alert">
+          <span className="inline-block h-1 w-1 shrink-0 rounded-full bg-destructive" />
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 export default function NewCoachPage() {
   const router = useRouter();
@@ -56,55 +74,106 @@ export default function NewCoachPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <PageShell>
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-2">
-          <Link href="/admin/coaches"><ChevronRight className="h-4 w-4" /> بازگشت به مربیان</Link>
+          <Link href="/admin/coaches"><ChevronRight className="h-4 w-4" strokeWidth={1.75} /> بازگشت به مربیان</Link>
         </Button>
-        <h1 className="text-2xl font-bold">افزودن مربی جدید</h1>
-        <p className="text-muted-foreground">ثبت اطلاعات مربی جدید</p>
+        <PageHeader title="افزودن مربی جدید" subtitle="ثبت اطلاعات مربی جدید" />
       </div>
 
-      <FadeIn>
-        <Card glass>
-          <CardHeader><CardTitle>اطلاعات مربی</CardTitle></CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Input label="نام" placeholder="احمد" error={errors.firstName?.message} {...register("firstName")} />
-                <Input label="نام خانوادگی" placeholder="احمدی" error={errors.lastName?.message} {...register("lastName")} />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Input label="ایمیل" type="email" placeholder="coach@example.com" error={errors.email?.message} {...register("email")} />
-                <Input label="شماره موبایل" type="tel" placeholder="۰۹۱۲۱۱۱۲۲۳۳" error={errors.phone?.message} {...register("phone")} />
-              </div>
-              <Input label="رمز عبور" type="password" placeholder="••••••••" error={errors.password?.message} {...register("password")} />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label>تخصص</Label>
-                  <Select value={selectedSpecialty} onValueChange={(v) => setValue("specialty", v)}>
-                    <SelectTrigger><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
-                    <SelectContent>{specialties.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}</SelectContent>
-                  </Select>
-                  {errors.specialty && <p className="text-sm text-destructive">{errors.specialty.message}</p>}
-                </div>
-                <div className="space-y-1.5">
-                  <Label>سابقه</Label>
-                  <Select value={selectedExperience} onValueChange={(v) => setValue("experience", v)}>
-                    <SelectTrigger><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
-                    <SelectContent>{experienceOptions.map((e) => (<SelectItem key={e} value={e}>{e}</SelectItem>))}</SelectContent>
-                  </Select>
-                  {errors.experience && <p className="text-sm text-destructive">{errors.experience.message}</p>}
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" type="button" onClick={() => router.push("/admin/coaches")}>انصراف</Button>
-                <Button type="submit" loading={isSubmitting}><Save className="ml-2 h-4 w-4" />ثبت مربی</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </FadeIn>
-    </div>
+      <TwilightCard>
+        <SectionTitle className="mb-4">اطلاعات مربی</SectionTitle>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="نام" htmlFor="new-coach-firstName" error={errors.firstName?.message}>
+              <input
+                id="new-coach-firstName"
+                type="text"
+                placeholder="احمد"
+                aria-invalid={errors.firstName ? "true" : "false"}
+                className={inputClass}
+                {...register("firstName")}
+              />
+            </Field>
+            <Field label="نام خانوادگی" htmlFor="new-coach-lastName" error={errors.lastName?.message}>
+              <input
+                id="new-coach-lastName"
+                type="text"
+                placeholder="احمدی"
+                aria-invalid={errors.lastName ? "true" : "false"}
+                className={inputClass}
+                {...register("lastName")}
+              />
+            </Field>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="ایمیل" htmlFor="new-coach-email" error={errors.email?.message}>
+              <input
+                id="new-coach-email"
+                type="email"
+                placeholder="coach@example.com"
+                aria-invalid={errors.email ? "true" : "false"}
+                className={inputClass}
+                {...register("email")}
+              />
+            </Field>
+            <Field label="شماره موبایل" htmlFor="new-coach-phone" error={errors.phone?.message}>
+              <input
+                id="new-coach-phone"
+                type="tel"
+                placeholder="۰۹۱۲۱۱۱۲۲۳۳"
+                aria-invalid={errors.phone ? "true" : "false"}
+                className={inputClass}
+                {...register("phone")}
+              />
+            </Field>
+          </div>
+          <Field label="رمز عبور" htmlFor="new-coach-password" error={errors.password?.message}>
+            <input
+              id="new-coach-password"
+              type="password"
+              placeholder="••••••••"
+              aria-invalid={errors.password ? "true" : "false"}
+              className={inputClass}
+              {...register("password")}
+            />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>تخصص</Label>
+              <Select value={selectedSpecialty} onValueChange={(v) => setValue("specialty", v)}>
+                <SelectTrigger className="h-11 rounded-xl border-[#232934] bg-[#161a22] text-sm text-white">
+                  <SelectValue placeholder="انتخاب کنید" />
+                </SelectTrigger>
+                <SelectContent>{specialties.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}</SelectContent>
+              </Select>
+              {errors.specialty && <p className="text-sm text-destructive">{errors.specialty.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>سابقه</Label>
+              <Select value={selectedExperience} onValueChange={(v) => setValue("experience", v)}>
+                <SelectTrigger className="h-11 rounded-xl border-[#232934] bg-[#161a22] text-sm text-white">
+                  <SelectValue placeholder="انتخاب کنید" />
+                </SelectTrigger>
+                <SelectContent>{experienceOptions.map((e) => (<SelectItem key={e} value={e}>{e}</SelectItem>))}</SelectContent>
+              </Select>
+              {errors.experience && <p className="text-sm text-destructive">{errors.experience.message}</p>}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4">
+            <CtaButton variant="ghost" type="button" onClick={() => router.push("/admin/coaches")} className="w-auto px-6">
+              انصراف
+            </CtaButton>
+            <CtaButton type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="w-auto px-6">
+              {isSubmitting
+                ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
+                : <Save className="ml-2 h-4 w-4" strokeWidth={1.75} />}
+              ثبت مربی
+            </CtaButton>
+          </div>
+        </form>
+      </TwilightCard>
+    </PageShell>
   );
 }

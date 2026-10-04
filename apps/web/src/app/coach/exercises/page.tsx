@@ -2,20 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/Table";
-import { formatPersianNumber } from "@/lib/utils";
-import { Search, Plus, Dumbbell, Filter } from "lucide-react";
+import { formatPersianNumber, cn } from "@/lib/utils";
+import { SearchInput, FilterChips, EmptyState } from "@/components/twilight/controls";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { Plus, Dumbbell, Pencil, Trash2 } from "lucide-react";
 import { useExercises } from "@/hooks/use-api";
-import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
-import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 
 const muscles = ["همه", "سینه", "پشت", "پاها", "بازو", "شکم", "سرشانه"];
 const difficulties = ["همه", "مبتدی", "متوسط", "پیشرفته"];
+
+const chipLabels = (opts: string[]): Record<string, string> =>
+  Object.fromEntries(opts.map((o) => [o, o]));
 
 export default function ExerciseLibraryPage() {
   const [search, setSearch] = useState("");
@@ -41,85 +42,98 @@ export default function ExerciseLibraryPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <ScrollReveal direction="none">
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold leading-8">کتابخانه تمرینات</h1>
-          <p className="mt-1 text-muted-foreground leading-6">مدیریت حرکات ورزشی</p>
+    <PageShell>
+      <PageHeader
+        title="کتابخانه تمرینات"
+        subtitle="مدیریت حرکات ورزشی"
+        action={
+          <Button variant="default" asChild className="w-auto">
+            <Link href="/coach/exercises/new">
+              <Plus className="ml-2 h-4 w-4" />
+              افزودن حرکت جدید
+            </Link>
+          </Button>
+        }
+      />
+
+      <div className="flex flex-col gap-3">
+        <SearchInput value={search} onChange={setSearch} placeholder="جستجوی حرکت..." />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <span className="w-16 shrink-0 text-[11px] font-semibold text-[#8e98a8]">عضله هدف</span>
+          <FilterChips
+            pillId="coach-exercises-muscle"
+            options={muscles}
+            value={muscleFilter}
+            onChange={setMuscleFilter}
+            labels={chipLabels(muscles)}
+          />
         </div>
-        <Button asChild className="w-full sm:w-auto"><Link href="/coach/exercises/new"><Plus className="ml-2 h-4 w-4" />افزودن حرکت جدید</Link></Button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <span className="w-16 shrink-0 text-[11px] font-semibold text-[#8e98a8]">سطح</span>
+          <FilterChips
+            pillId="coach-exercises-difficulty"
+            options={difficulties}
+            value={difficultyFilter}
+            onChange={setDifficultyFilter}
+            labels={chipLabels(difficulties)}
+          />
+        </div>
       </div>
-      </ScrollReveal>
 
-      <ScrollReveal delay={0.05}>
-      <Card glass>
-        <CardContent className="p-6">
-          <div className="flex flex-wrap gap-3">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="جستجوی حرکت..." aria-label="جستجوی حرکت" value={search} onChange={(e) => setSearch(e.target.value)} className="pr-10 bg-white/70 backdrop-blur-sm border-white/30" />
-            </div>
-            <Select value={muscleFilter} onValueChange={setMuscleFilter}>
-              <SelectTrigger className="w-36 bg-white/70 backdrop-blur-sm border-white/30">
-                <Filter className="h-4 w-4" /><SelectValue />
-              </SelectTrigger>
-              <SelectContent>{muscles.map((m) => (<SelectItem key={m} value={m}>{m}</SelectItem>))}</SelectContent>
-            </Select>
-            <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-              <SelectTrigger className="w-36 bg-white/70 backdrop-blur-sm border-white/30">
-                <Filter className="h-4 w-4" /><SelectValue />
-              </SelectTrigger>
-              <SelectContent>{difficulties.map((d) => (<SelectItem key={d} value={d}>{d}</SelectItem>))}</SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-      </ScrollReveal>
-
-      <ScrollReveal delay={0.1}>
-      <Card glass>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">ردیف</TableHead>
-                <TableHead>نام حرکت</TableHead>
-                <TableHead>عضله هدف</TableHead>
-                <TableHead>وسیله</TableHead>
-                <TableHead>سطح</TableHead>
-                <TableHead className="w-28">عملیات</TableHead>
+      <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-[#232934]">
+              <TableHead className="w-12 text-[11px] font-semibold text-[#8e98a8]">ردیف</TableHead>
+              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">نام حرکت</TableHead>
+              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">عضله هدف</TableHead>
+              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">وسیله</TableHead>
+              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">سطح</TableHead>
+              <TableHead className="w-28 text-[11px] font-semibold text-[#8e98a8]">عملیات</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((ex, idx) => (
+              <TableRow key={ex.id} className={cn("border-t border-[#1e2430] hover:bg-[#1a202a]")}>
+                <TableCell className="tabular-nums text-white">{formatPersianNumber(idx + 1)}</TableCell>
+                <TableCell className="font-medium text-white">{ex.name}</TableCell>
+                <TableCell><Badge variant="outline">{ex.muscleGroup}</Badge></TableCell>
+                <TableCell>
+                  <span className="flex items-center gap-1 text-white">
+                    <Dumbbell className="h-3.5 w-3.5 text-[#8e98a8]" strokeWidth={1.75} />
+                    {ex.equipment || "–"}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={difficultyColor[ex.difficulty] || difficultyColor["متوسط"]}>
+                    {ex.difficulty}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm">
+                      <Pencil className="h-4 w-4" />
+                      ویرایش
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                      حذف
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6}>
-                    <EmptyState title="هیچ حرکتی یافت نشد" description="حرکتی با فیلترهای انتخاب شده وجود ندارد" />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filtered.map((ex, idx) => (
-                <TableRow key={ex.id} className="transition-colors hover:bg-white/30">
-                  <TableCell>{formatPersianNumber(idx + 1)}</TableCell>
-                  <TableCell className="font-medium">{ex.name}</TableCell>
-                  <TableCell><Badge variant="outline" className="bg-white/40">{ex.muscleGroup}</Badge></TableCell>
-                  <TableCell><span className="flex items-center gap-1"><Dumbbell className="h-3.5 w-3.5" />{ex.equipment || "–"}</span></TableCell>
-                  <TableCell><Badge variant={difficultyColor[ex.difficulty] || difficultyColor["متوسط"]}>{ex.difficulty}</Badge></TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">ویرایش</Button>
-                      <Button variant="destructive" size="sm">حذف</Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-      </ScrollReveal>
-    </div>
+            ))}
+          </TableBody>
+        </Table>
+        {filtered.length === 0 && (
+          <div className="border-t border-[#1e2430] p-6">
+            <EmptyState
+              title="هیچ حرکتی یافت نشد"
+              description="حرکتی با فیلترهای انتخاب شده وجود ندارد"
+            />
+          </div>
+        )}
+      </div>
+    </PageShell>
   );
 }

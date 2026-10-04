@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { FadeIn } from "@/components/animations/FadeIn";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { PageShell, PageHeader } from "@/components/twilight/Page";
+import { CircleIconButton } from "@/components/twilight/controls";
 import { Textarea } from "@/components/ui/Textarea";
 import { toast } from "sonner";
 import { ArrowRight, MessageSquare, Search, Send } from "lucide-react";
@@ -35,98 +34,102 @@ export default function CoachMessagesPage() {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">پیام‌ها</h1>
-        <p className="text-muted-foreground">ارسال پیام به شاگردان</p>
-      </div>
+  const canSend = message.trim().length > 0 && !isSending;
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <FadeIn className={cn("lg:col-span-1", activeConversation !== null && "hidden lg:block")}>
-          <Card glass className="overflow-hidden">
-            <div className="border-b border-border/60 p-5">
-              <h2 className="font-bold">مکالمات</h2>
-              <div className="mt-3 flex items-center gap-2 rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-                <Search className="h-4 w-4" /> جست‌وجو در شاگردان
+  return (
+    <PageShell>
+      <PageHeader title="پیام‌ها" subtitle="ارسال پیام به شاگردان" />
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className={cn("lg:col-span-1", activeConversation !== null && "hidden lg:block")}>
+          <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+            <div className="border-b border-[#1e2430] p-4">
+              <h2 className="font-serif text-lg font-normal text-white">مکالمات</h2>
+              <div className="mt-3 flex items-center gap-2 rounded-xl border border-[#232934] bg-[#1a202a] px-3 py-2.5 text-xs text-[#8e98a8]">
+                <Search className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+                جست‌وجو در شاگردان
               </div>
             </div>
-            <CardContent className="max-h-[62dvh] overflow-y-auto p-0 lg:max-h-[calc(100dvh-17rem)]">
+            <div className="max-h-[62dvh] divide-y divide-[#1e2430] overflow-y-auto lg:max-h-[calc(100dvh-17rem)]">
               {conversations.map((conv) => (
                 <button
                   key={conv.id}
                   onClick={() => { setActiveConversation(conv.id); setSelectedAthlete(conv.athlete); }}
                   className={cn(
-                    "w-full border-b border-border/50 p-4 text-right transition-colors hover:bg-primary/5",
-                    activeConversation === conv.id && "bg-primary/10"
+                    "w-full px-4 py-3.5 text-right transition-colors hover:bg-[#1a202a] cursor-pointer",
+                    activeConversation === conv.id && "bg-[#1a202a]"
                   )}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{conv.athlete}</span>
-                    {conv.unread && <span className="h-2 w-2 rounded-full bg-primary" />}
+                    <span className="text-sm font-medium text-white">{conv.athlete}</span>
+                    {conv.unread && <span className="h-2 w-2 rounded-full bg-[#d2c0a5]" />}
                   </div>
-                  <p className="mt-1 truncate text-sm text-muted-foreground">{conv.lastMessage}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/60">{conv.time}</p>
+                  <p className="mt-1 truncate text-xs text-[#8e98a8]">{conv.lastMessage}</p>
+                  <p className="mt-0.5 text-[11px] text-[#606a78]">{conv.time}</p>
                 </button>
               ))}
-            </CardContent>
-          </Card>
-        </FadeIn>
+            </div>
+          </div>
+        </div>
 
-        <FadeIn delay={0.1} className={cn("lg:col-span-2", activeConversation === null && "hidden lg:block")}>
-          <Card glass className="flex min-h-[65dvh] flex-col overflow-hidden lg:h-[calc(100dvh-13rem)] lg:min-h-[34rem]">
-            <div className="flex items-center gap-3 border-b border-border/60 p-4 md:p-5">
+        <div className={cn("lg:col-span-2", activeConversation === null && "hidden lg:block")}>
+          <div className="flex min-h-[65dvh] flex-col overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22] lg:h-[calc(100dvh-13rem)] lg:min-h-[34rem]">
+            <div className="flex items-center gap-3 border-b border-[#1e2430] p-4 md:p-5">
               <button
                 onClick={() => { setActiveConversation(null); setSelectedAthlete(""); }}
-                className="rounded-xl p-2 text-muted-foreground active:bg-muted lg:hidden"
+                className="rounded-xl p-2 text-[#8e98a8] active:bg-[#1a202a] lg:hidden"
                 aria-label="بازگشت به فهرست مکالمات"
               >
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-5 w-5" strokeWidth={1.75} />
               </button>
               <div>
-                <h2 className="font-bold">{selectedAthlete || "انتخاب شاگرد"}</h2>
-                {selectedAthlete && <p className="text-xs text-emerald-600">آنلاین</p>}
+                <h2 className="text-sm font-semibold text-white">{selectedAthlete || "انتخاب شاگرد"}</h2>
+                {selectedAthlete && <p className="mt-0.5 text-[11px] text-[#d2c0a5]">آنلاین</p>}
               </div>
             </div>
-            <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+            <div className="flex min-h-0 flex-1 flex-col p-0">
               {!selectedAthlete ? (
-                <div className="m-auto py-8 text-center text-muted-foreground">
-                  <MessageSquare className="mx-auto mb-3 h-12 w-12 opacity-50" />
-                  <p>مخاطبی را از لیست مکالمات انتخاب کنید</p>
+                <div className="m-auto py-8 text-center">
+                  <MessageSquare className="mx-auto mb-3 h-12 w-12 text-[#606a78] opacity-70" strokeWidth={1.25} />
+                  <p className="text-sm text-[#8e98a8]">مخاطبی را از لیست مکالمات انتخاب کنید</p>
                 </div>
               ) : (
                 <>
-                  <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-muted/25 p-4 md:p-6">
-                    <div className="max-w-[85%] self-start rounded-2xl rounded-tr-md bg-card p-3 shadow-sm">
-                      <p className="text-sm">سلام {selectedAthlete.split(" ")[0]} جان. تمرینات امروز رو چطور انجام دادی؟</p>
-                      <p className="mt-1 text-xs text-muted-foreground">۱۰:۳۰</p>
+                  <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-[#0c0e12] p-4 md:p-6">
+                    <div className="max-w-[85%] self-start rounded-2xl rounded-tr-md border border-[#232934] bg-[#202632] p-3 shadow-sm">
+                      <p className="text-sm text-white">سلام {selectedAthlete.split(" ")[0]} جان. تمرینات امروز رو چطور انجام دادی؟</p>
+                      <p className="mt-1 text-[11px] text-[#8e98a8]">۱۰:۳۰</p>
                     </div>
-                    <div className="max-w-[85%] self-end rounded-2xl rounded-tl-md bg-primary/12 p-3 text-foreground">
-                      <p className="text-sm">عالی بود استاد. همه حرکت‌ها رو انجام دادم.</p>
-                      <p className="mt-1 text-xs text-muted-foreground">۱۱:۱۵</p>
+                    <div className="max-w-[85%] self-end rounded-2xl rounded-tl-md bg-[#d2c0a5] p-3 shadow-sm">
+                      <p className="text-sm text-[#121417]">عالی بود استاد. همه حرکت‌ها رو انجام دادم.</p>
+                      <p className="mt-1 text-[11px] text-[#121417]/60">۱۱:۱۵</p>
                     </div>
                   </div>
-                  <div className="sticky bottom-0 border-t border-border/60 bg-background/90 p-3 backdrop-blur-xl md:p-4">
+                  <div className="sticky bottom-0 border-t border-[#1e2430] bg-[#10141a]/95 p-3 backdrop-blur-xl md:p-4">
                     <div className="flex items-end gap-2">
-                    <Textarea
-                      placeholder="متن پیام خود را وارد کنید..."
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      rows={1}
-                      aria-label={`ارسال پیام جدید به ${selectedAthlete}`}
-                      className="max-h-28 min-h-11 resize-none rounded-2xl bg-card"
-                    />
-                    <Button size="icon" onClick={handleSendMessage} loading={isSending} disabled={!message.trim()} aria-label="ارسال پیام">
-                      {!isSending && <Send className="h-4 w-4" />}
-                    </Button>
+                      <Textarea
+                        placeholder="متن پیام خود را وارد کنید..."
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        rows={1}
+                        aria-label={`ارسال پیام جدید به ${selectedAthlete}`}
+                        className="max-h-28 min-h-11 resize-none rounded-2xl"
+                      />
+                      <CircleIconButton
+                        label="ارسال پیام"
+                        onClick={canSend ? handleSendMessage : undefined}
+                        className={cn(!canSend && "cursor-not-allowed opacity-40")}
+                      >
+                        <Send className="h-4 w-4" strokeWidth={1.75} />
+                      </CircleIconButton>
                     </div>
                   </div>
                 </>
               )}
-            </CardContent>
-          </Card>
-        </FadeIn>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

@@ -9,6 +9,7 @@ import { useCheckIns, useCheckIn, useCheckOut, useBranches } from "@/hooks/use-a
 import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
 import { PageShell, PageHeader, MicroLabelFa, SectionTitle } from "@/components/twilight/Page";
 import { TwilightCard, CtaButton } from "@/components/twilight/controls";
+import { soundEngine } from "@/services/soundEngine";
 
 export default function CheckinPage() {
   const { user } = useAuth();
@@ -57,6 +58,7 @@ export default function CheckinPage() {
 
   const handleCheckin = () => {
     if (!checkedIn) {
+      soundEngine.playBell(528);
       setLocalCheckedIn(true);
       setLocalCheckinTime(new Date().toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" }));
       if (athleteId && effectiveBranchId) {
@@ -66,6 +68,7 @@ export default function CheckinPage() {
         });
       }
     } else {
+      soundEngine.playBell(440);
       setLocalCheckedIn(false);
       setLocalCheckinTime(null);
       const targetId = openCheckin?.id;

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Play } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Progress } from "@/components/ui/Progress";
 import { Button } from "@/components/ui/Button";
@@ -11,7 +11,9 @@ import { formatPersianNumber, formatDate, calculateProgress, cn } from "@/lib/ut
 import { useTrainingProgram } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { PageShell, PageHeader, SectionTitle, MicroLabelFa } from "@/components/twilight/Page";
-import { TwilightCard, FilterChips } from "@/components/twilight/controls";
+import { TwilightCard, FilterChips, CtaButton } from "@/components/twilight/controls";
+import { GymWorkoutPlayerModal } from "@/components/twilight/GymWorkoutPlayerModal";
+import { toast } from "sonner";
 
 const dayNames = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"] as const;
 type DayName = (typeof dayNames)[number];
@@ -21,6 +23,7 @@ export default function ProgramDetailPage() {
   const { data, isLoading, isError, error, refetch } = useTrainingProgram(params.id as string);
   const [completedExercises, setCompletedExercises] = useState<Record<string, number[]>>({});
   const [activeDay, setActiveDay] = useState<DayName>(dayNames[0]);
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
   const program = data?.data;
 
@@ -60,6 +63,21 @@ export default function ProgramDetailPage() {
 
   const activeDayData = weeklyProgram.find((d) => d.day === activeDay) || weeklyProgram[0];
   const activeDayCompleted = (completedExercises[activeDayData?.day || ""] || []).length;
+
+  const playerRoutine = {
+    id: program.id,
+    name: `${program.name} - ${activeDayData?.day || ""}`,
+    exercises: (activeDayData?.exercises || []).map((e, idx) => ({
+      id: String(e.id || idx),
+      name: e.exercise?.name || `حرکت ${idx + 1}`,
+      nameFa: e.exercise?.name,
+      targetMuscle: e.exercise?.muscleGroup || "عضلات هدف",
+      sets: e.sets || 3,
+      reps: e.reps || "10-12",
+      restSecs: e.restSeconds || 60,
+      tips: e.exercise?.tips || "تمرکز روی فرم صحیح و اضافه بار تدریجی",
+    })),
+  };
 
   return (
     <PageShell>
@@ -104,14 +122,26 @@ export default function ProgramDetailPage() {
       {activeDayData && (
         <TwilightCard className="p-0">
           <div className="flex items-center justify-between px-4 pt-4">
-            <SectionTitle>تمرینات {activeDayData.day}</SectionTitle>
-            <span className="text-[11px] text-[#8e98a8]">
-              {formatPersianNumber(activeDayCompleted)}/{formatPersianNumber(activeDayData.exercises.length)} تکمیل
-            </span>
+            <div>
+              <SectionTitle>تمرینات {activeDayData.day}</SectionTitle>
+              <span className="text-[11px] text-[#8e98a8]">
+                {formatPersianNumber(activeDayCompleted)}/{formatPersianNumber(activeDayData.exercises.length)} حرکت تکمیل شده
+              </span>
+            </div>
+            {activeDayData.exercises.length > 0 && (
+              <CtaButton
+                variant="cream"
+                onClick={() => setIsPlayerOpen(true)}
+                className="w-auto px-4 py-2 text-xs"
+              >
+                <Play className="w-3.5 h-3.5 fill-current text-[#121417]" />
+                <span>شروع تمرین این روز</span>
+              </CtaButton>
+            )}
           </div>
           <div className="flex flex-col gap-2.5 p-4">
             {activeDayData.exercises.length === 0 ? (
-              <p className="py-4 text-center text-sm text-[#8e98a8]">روز استراحت</p>
+              <p className="py-6 text-center text-sm text-[#8e98a8]">روز استراحت و ریکاوری عضلات</p>
             ) : (
               activeDayData.exercises.map((exercise, idx) => {
                 const isCompleted = (completedExercises[activeDayData.day] || []).includes(idx);
@@ -143,6 +173,16 @@ export default function ProgramDetailPage() {
           </div>
         </TwilightCard>
       )}
+
+      {/* Interactive Workout Modal */}
+      <GymWorkoutPlayerModal
+        isOpen={isPlayerOpen}
+        routine={playerRoutine}
+        onClose={() => setIsPlayerOpen(false)}
+        onFinishWorkout={() => {
+          toast.success("تمرین این روز با موفقیت ثبت شد!");
+        }}
+      />
     </PageShell>
   );
 }

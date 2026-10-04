@@ -41,7 +41,7 @@ function safeStringify(value: unknown): string {
  * `error`/`message`, derive them additively so downstream error handling keeps
  * working. Existing fields are never removed or overwritten.
  */
-function normalizeFastApiError(error: AxiosError): void {
+export function normalizeFastApiError(error: AxiosError): void {
   const response = error.response;
   if (!response) return;
   const body = response.data as Record<string, unknown> | null | undefined;

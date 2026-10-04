@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, ArrowLeft, Dumbbell, MessagesSquare, TrendingUp, Sparkles, Mail, Lock, ShieldCheck, Loader2, Quote } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Mail, Lock, ShieldCheck, Loader2 } from "lucide-react";
 import { CtaButton } from "@/components/twilight/controls";
 import { GymBackdrop } from "@/components/twilight/GymBackdrop";
 import { LumiWordmark } from "@/components/auth/AuthLayout";
@@ -176,217 +176,58 @@ function SignInContent() {
   );
 }
 
-const FEATURES = [
-  { icon: Dumbbell, title: "برنامه تمرینی شخصی", desc: "طراحی‌شده برای بدن و هدف تو" },
-  { icon: MessagesSquare, title: "مربی اختصاصی", desc: "ارتباط مستقیم و پیگیری مداوم" },
-  { icon: TrendingUp, title: "پیشرفت قابل دیدن", desc: "آمار و نمودار رشد هر هفته" },
-];
-
-const STATS = [
-  { value: "۲٬۴۰۰+", label: "ورزشکار فعال" },
-  { value: "۱۵۰+", label: "برنامه تمرینی" },
-  { value: "۹۸٪", label: "رضایت اعضا" },
-];
-
-/** Showcase panel — desktop scenic side with headline, features and stats. */
-function ShowcasePanel() {
+export default function LoginPage() {
   return (
-    <div className="relative hidden h-full w-full overflow-hidden lg:block">
-      <GymBackdrop className="absolute inset-0" />
-      {/* Warm golden glow + readability scrims */}
+    <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-[#07090c] px-4 py-8 text-white">
+      {/* Subtle atmospheric scenic background */}
+      <div className="pointer-events-none absolute inset-0 opacity-25">
+        <GymBackdrop />
+      </div>
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 45% at 50% 100%, rgba(210,192,165,0.14) 0%, transparent 65%)",
+            "radial-gradient(circle at 50% 50%, rgba(210,192,165,0.08) 0%, rgba(7,9,12,0.85) 60%, #07090c 100%)",
         }}
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-l from-[#07090c]/70 via-transparent to-transparent" />
 
-      {/* Floating mini progress card */}
+      {/* Centered form card container */}
       <motion.div
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute left-10 top-24 z-10 w-44 rounded-2xl border border-white/10 bg-[#10141a]/85 p-4 shadow-2xl shadow-black/50 backdrop-blur-md"
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 w-full max-w-[420px] flex flex-col items-center"
       >
-        <p className="text-[10px] font-medium tracking-wide text-[#8e98a8]">فعالیت روزانه</p>
-        <p className="mt-1 font-serif text-3xl text-white" dir="ltr">78%</p>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#1b2029]">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: "78%" }}
-            transition={{ delay: 0.8, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="h-full rounded-full bg-[#d2c0a5]"
-          />
-        </div>
-        <p className="mt-2 text-[10px] text-[#8e98a8]">تکمیل‌شده امروز</p>
-      </motion.div>
-
-      <div className="relative z-10 flex h-full flex-col justify-end p-12 text-white">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#d2c0a5]/30 bg-[#d2c0a5]/10 px-4 py-1.5 text-xs font-medium text-[#d2c0a5]">
-            <Sparkles className="h-3.5 w-3.5" strokeWidth={1.75} />
-            باشگاه دیجیتال بانوان
+        {/* Centered Brand Header */}
+        <div className="mb-6 flex flex-col items-center text-center">
+          <LumiWordmark />
+          <h1 className="mt-4 font-serif text-3xl font-normal text-white sm:text-4xl">
+            خوش برگشتی
+          </h1>
+          <p className="mt-1.5 text-xs text-[#8e98a8]">
+            وارد حساب کاربری‌ات شو و تمرینت رو ادامه بده
           </p>
-          <h2 className="font-serif text-5xl font-medium leading-[1.4]">
-            قوی‌تر از
-            <br />
-            <span className="text-[#d2c0a5]">دیروزت</span> باش.
-          </h2>
-        </motion.div>
-
-        <div className="mt-8 flex flex-col gap-3">
-          {FEATURES.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, x: 16 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.25 + i * 0.12, duration: 0.45 }}
-              className="flex items-center gap-3"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#d2c0a5]/25 bg-[#d2c0a5]/10 text-[#d2c0a5]">
-                <f.icon className="h-5 w-5" strokeWidth={1.75} />
-              </span>
-              <span>
-                <span className="block text-sm font-semibold text-white">{f.title}</span>
-                <span className="block text-xs text-[#8e98a8]">{f.desc}</span>
-              </span>
-            </motion.div>
-          ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="mt-8 flex items-center gap-8 border-t border-white/10 pt-6"
-        >
-          {STATS.map((s) => (
-            <div key={s.label}>
-              <p className="font-serif text-2xl text-[#d2c0a5]">{s.value}</p>
-              <p className="mt-0.5 text-[11px] text-[#8e98a8]">{s.label}</p>
-            </div>
-          ))}
-        </motion.div>
+        {/* Form Card */}
+        <div className="relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[#10141a]/95 p-6 shadow-2xl shadow-black/70 backdrop-blur-xl sm:p-8">
+          {/* Top subtle highlight */}
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-[#d2c0a5]/50 to-transparent" />
+          <SignInContent />
+        </div>
 
-        {/* Testimonial */}
-        <motion.figure
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.85, duration: 0.5 }}
-          className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-sm"
-        >
-          <Quote className="h-4 w-4 text-[#d2c0a5]/60" strokeWidth={1.75} />
-          <blockquote className="mt-2 text-[13px] leading-6 text-[#c9cfd9]">
-            «با لومی بالاخره تونستم برنامه‌م رو منظم نگه دارم؛ مربی‌م هر هفته پیگیرمه.»
-          </blockquote>
-          <figcaption className="mt-2 flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#202634] font-serif text-xs text-[#d2c0a5]">س</span>
-            <span className="text-[11px] text-[#8e98a8]">سارا م. — عضو از ۱۴۰۲</span>
-          </figcaption>
-        </motion.figure>
-      </div>
-    </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <div className="relative flex min-h-svh flex-col overflow-hidden bg-[#07090c] text-white lg:flex-row">
-      {/* ── Mobile scenic hero ─────────────────────────────── */}
-      <div className="relative h-[34svh] min-h-[260px] w-full shrink-0 overflow-hidden lg:hidden">
-        <GymBackdrop className="absolute inset-0" />
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 90% 55% at 50% 100%, rgba(210,192,165,0.16) 0%, transparent 65%)",
-          }}
-        />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#07090c]/40 via-transparent to-[#07090c]" />
-        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 pt-[env(safe-area-inset-top)] text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="flex flex-col items-center"
+        {/* Footer Terms Note */}
+        <p className="mt-6 text-center text-[11px] leading-5 text-[#6b7280]">
+          با ورود،{" "}
+          <Link
+            href="/terms"
+            className="text-[#8e98a8] underline underline-offset-4 transition-colors hover:text-white"
           >
-            <LumiWordmark />
-            <h1 className="mt-4 font-serif text-4xl font-normal leading-snug">
-              خوش برگشتی
-            </h1>
-            <p className="mt-1.5 text-sm text-[#c9cfd9]">
-              ادامه‌ی مسیرت از همین‌جا شروع می‌شه
-            </p>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* ── Desktop showcase ───────────────────────────────── */}
-      <div className="relative hidden w-[54%] shrink-0 lg:block">
-        <ShowcasePanel />
-      </div>
-
-      {/* ── Form column / mobile bottom sheet ──────────────── */}
-      <div className="relative z-10 -mt-8 flex flex-1 flex-col rounded-t-[32px] border-t border-white/10 bg-[#0c0e12] px-5 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-7 lg:mt-0 lg:items-center lg:justify-center lg:rounded-none lg:border-0 lg:bg-[#0c0e12] lg:px-10 lg:py-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-          className="mx-auto w-full max-w-[420px]"
-        >
-          {/* Desktop heading */}
-          <div className="mb-7 hidden text-right lg:block">
-            <LumiWordmark />
-            <h1 className="mt-5 font-serif text-4xl font-normal text-white">
-              خوش برگشتی
-            </h1>
-            <p className="mt-2 text-sm text-[#8e98a8]">
-              وارد حساب کاربری‌ات شو و ادامه بده
-            </p>
-          </div>
-
-          {/* Form card */}
-          <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#10141a] p-6 shadow-2xl shadow-black/50 sm:p-7">
-            {/* Premium top highlight */}
-            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-[#d2c0a5]/50 to-transparent" />
-            <SignInContent />
-          </div>
-
-          {/* Mobile feature strip */}
-          <div className="mt-6 grid grid-cols-3 gap-2 lg:hidden">
-            {FEATURES.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 + i * 0.1 }}
-                className="flex flex-col items-center gap-1.5 rounded-2xl border border-white/5 bg-[#10141a] px-2 py-3 text-center"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#d2c0a5]/10 text-[#d2c0a5]">
-                  <f.icon className="h-4 w-4" strokeWidth={1.75} />
-                </span>
-                <span className="text-[10px] font-semibold leading-4 text-white">{f.title}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          <p className="mt-6 text-center text-[11px] leading-5 text-[#6b7280]">
-            با ورود،{" "}
-            <Link
-              href="/terms"
-              className="text-[#8e98a8] underline underline-offset-4 transition-colors hover:text-white"
-            >
-              شرایط استفاده
-            </Link>{" "}
-            را می‌پذیری
-          </p>
-        </motion.div>
-      </div>
+            شرایط استفاده
+          </Link>{" "}
+          را می‌پذیری
+        </p>
+      </motion.div>
     </div>
   );
 }

@@ -4,17 +4,17 @@ import Link from "next/link";
 export interface LumiLogoProps {
   /** Size preset */
   size?: "xs" | "sm" | "md" | "lg" | "xl" | "hero" | "responsive";
-  /** Color theme variant */
+  /** Colour role. Maps to a semantic ink token (never a hard-coded hue). */
   variant?: "white" | "dark" | "rose" | "current" | "auto";
   /** Show the WELLNESS subtitle (default: true) */
   showSubtitle?: boolean;
   /** Show the delicate horizontal divider line (default: true) */
   showDivider?: boolean;
-  /** Add subtle luxury ambient glow behind logo */
+  /** Add a subtle ambient glow behind the mark */
   glow?: boolean;
-  /** Additional CSS class names for the container / SVG */
+  /** Additional CSS class names for the SVG */
   className?: string;
-  /** If true, wraps the logo in a Link to "/" */
+  /** If true, wraps the logo in a Link */
   asLink?: boolean;
   /** Custom link target when asLink is true */
   href?: string;
@@ -23,8 +23,19 @@ export interface LumiLogoProps {
 }
 
 /**
- * LumiLogo - Official luxury vector wordmark for LUMI WELLNESS.
- * Built with pre-calculated vector outline paths for zero-layout-shift and crisp rendering at any scale.
+ * LumiLogo — the official LUMI WELLNESS wordmark.
+ *
+ * Renders the supplied brand design directly: "LUMI" set in Bodoni Moda, a
+ * hairline divider, and "WELLNESS" set in wide-tracked Montserrat. It is an
+ * **inline** SVG on purpose — the DOM resolves the `--font-bodoni` /
+ * `--font-montserrat` variable faces, which an `<img src=".svg">` could not —
+ * so the mark always paints in the intended faces instead of a system serif.
+ *
+ * Colour comes from `currentColor`, driven by a semantic ink token per variant
+ * (DESIGN_SYSTEM §1 / rule #1 — no raw hues here). The ink tokens
+ * `--logo-ink` / `--logo-ink-inverse` are theme-invariant: "dark" is dark ink
+ * for light surfaces, "white" is light ink for dark surfaces, and "auto"
+ * follows the active theme.
  */
 export const LumiLogo: React.FC<LumiLogoProps> = ({
   size = "md",
@@ -35,37 +46,24 @@ export const LumiLogo: React.FC<LumiLogoProps> = ({
   className = "",
   asLink = false,
   href = "/",
-  ariaLabel = "LUMI WELLNESS Logo",
+  ariaLabel = "LUMI WELLNESS",
 }) => {
-  // Determine fill & stroke colors
-  // NOTE: "auto" uses explicit fill utilities (not currentColor) so theme
-  // flips change `fill` directly — inherited currentColor does not reliably
-  // repaint this vector subtree in Chromium (stale dark raster bug).
-  let fillClass = "fill-white";
-  let strokeColor = "rgba(255, 255, 255, 0.4)";
-  let strokeUsesCurrent = false;
+  const colorClass =
+    variant === "dark"
+      ? "text-logo-ink"
+      : variant === "rose"
+        ? "text-primary"
+        : variant === "current"
+          ? "text-current"
+          : variant === "auto"
+            ? "text-logo-ink dark:text-logo-ink-inverse"
+            : "text-logo-ink-inverse"; // "white"
 
-  if (variant === "dark") {
-    fillClass = "fill-zinc-900";
-    strokeColor = "rgba(24, 24, 27, 0.35)";
-  } else if (variant === "rose") {
-    fillClass = "fill-rose-400";
-    strokeColor = "rgba(244, 63, 94, 0.45)";
-  } else if (variant === "current") {
-    fillClass = "fill-current";
-    strokeColor = "currentColor";
-  } else if (variant === "auto") {
-    fillClass = "fill-zinc-900 dark:fill-white";
-    strokeColor = "currentColor";
-    strokeUsesCurrent = true;
-  }
+  // User space is a 600×232 canvas with the wordmark centred on x=300.
+  // Cropping to LUMI-only just narrows the box around the title.
+  const viewBox = showSubtitle ? "40 18 520 196" : "120 18 360 124";
 
-  // ViewBox:
-  // Full logo with divider & subtitle: 0 170 886 340
-  // LUMI only: 160 170 560 160
-  const viewBox = showSubtitle ? "0 170 886 340" : "160 170 560 160";
-
-  const sizeClasses = 
+  const sizeClasses =
     size === "xs" ? "h-6 w-auto" :
     size === "sm" ? "h-8 w-auto" :
     size === "md" ? "h-11 w-auto" :
@@ -74,62 +72,82 @@ export const LumiLogo: React.FC<LumiLogoProps> = ({
     size === "hero" ? "h-24 sm:h-32 md:h-36 w-auto" :
     "w-full max-w-[240px] h-auto";
 
-  const svgElement = (
-    <div className={`relative inline-flex items-center justify-center ${glow ? "group" : ""}`}>
+  const svg = (
+    <span className={`relative inline-flex items-center justify-center ${glow ? "group" : ""}`}>
       {glow && (
-        <div className="absolute inset-0 -m-3 bg-gradient-to-r from-rose-500/20 via-pink-500/20 to-purple-600/20 blur-xl rounded-full opacity-70 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -m-4 rounded-full bg-gradient-to-r from-primary/25 via-brand/20 to-blush/25 opacity-70 blur-2xl transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+        />
       )}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox={viewBox}
-        aria-label={ariaLabel}
         role="img"
-        className={`relative z-10 ${sizeClasses} ${className}`}
-        style={{ overflow: "visible" }}
+        aria-label={ariaLabel}
+        className={`relative z-10 ${sizeClasses} ${colorClass} ${className}`}
+        fill="currentColor"
       >
-      {/* LUMI Title (Outlined Vector Path) */}
-      <path
-        className={fillClass}
-        d="M274.35,295.69 Q274.35,300.11 273.84,310.31 L271.97,310.31 Q270.95,310.31 267.04,309.97 Q263.13,309.63 258.20,309.63 L187.48,309.12 Q184.59,309.12 184.59,307.59 Q184.59,306.40 189.18,306.06 Q195.64,305.72 196.91,304.62 Q198.19,303.51 198.19,298.24 L198.19,202.70 Q198.19,196.41 196.91,195.39 Q195.64,194.37 187.82,194.37 Q184.59,194.37 184.59,192.50 Q184.59,190.97 186.63,190.97 L188.16,190.97 Q193.77,191.48 210.43,191.48 Q211.96,191.48 216.38,191.22 Q220.80,190.97 223.69,190.97 L225.56,190.97 Q228.62,190.97 228.62,192.67 Q228.62,193.69 227.69,193.94 Q226.75,194.20 221.82,194.37 Q216.89,194.54 215.96,195.99 Q215.02,197.43 215.02,204.91 L215.02,305.21 Q219.61,305.38 227.77,305.38 Q247.66,305.38 255.82,303.34 Q263.98,301.30 266.87,295.69 Q269.76,290.08 270.27,280.56 Q270.44,278.35 272.31,278.35 Q274.52,278.35 274.35,280.90 L274.18,285.15 Q274.18,285.49 274.18,286.68 Q274.35,287.87 274.35,289.06 Z M421.57,192.67 Q421.57,194.20 418.51,194.20 Q418.00,194.20 415.11,194.03 Q414.26,193.86 412.73,193.86 Q408.48,193.86 407.63,196.07 Q407.29,197.26 407.29,199.98 L407.29,263.73 Q407.29,288.55 398.02,299.86 Q388.76,311.16 368.19,311.16 Q343.54,311.16 333.51,297.22 Q326.88,287.87 326.88,266.45 L326.71,198.28 Q326.20,195.22 322.63,194.54 Q321.61,194.37 316.34,194.37 Q313.45,194.03 313.45,192.67 Q313.45,191.14 315.83,191.14 L318.89,191.14 Q319.74,191.14 322.80,191.31 Q325.52,191.31 327.73,191.31 L352.04,191.14 Q352.89,190.97 354.08,190.97 Q356.97,190.97 356.97,192.84 Q356.97,194.03 355.95,194.20 Q354.93,194.37 349.15,194.54 Q346.77,194.54 345.92,194.88 Q344.22,195.56 344.05,197.26 Q343.88,197.94 343.88,206.95 L343.88,267.81 Q343.88,290.25 351.02,298.41 Q358.16,306.57 372.27,306.57 Q398.11,306.57 401.51,277.16 Q402.02,272.74 402.02,239.76 L402.02,230.07 L402.19,216.47 L402.02,204.74 Q402.02,203.04 402.02,201.00 Q402.19,198.79 402.19,199.13 Q402.19,195.39 398.62,194.54 Q397.43,194.20 391.65,194.20 Q388.25,194.20 388.25,192.33 Q388.25,190.80 390.63,190.80 Q391.99,190.80 392.84,190.97 Q394.88,191.14 407.63,191.14 Q409.50,191.14 411.88,190.97 Q414.09,190.97 415.11,190.97 L417.66,190.97 Q421.57,190.97 421.57,192.67 Z M584.09,307.76 Q584.09,309.46 580.52,309.46 L578.65,309.46 Q576.27,309.46 569.98,309.29 Q563.69,309.12 560.29,309.12 Q555.19,309.12 548.39,309.29 Q541.42,309.29 539.21,309.29 L538.02,309.29 Q534.45,309.29 534.45,307.76 Q534.45,306.06 539.38,306.06 Q548.05,306.06 549.92,304.19 Q550.77,303.34 550.77,292.80 L550.77,204.74 Q550.77,204.91 548.90,210.69 Q542.10,231.26 529.18,272.57 L521.19,299.60 Q518.81,307.59 517.79,307.59 Q516.60,307.59 515.24,303.51 Q510.31,288.04 487.36,226.33 L480.56,208.14 Q480.73,211.37 480.73,216.98 L480.73,272.23 Q480.73,303.34 481.24,303.68 Q482.43,305.89 489.40,305.89 Q495.01,305.89 495.01,307.42 Q495.01,309.12 491.44,309.12 Q489.23,309.12 487.36,308.95 Q484.98,308.78 483.11,308.78 L463.56,309.29 Q460.50,309.29 460.50,307.76 Q460.50,306.06 470.19,305.89 Q474.27,305.89 474.95,304.53 Q475.63,303.17 475.63,295.69 L475.63,214.26 Q475.63,200.15 475.29,198.96 Q474.61,196.58 472.40,195.73 Q470.19,194.88 462.88,194.37 Q460.16,194.20 460.16,192.84 Q460.16,190.97 465.09,190.97 Q465.77,190.97 467.98,191.14 L476.82,191.14 Q486.85,191.14 490.93,190.97 Q491.78,193.18 500.96,217.66 Q504.87,227.86 522.89,277.16 Q526.12,266.11 529.52,255.40 L547.54,199.13 Q549.07,194.20 550.26,190.97 L575.76,190.80 Q581.37,190.80 582.22,191.31 Q583.07,191.82 583.07,192.84 Q583.07,194.54 580.18,194.54 Q575.42,194.54 573.72,194.88 Q569.64,195.56 568.11,197.60 Q567.26,198.79 567.26,217.49 L567.26,296.54 Q567.26,303.34 568.62,304.53 Q570.83,306.06 579.67,306.06 L580.69,306.06 Q584.09,306.06 584.09,307.76 Z M668.41,307.76 Q668.41,309.12 666.37,309.12 L664.67,309.12 Q663.65,308.61 641.55,308.61 Q637.30,308.61 633.05,308.95 Q630.84,309.12 626.25,309.12 Q624.04,309.12 624.04,307.59 Q624.04,306.23 628.46,306.06 Q635.26,305.89 636.45,304.44 Q637.64,303.00 637.64,294.67 L637.64,205.25 Q637.64,196.92 636.79,195.90 Q635.77,194.20 627.44,193.86 Q624.21,193.69 624.21,192.50 Q624.21,190.97 626.25,190.97 L649.20,191.31 Q651.75,191.31 659.06,191.14 L665.52,190.97 Q668.24,190.97 668.24,192.50 Q668.24,193.86 660.76,194.20 Q656.51,194.37 655.58,195.73 Q654.64,197.09 654.64,202.87 L654.64,293.65 Q654.64,303.34 655.49,304.19 Q657.36,306.06 666.54,306.40 Q668.41,306.40 668.41,307.76 Z"
-      />
-
-      {/* Optional Divider Line */}
-      {showSubtitle && showDivider && (
-        <line
-          x1="190.5"
-          y1="375"
-          x2="696.3"
-          y2="375"
-          stroke={strokeUsesCurrent ? "currentColor" : strokeColor}
-          strokeOpacity={strokeUsesCurrent ? 0.45 : undefined}
-          strokeWidth="1.8"
-        />
-      )}
-
-      {/* Optional WELLNESS Subtitle (Outlined Vector Path) */}
-      {showSubtitle && (
-        <path
-          className={fillClass}
-          d="M228.80,442.00 L236.72,470.56 L239.68,470.56 L246.88,445.00 L246.96,445.00 L254.20,470.56 L257.08,470.56 L264.96,442.00 L262.24,442.00 L255.72,467.00 L255.64,467.00 L248.64,442.00 L245.24,442.00 L238.28,467.00 L238.20,467.00 L231.72,442.00 Z M295.96,442.00 L295.96,470.56 L315.88,470.56 L315.88,468.24 L298.68,468.24 L298.68,456.96 L314.60,456.96 L314.60,454.64 L298.68,454.64 L298.68,444.32 L315.68,444.32 L315.68,442.00 Z M347.68,442.00 L347.68,470.56 L366.40,470.56 L366.40,468.24 L350.40,468.24 L350.40,442.00 Z M397.16,442.00 L397.16,470.56 L415.88,470.56 L415.88,468.24 L399.88,468.24 L399.88,442.00 Z M446.60,442.00 L446.60,470.56 L449.32,470.56 L449.32,446.40 L449.40,446.40 L466.04,470.56 L469.08,470.56 L469.08,442.00 L466.36,442.00 L466.36,466.16 L466.28,466.16 L449.64,442.00 Z M502.80,442.00 L502.80,470.56 L522.72,470.56 L522.72,468.24 L505.52,468.24 L505.52,456.96 L521.44,456.96 L521.44,454.64 L505.52,454.64 L505.52,444.32 L522.51,444.32 L522.51,442.00 Z M555.79,461.16 L553.08,461.16 Q552.96,463.80 553.77,465.68 Q554.60,467.56 556.12,468.76 Q557.63,469.96 559.79,470.54 Q561.96,471.12 564.48,471.12 Q567.00,471.12 568.79,470.66 Q570.60,470.20 571.81,469.46 Q573.03,468.72 573.74,467.80 Q574.43,466.88 574.81,465.98 Q575.19,465.08 575.29,464.28 Q575.39,463.48 575.39,463.00 Q575.39,461.24 574.81,460.00 Q574.24,458.76 573.22,457.90 Q572.19,457.04 570.86,456.46 Q569.51,455.88 568.00,455.48 L561.03,453.76 Q560.15,453.56 559.38,453.24 Q558.60,452.92 558.00,452.40 Q557.39,451.88 557.05,451.14 Q556.72,450.40 556.72,449.40 Q556.72,447.80 557.31,446.72 Q557.91,445.64 558.89,444.98 Q559.88,444.32 561.17,444.02 Q562.48,443.72 563.88,443.72 Q565.39,443.72 566.77,444.14 Q568.15,444.56 569.22,445.38 Q570.27,446.20 570.93,447.42 Q571.60,448.64 571.67,450.28 L574.39,450.28 Q574.39,448.08 573.53,446.42 Q572.67,444.76 571.24,443.64 Q569.79,442.52 567.88,441.96 Q565.96,441.40 563.84,441.40 Q560.84,441.40 558.91,442.26 Q557.00,443.12 555.89,444.36 Q554.79,445.60 554.39,447.00 Q554.00,448.40 554.00,449.44 Q554.00,451.12 554.53,452.28 Q555.08,453.44 555.96,454.24 Q556.84,455.04 558.01,455.52 Q559.19,456.00 560.43,456.32 L566.79,457.88 Q567.79,458.12 568.84,458.50 Q569.88,458.88 570.74,459.48 Q571.60,460.08 572.13,460.96 Q572.67,461.84 572.67,463.04 Q572.67,464.60 571.91,465.70 Q571.15,466.80 570.01,467.50 Q568.88,468.20 567.55,468.52 Q566.24,468.84 565.12,468.84 Q563.15,468.84 561.43,468.46 Q559.72,468.08 558.46,467.20 Q557.19,466.32 556.48,464.84 Q555.75,463.36 555.79,461.16 Z M609.00,461.16 L606.28,461.16 Q606.16,463.80 606.98,465.68 Q607.80,467.56 609.32,468.76 Q610.84,469.96 613.00,470.54 Q615.16,471.12 617.68,471.12 Q620.20,471.12 622.00,470.66 Q623.80,470.20 625.01,469.46 Q626.24,468.72 626.94,467.80 Q627.63,466.88 628.01,465.98 Q628.39,465.08 628.50,464.28 Q628.60,463.48 628.60,463.00 Q628.60,461.24 628.01,460.00 Q627.44,458.76 626.42,457.90 Q625.39,457.04 624.06,456.46 Q622.72,455.88 621.20,455.48 L614.24,453.76 Q613.36,453.56 612.58,453.24 Q611.80,452.92 611.20,452.40 Q610.60,451.88 610.25,451.14 Q609.92,450.40 609.92,449.40 Q609.92,447.80 610.51,446.72 Q611.12,445.64 612.10,444.98 Q613.08,444.32 614.38,444.02 Q615.68,443.72 617.08,443.72 Q618.60,443.72 619.98,444.14 Q621.36,444.56 622.42,445.38 Q623.48,446.20 624.13,447.42 Q624.80,448.64 624.88,450.28 L627.60,450.28 Q627.60,448.08 626.74,446.42 Q625.88,444.76 624.44,443.64 Q623.00,442.52 621.08,441.96 Q619.16,441.40 617.04,441.40 Q614.04,441.40 612.12,442.26 Q610.20,443.12 609.10,444.36 Q608.00,445.60 607.60,447.00 Q607.20,448.40 607.20,449.44 Q607.20,451.12 607.74,452.28 Q608.28,453.44 609.16,454.24 Q610.04,455.04 611.22,455.52 Q612.39,456.00 613.63,456.32 L620.00,457.88 Q621.00,458.12 622.04,458.50 Q623.08,458.88 623.94,459.48 Q624.80,460.08 625.34,460.96 Q625.88,461.84 625.88,463.04 Q625.88,464.60 625.12,465.70 Q624.36,466.80 623.22,467.50 Q622.08,468.20 620.75,468.52 Q619.44,468.84 618.32,468.84 Q616.36,468.84 614.63,468.46 Q612.92,468.08 611.66,467.20 Q610.39,466.32 609.68,464.84 Q608.96,463.36 609.00,461.16 Z"
-        />
-      )}
+        <text
+          x="300"
+          y="128"
+          textAnchor="middle"
+          style={{
+            fontFamily: "var(--font-bodoni), 'Bodoni Moda', 'Didot', Georgia, serif",
+            fontOpticalSizing: "auto",
+            fontWeight: 600,
+            fontSize: "132px",
+            letterSpacing: "6px",
+          }}
+        >
+          LUMI
+        </text>
+        {showSubtitle && showDivider && (
+          <line
+            x1="178"
+            y1="156"
+            x2="422"
+            y2="156"
+            stroke="currentColor"
+            strokeOpacity={0.32}
+            strokeWidth="1.6"
+          />
+        )}
+        {showSubtitle && (
+          <text
+            x="300"
+            y="202"
+            textAnchor="middle"
+            style={{
+              fontFamily: "var(--font-montserrat), 'Montserrat', system-ui, sans-serif",
+              fontWeight: 400,
+              fontSize: "27px",
+              // Tracked wide, with a matching start indent so the optical centre
+              // sits true despite the trailing letter-spacing advance.
+              letterSpacing: "17px",
+            }}
+            dx="8"
+          >
+            WELLNESS
+          </text>
+        )}
       </svg>
-    </div>
+    </span>
   );
 
   if (asLink) {
     return (
       <Link
         href={href}
-        className="inline-flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-rose-500/50 rounded-xl transition-transform duration-200 hover:scale-[1.02]"
         aria-label={ariaLabel}
+        className="ring-focus inline-flex items-center rounded-xl outline-none transition-transform duration-200 ease-out hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100"
       >
-        {svgElement}
+        {svg}
       </Link>
     );
   }
 
-  return svgElement;
+  return svg;
 };
 
 export default LumiLogo;

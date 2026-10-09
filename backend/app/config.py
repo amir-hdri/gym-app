@@ -1,3 +1,5 @@
+import os
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -17,6 +19,7 @@ class Settings(BaseSettings):
 
     # Rate limiting (simple in-memory, per-minute)
     LOGIN_RATE_LIMIT: int = 5
+    FRONTEND_URL: str = "http://localhost:3000"
 
     # Seed demo data (default admin/coach/athlete credentials) on startup in
     # non-production environments. Local dev seeds by default (ENVIRONMENT
@@ -31,6 +34,14 @@ class Settings(BaseSettings):
     # an attacker can otherwise bypass the limiter by rotating a spoofed
     # X-Forwarded-For on every request.
     TRUST_PROXY: bool = False
+
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM: str = ""
+    SMTP_STARTTLS: bool = True
+    SMTP_SSL: bool = False
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

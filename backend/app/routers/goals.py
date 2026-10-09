@@ -11,16 +11,21 @@ router = APIRouter(prefix="/api/v1/goals", tags=["Goals"])
 
 
 def _check_goal_assignment(goal: Goal, current_user: User):
-    """Shared assignment rule for goal mutation endpoints.
+    """The single rule for acting on a goal (update / progress / delete).
 
-    Allowed: the athlete owner, the assigned coach (coaches may also claim a
-    currently-unassigned goal), or an admin. Returns an error response when
-    denied, None when allowed.
+    - Athlete: only their own goal.
+    - Coach: only their assigned goal, or an unassigned one (claim).
+    - Admin: any.
+    - Any other role (receptionist, ...): denied — goals are coaching
+      domain, matching the DELETE contract below. Previously PUT/progress
+      let a receptionist edit any goal while DELETE 403'd them.
+    Returns an error_response to return, or None when allowed.
     """
     if current_user.role == "athlete" and goal.athlete_id != current_user.id:
         return error_response("Insufficient permissions", 403)
-    # Coaches may also claim currently-unassigned goals (coach_id is None).
     if current_user.role == "coach" and goal.coach_id != current_user.id and goal.coach_id is not None:
+        return error_response("Insufficient permissions", 403)
+    if current_user.role not in ("athlete", "coach", "admin"):
         return error_response("Insufficient permissions", 403)
     return None
 
@@ -29,16 +34,18 @@ def _check_goal_assignment(goal: Goal, current_user: User):
 def list_goals(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    athlete_id: str | None = None,
-    athleteId: str | None = None,  # camelCase alias — frontend sends athleteId
-    coach_id: str | None = None,
-    status: str | None = None,
-    category: str | None = None,
+    athlete_id: str = None,
+    athleteId: str = None,
+    coach_id: str = None,
+    coachId: str = None,
+    status: str = None,
+    category: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # Accept both spellings of the athlete filter
+    # Accept both camelCase and snake_case filter spellings (the frontend mixes them).
     athlete_id = athlete_id or athleteId
+    coach_id = coach_id or coachId
     # Athletes see only their own goals
     if current_user.role == "athlete":
         athlete_id = athlete_id or current_user.id
@@ -72,10 +79,16 @@ def create_goal(
     # Athletes can only create goals for themselves
     if current_user.role == "athlete" and req.athlete_id != current_user.id:
         return error_response("Insufficient permissions", 403)
-    # Validate athlete exists
+    # The goal owner must be an actual athlete, and an assigned coach an
+    # actual coach — previously any user id (even a coach or admin) was
+    # accepted as the athlete side.
     athlete = db.query(User).filter(User.id == req.athlete_id).first()
-    if not athlete:
+    if not athlete or athlete.role != "athlete":
         return error_response("Athlete not found", 404)
+    if req.coach_id is not None:
+        coach = db.query(User).filter(User.id == req.coach_id).first()
+        if not coach or coach.role != "coach":
+            return error_response("Coach not found", 404)
     goal = Goal(**req.model_dump(by_alias=False))
     db.add(goal)
     db.commit()
@@ -106,7 +119,6 @@ def update_goal(
     goal = db.query(Goal).filter(Goal.id == goal_id).first()
     if not goal:
         return error_response("Goal not found", 404)
-    # Same assignment rule as update_goal_progress (shared helper).
     denied = _check_goal_assignment(goal, current_user)
     if denied:
         return denied
@@ -121,6 +133,29 @@ def update_goal(
     )
 
 
+@router.delete("/{goal_id}")
+def delete_goal(
+    goal_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    goal = db.query(Goal).filter(Goal.id == goal_id).first()
+    if not goal:
+        return error_response("Goal not found", 404)
+    # Owner athlete, the assigned coach, or an admin.
+    if current_user.role == "athlete":
+        if goal.athlete_id != current_user.id:
+            return error_response("Insufficient permissions", 403)
+    elif current_user.role == "coach":
+        if goal.coach_id is not None and goal.coach_id != current_user.id:
+            return error_response("Insufficient permissions", 403)
+    elif current_user.role != "admin":
+        return error_response("Insufficient permissions", 403)
+    db.delete(goal)
+    db.commit()
+    return success_response(message="Goal deleted")
+
+
 @router.post("/{goal_id}/progress")
 @router.patch("/{goal_id}/progress")
 def update_goal_progress(
@@ -132,8 +167,6 @@ def update_goal_progress(
     goal = db.query(Goal).filter(Goal.id == goal_id).first()
     if not goal:
         return error_response("Goal not found", 404)
-    # Same assignment rule as update_goal (shared helper): athlete owner,
-    # assigned coach (or coach claiming an unassigned goal), or admin.
     denied = _check_goal_assignment(goal, current_user)
     if denied:
         return denied

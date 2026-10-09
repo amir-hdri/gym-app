@@ -5,11 +5,19 @@ import { LogIn, LogOut, Timer, QrCode, Building2 } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { formatDate } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useCheckIns, useCheckIn, useCheckOut, useBranches } from "@/hooks/use-api";
+import { useCheckIns, useCheckIn, useCheckOut, useCheckOutAt, useBranches } from "@/hooks/use-api";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/Input";
 import { Loading, ErrorDisplay, EmptyState } from "@/components/ui/DataState";
 import { PageShell, PageHeader, MicroLabelFa, SectionTitle } from "@/components/twilight/Page";
 import { TwilightCard, CtaButton } from "@/components/twilight/controls";
 import { soundEngine } from "@/services/soundEngine";
+
+/** Formats a Date as a `datetime-local` value in the device's local timezone. */
+function toLocalInputValue(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export default function CheckinPage() {
   const { user } = useAuth();
@@ -18,10 +26,11 @@ export default function CheckinPage() {
   const { data: branchesData } = useBranches();
   const checkInMutation = useCheckIn();
   const checkOutMutation = useCheckOut();
+  const checkOutAtMutation = useCheckOutAt();
 
-  const [localCheckedIn, setLocalCheckedIn] = useState(false);
-  const [localCheckinTime, setLocalCheckinTime] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [correctionTime, setCorrectionTime] = useState("");
+  const [correctionError, setCorrectionError] = useState<string | null>(null);
   const branches: { id: string; name: string }[] = useMemo(() => {
     const d = branchesData as unknown;
     if (d && typeof d === "object" && "data" in (d as Record<string, unknown>)) return ((d as { data: { id: string; name: string }[] }).data) || [];
@@ -38,10 +47,13 @@ export default function CheckinPage() {
     () => recentCheckins.find((c) => !c.checkOutTime),
     [recentCheckins]
   );
-  const checkedIn = !!openCheckin || localCheckedIn;
+  const checkedIn = !!openCheckin;
   const checkinTime = openCheckin
     ? new Date(openCheckin.checkInTime).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" })
-    : localCheckinTime;
+    : null;
+  const statusMessage = checkedIn
+    ? `جلسه از ساعت ${checkinTime} در حال انجام است`
+    : "جلسه بازی وجود ندارد — آماده ثبت ورود";
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -58,22 +70,64 @@ export default function CheckinPage() {
 
   const handleCheckin = () => {
     if (!checkedIn) {
-      soundEngine.playBell(528);
-      setLocalCheckedIn(true);
-      setLocalCheckinTime(new Date().toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" }));
-      if (athleteId && effectiveBranchId) {
-        checkInMutation.mutate({ userId: athleteId, branchId: effectiveBranchId }, {
-          onSuccess: () => { setLocalCheckedIn(false); setLocalCheckinTime(null); },
-          onError: () => { setLocalCheckedIn(false); setLocalCheckinTime(null); }
-        });
+      if (!athleteId || !effectiveBranchId) {
+        toast.error("شعبه شما مشخص نیست؛ ابتدا شعبه را انتخاب کنید");
+        return;
       }
+      soundEngine.playBell(528);
+      checkInMutation.mutate(
+        { userId: athleteId, branchId: effectiveBranchId },
+        {
+          onSuccess: () => toast.success("ورود شما با موفقیت ثبت شد"),
+          onError: (e) => toast.error((e as Error)?.message || "ثبت ورود ناموفق بود"),
+        }
+      );
     } else {
-      soundEngine.playBell(440);
-      setLocalCheckedIn(false);
-      setLocalCheckinTime(null);
       const targetId = openCheckin?.id;
-      if (targetId) checkOutMutation.mutate(targetId);
+      if (!targetId) return;
+      soundEngine.playBell(440);
+      checkOutMutation.mutate(targetId, {
+        onSuccess: () => {
+          toast.success("جلسه با موفقیت به پایان رسید");
+          setCorrectionTime("");
+          setCorrectionError(null);
+        },
+        onError: (e) => toast.error((e as Error)?.message || "ثبت خروج ناموفق بود"),
+      });
     }
+  };
+
+  const handleCorrection = () => {
+    const targetId = openCheckin?.id;
+    if (!targetId) return;
+    setCorrectionError(null);
+    if (!correctionTime) {
+      setCorrectionError("ساعت پایان را وارد کنید");
+      return;
+    }
+    const picked = new Date(correctionTime);
+    if (Number.isNaN(picked.getTime())) {
+      setCorrectionError("زمان واردشده معتبر نیست");
+      return;
+    }
+    if (picked.getTime() <= new Date(openCheckin.checkInTime).getTime()) {
+      setCorrectionError("ساعت پایان باید بعد از ساعت ورود باشد");
+      return;
+    }
+    if (picked.getTime() > Date.now()) {
+      setCorrectionError("ساعت پایان نمی‌تواند در آینده باشد");
+      return;
+    }
+    checkOutAtMutation.mutate(
+      { id: targetId, checkOutTime: picked.toISOString() },
+      {
+        onSuccess: () => {
+          toast.success("ساعت پایان جلسه اصلاح شد");
+          setCorrectionTime("");
+        },
+        onError: (e) => toast.error((e as Error)?.message || "اصلاح ساعت پایان ناموفق بود"),
+      }
+    );
   };
 
   if (isLoading) return <Loading />;
@@ -131,15 +185,22 @@ export default function CheckinPage() {
           {checkedIn ? (
             <>
               <LogOut className="h-4 w-4" strokeWidth={1.75} />
-              <span>خروج (چک‌اوت)</span>
+              <span>پایان جلسه</span>
             </>
           ) : (
             <>
               <LogIn className="h-4 w-4" strokeWidth={1.75} />
-              <span>ورود (چک‌این)</span>
+              <span>ثبت ورود</span>
             </>
           )}
         </CtaButton>
+        <div role="status" aria-live="polite" className="text-center text-xs text-muted-foreground">
+          {checkInMutation.isPending
+            ? "در حال ثبت ورود…"
+            : checkOutMutation.isPending
+              ? "در حال پایان جلسه…"
+              : statusMessage}
+        </div>
         {(checkInMutation.isError || checkOutMutation.isError) && (
           <p className="text-center text-sm text-destructive">
             {(checkInMutation.error as Error)?.message || (checkOutMutation.error as Error)?.message || "خطایی رخ داد"}
@@ -162,6 +223,43 @@ export default function CheckinPage() {
         </div>
         <span className="font-sans text-xl font-bold tabular-nums text-[#d2c0a5]">{timeStr}</span>
       </TwilightCard>
+
+      {/* Checkout-time correction for the open session */}
+      {openCheckin && (
+        <TwilightCard className="flex flex-col gap-3">
+          <div>
+            <MicroLabelFa>اصلاح ساعت پایان جلسه باز</MicroLabelFa>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              اگر خروج را فراموش کرده‌اید ثبت کنید، ساعت واقعی پایان را وارد کنید
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="flex-1">
+              <Input
+                type="datetime-local"
+                label="ساعت پایان"
+                value={correctionTime}
+                min={toLocalInputValue(new Date(openCheckin.checkInTime))}
+                max={toLocalInputValue(new Date())}
+                onChange={(e) => {
+                  setCorrectionTime(e.target.value);
+                  setCorrectionError(null);
+                }}
+                error={correctionError ?? undefined}
+                className="min-h-11"
+              />
+            </div>
+            <CtaButton
+              variant="outline"
+              onClick={handleCorrection}
+              disabled={checkOutAtMutation.isPending}
+              className="min-h-11 sm:w-auto"
+            >
+              {checkOutAtMutation.isPending ? "در حال ثبت…" : "ثبت اصلاح"}
+            </CtaButton>
+          </div>
+        </TwilightCard>
+      )}
 
       {/* Branch selector — hidden when only one branch exists (single-branch rule) */}
       {branches.length > 1 && (

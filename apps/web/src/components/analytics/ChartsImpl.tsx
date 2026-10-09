@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useReducedMotion } from "framer-motion";
 import type { CheckIn, CoachDashboardData, Payment } from "@/lib/types";
 import { cn, formatCurrency, formatPersianNumber } from "@/lib/utils";
@@ -152,6 +152,200 @@ export function AthleteProgressChart({ athletes }: { athletes: CoachAthlete[] })
             formatter={(value, _name, item) => [`${formatPersianNumber(value as number)}٪`, (item.payload as any).program ?? "بدون برنامه فعال"] as any}
           />
           <Bar dataKey="progress" fill="#d2c0a5" radius={[0, 6, 6, 0]} maxBarSize={20} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+// ---- Analytics series (GET /dashboard/*-trend etc.) ----
+
+export function AttendanceTrendChart({
+  data, compact = false,
+}: {
+  data: { date: string; checkIns: number; uniqueMembers: number }[];
+  compact?: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const rows = data.map((d) => ({ ...d, label: chartDate(d.date, dayFormatter) }));
+  if (rows.length < 2) {
+    return <EmptyChart className={compact ? "h-44" : undefined} message="برای نمایش روند حضور، حداقل دو روز داده لازم است." />;
+  }
+  return (
+    <div className={cn(compact ? "h-44" : "h-72")} dir="ltr" role="img" aria-label="نمودار روند حضور روزانه">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={rows} margin={{ top: 12, right: 4, left: -12, bottom: 0 }} barCategoryGap={compact ? "30%" : "18%"}>
+          <CartesianGrid vertical={false} stroke={twilightGrid} strokeDasharray="3 6" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={twilightTick} minTickGap={28} />
+          <YAxis hide />
+          <Tooltip
+            cursor={twilightTooltip.cursor}
+            contentStyle={twilightTooltip.contentStyle as any}
+            formatter={(value, name) => [
+              formatPersianNumber(value as number),
+              name === "checkIns" ? "ورود" : "عضو یکتا",
+            ] as any}
+          />
+          <Bar dataKey="checkIns" fill="#d2c0a5" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function RevenueTrendChart({
+  data, compact = false,
+}: {
+  data: { month: string; revenue: number; payments: number }[];
+  compact?: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const rows = data.map((d) => ({ ...d, label: chartDate(`${d.month}-01`, monthFormatter) }));
+  if (rows.length < 2) {
+    return <EmptyChart className={compact ? "h-44" : undefined} message="برای نمایش روند درآمد، حداقل دو ماه داده لازم است." />;
+  }
+  return (
+    <div className={cn(compact ? "h-44" : "h-72")} dir="ltr" role="img" aria-label="نمودار روند درآمد ماهانه">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={rows} margin={{ top: 12, right: 4, left: -12, bottom: 0 }} barCategoryGap={compact ? "30%" : "24%"}>
+          <CartesianGrid vertical={false} stroke={twilightGrid} strokeDasharray="3 6" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={twilightTick} />
+          <YAxis hide />
+          <Tooltip
+            cursor={twilightTooltip.cursor}
+            contentStyle={twilightTooltip.contentStyle as any}
+            formatter={(value) => [formatCurrency(value as number), "درآمد"] as any}
+          />
+          <Bar dataKey="revenue" fill="#d2c0a5" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function RevenueSeriesChart({
+  labels, values, period = "monthly", compact = false,
+}: {
+  labels: string[];
+  values: number[];
+  period?: "daily" | "monthly";
+  compact?: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const rows = labels.map((label, i) => ({
+    label: period === "daily" ? chartDate(label, dayFormatter) : chartDate(`${label}-01`, monthFormatter),
+    revenue: values[i] ?? 0,
+  }));
+  if (rows.length < 2) {
+    return <EmptyChart className={compact ? "h-44" : undefined} message="برای نمایش سری درآمد، حداقل دو نقطه داده لازم است." />;
+  }
+  return (
+    <div className={cn(compact ? "h-44" : "h-72")} dir="ltr" role="img" aria-label="نمودار سری زمانی درآمد">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={rows} margin={{ top: 12, right: 8, left: -12, bottom: 0 }}>
+          <CartesianGrid vertical={false} stroke={twilightGrid} strokeDasharray="3 6" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={twilightTick} minTickGap={28} />
+          <YAxis hide />
+          <Tooltip
+            cursor={{ stroke: "rgba(210,192,165,0.3)" }}
+            contentStyle={twilightTooltip.contentStyle as any}
+            formatter={(value) => [formatCurrency(value as number), "درآمد"] as any}
+          />
+          <Line type="monotone" dataKey="revenue" stroke="#d2c0a5" strokeWidth={2} dot={false} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function MembershipDistributionChart({
+  data,
+}: {
+  data: { planId: string; planName: string; count: number; revenue: number }[];
+}) {
+  const reduceMotion = useReducedMotion();
+  if (data.length < 1) {
+    return <EmptyChart message="هنوز عضویتی برای نمایش توزیع پلن‌ها ثبت نشده است." />;
+  }
+  return (
+    <div className="h-72" dir="ltr" role="img" aria-label="نمودار توزیع اعضا بین پلن‌ها">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ top: 4, right: 10, left: 4, bottom: 0 }}>
+          <CartesianGrid horizontal={false} stroke={twilightGrid} strokeDasharray="3 6" />
+          <XAxis type="number" hide />
+          <YAxis dataKey="planName" type="category" width={90} tickLine={false} axisLine={false} tick={twilightTick} />
+          <Tooltip
+            cursor={twilightTooltip.cursor}
+            contentStyle={twilightTooltip.contentStyle as any}
+            formatter={(value, _name, item) => [`${formatPersianNumber(value as number)} عضو`, formatCurrency((item.payload as any).revenue)] as any}
+          />
+          <Bar dataKey="count" fill="#4ade80" radius={[0, 6, 6, 0]} maxBarSize={20} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function PeakHoursChart({
+  data, compact = false,
+}: {
+  data: { hour: number; checkIns: number }[];
+  compact?: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const rows = data.map((d) => ({ ...d, label: formatPersianNumber(d.hour) }));
+  const peak = rows.reduce((m, r) => (r.checkIns > m.checkIns ? r : m), rows[0] ?? { checkIns: 0 });
+  if (rows.length < 2 || peak.checkIns === 0) {
+    return <EmptyChart className={compact ? "h-44" : undefined} message="برای نمایش ساعات اوج، داده حضور کافی نیست." />;
+  }
+  return (
+    <div className={cn(compact ? "h-44" : "h-72")} dir="ltr" role="img" aria-label="نمودار ساعات اوج حضور">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={rows} margin={{ top: 12, right: 4, left: -12, bottom: 0 }} barCategoryGap="18%">
+          <CartesianGrid vertical={false} stroke={twilightGrid} strokeDasharray="3 6" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={twilightTick} />
+          <YAxis hide />
+          <Tooltip
+            cursor={twilightTooltip.cursor}
+            contentStyle={twilightTooltip.contentStyle as any}
+            formatter={(value) => [`${formatPersianNumber(value as number)} ورود`, "ساعت"] as any}
+          />
+          <Bar dataKey="checkIns" fill="#7dd3fc" radius={[6, 6, 0, 0]} maxBarSize={compact ? 18 : 22} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function AthleteActivityChart({
+  data, compact = false,
+}: {
+  data: { date: string; checkedIn: boolean; durationMinutes: number; exercisesCompleted: number }[];
+  compact?: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const rows = data.map((d) => ({ ...d, label: chartDate(d.date, dayFormatter) }));
+  if (rows.filter((r) => r.checkedIn).length < 2) {
+    return <EmptyChart className={compact ? "h-44" : undefined} message="برای نمایش فعالیت، حداقل دو روز حضور لازم است." />;
+  }
+  return (
+    <div className={cn(compact ? "h-44" : "h-72")} dir="ltr" role="img" aria-label="نمودار فعالیت روزانه ورزشکار">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={rows} margin={{ top: 12, right: 4, left: -12, bottom: 0 }} barCategoryGap={compact ? "30%" : "18%"}>
+          <CartesianGrid vertical={false} stroke={twilightGrid} strokeDasharray="3 6" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} tick={twilightTick} minTickGap={28} />
+          <YAxis hide />
+          <Tooltip
+            cursor={twilightTooltip.cursor}
+            contentStyle={twilightTooltip.contentStyle as any}
+            formatter={(value, name) => [
+              name === "durationMinutes"
+                ? `${formatPersianNumber(value as number)} دقیقه`
+                : `${formatPersianNumber(value as number)} حرکت`,
+              name === "durationMinutes" ? "مدت حضور" : "حرکات تکمیل‌شده",
+            ] as any}
+          />
+          <Bar dataKey="durationMinutes" fill="#d2c0a5" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>

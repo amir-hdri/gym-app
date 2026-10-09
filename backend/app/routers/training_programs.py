@@ -1,20 +1,20 @@
-from datetime import UTC, datetime
-
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user, require_roles
 from app.database import get_db
-from app.models import ProgramExercise, TrainingProgram, User
+from app.models import Exercise, ProgramExercise, TrainingProgram, User
 from app.responses import error_response, paginated_response, success_response
 from app.schemas import (
     ExerciseResponse,
     ProgramExerciseCreate,
+    ProgramExerciseCompletion,
     ProgramExerciseResponse,
     ProgramExerciseUpdate,
     TrainingProgramCreate,
     TrainingProgramResponse,
     TrainingProgramUpdate,
+    UserResponse,
 )
 
 router = APIRouter(prefix="/api/v1/training-programs", tags=["Training Programs"])
@@ -29,6 +29,10 @@ def _program_to_dict(program: TrainingProgram) -> dict:
             ed["exercise"] = ExerciseResponse.model_validate(e.exercise).model_dump(by_alias=True)
         exercises.append(ed)
     d["exercises"] = exercises
+    for relation in ("coach", "athlete"):
+        person = getattr(program, relation, None)
+        if person is not None:
+            d[relation] = UserResponse.model_validate(person).model_dump(by_alias=True)
     return d
 
 
@@ -36,9 +40,9 @@ def _program_to_dict(program: TrainingProgram) -> dict:
 def list_programs(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    athlete_id: str | None = None,
-    coach_id: str | None = None,
-    status: str | None = None,
+    athlete_id: str = None,
+    coach_id: str = None,
+    status: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -73,9 +77,13 @@ def create_program(
     # Coaches can only create programs under their own coaching
     if current_user.role == "coach" and req.coach_id != current_user.id:
         return error_response("Insufficient permissions", 403)
-    if not db.query(User).filter(User.id == req.athlete_id).first():
+    # Referenced parties must exist with the right roles — previously any
+    # string was accepted and surfaced later as a broken program detail.
+    athlete = db.query(User).filter(User.id == req.athlete_id).first()
+    if not athlete or athlete.role != "athlete":
         return error_response("Athlete not found", 404)
-    if not db.query(User).filter(User.id == req.coach_id).first():
+    coach = db.query(User).filter(User.id == req.coach_id).first()
+    if not coach or coach.role != "coach":
         return error_response("Coach not found", 404)
     program = TrainingProgram(**req.model_dump(by_alias=False))
     db.add(program)
@@ -115,9 +123,7 @@ def update_program(
 
 
 @router.delete("/{program_id}")
-def delete_program(
-    program_id: str, db: Session = Depends(get_db), current_user: User = Depends(require_roles("admin", "coach"))
-):
+def delete_program(program_id: str, db: Session = Depends(get_db), current_user: User = Depends(require_roles("admin", "coach"))):
     program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
     if not program:
         return error_response("Program not found", 404)
@@ -140,6 +146,9 @@ def add_exercise_to_program(
         return error_response("Program not found", 404)
     if current_user.role == "coach" and program.coach_id != current_user.id:
         return error_response("Insufficient permissions", 403)
+    exercise = db.query(Exercise).filter(Exercise.id == req.exercise_id).first()
+    if not exercise:
+        return error_response("Exercise not found", 404)
     pe = ProgramExercise(program_id=program_id, **req.model_dump(by_alias=False))
     db.add(pe)
     db.commit()
@@ -216,19 +225,23 @@ def remove_exercise_from_program(
 def complete_exercise(
     program_id: str,
     exercise_id: str,
-    req: ProgramExerciseUpdate,
+    req: ProgramExerciseCompletion,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     program = db.query(TrainingProgram).filter(TrainingProgram.id == program_id).first()
     if not program:
         return error_response("Program not found", 404)
-    # Only the program's athlete (owner), the assigned coach, or an admin may
-    # mark exercises complete. Everyone else (other athletes/coaches,
-    # receptionists, ...) gets 403.
-    is_owner_athlete = current_user.role == "athlete" and program.athlete_id == current_user.id
-    is_assigned_coach = current_user.role == "coach" and program.coach_id == current_user.id
-    if not (is_owner_athlete or is_assigned_coach or current_user.role == "admin"):
+    # Athletes complete only their own program; coaches only theirs; admins
+    # bypass. Every other role (receptionist, etc.) is denied explicitly —
+    # previously a receptionist fell through to success.
+    if current_user.role == "athlete":
+        if program.athlete_id != current_user.id:
+            return error_response("Insufficient permissions", 403)
+    elif current_user.role == "coach":
+        if program.coach_id != current_user.id:
+            return error_response("Insufficient permissions", 403)
+    elif current_user.role != "admin":
         return error_response("Insufficient permissions", 403)
     pe = (
         db.query(ProgramExercise)
@@ -241,10 +254,16 @@ def complete_exercise(
     if not pe:
         return error_response("Exercise not found in program", 404)
 
-    pe.is_completed = True
-    pe.completed_at = datetime.now(UTC).replace(tzinfo=None)
-    if req.actual_sets is not None:
-        pe.actual_sets = req.actual_sets
+    from datetime import datetime, timezone
+
+    pe.is_completed = req.completed
+    if req.completed:
+        # Every (re-)completion stamps now — a stale first-completion time
+        # previously survived forever and mis-ordered history views.
+        pe.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    else:
+        pe.completed_at = None
+    pe.actual_sets = req.actual_sets if req.actual_sets is not None else (pe.sets if req.completed else None)
     if req.actual_reps is not None:
         pe.actual_reps = req.actual_reps
     if req.actual_weight is not None:

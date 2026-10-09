@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PageShell, PageHeader } from "@/components/twilight/Page";
 import { CircleIconButton } from "@/components/twilight/controls";
 import { Textarea } from "@/components/ui/Textarea";
@@ -15,10 +16,49 @@ const conversations = [
 ];
 
 export default function CoachMessagesPage() {
-  const [selectedAthlete, setSelectedAthlete] = useState("");
+  // `useSearchParams` suspends on first render — the athlete file deep-links
+  // here with `?c=`, so the thread view waits behind a Suspense boundary.
+  return (
+    <Suspense
+      fallback={
+        <PageShell>
+          <PageHeader title="پیام‌ها" subtitle="ارسال پیام به شاگردان" />
+          <p className="py-10 text-center text-sm text-muted-foreground" role="status" aria-live="polite">
+            در حال بارگذاری گفت‌وگوها...
+          </p>
+        </PageShell>
+      }
+    >
+      <CoachMessagesInner />
+    </Suspense>
+  );
+}
+
+function CoachMessagesInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedId = searchParams.get("c") ?? "";
+
+  // `?c=` names a thread (athlete pages deep-link here); otherwise the first
+  // thread opens so the pane is never empty when threads exist.
+  const initialConversation =
+    conversations.find((conv) => String(conv.id) === requestedId) ?? conversations[0] ?? null;
+
+  const [selectedAthlete, setSelectedAthlete] = useState(initialConversation?.athlete ?? "");
   const [message, setMessage] = useState("");
-  const [activeConversation, setActiveConversation] = useState<number | null>(null);
+  const [activeConversation, setActiveConversation] = useState<number | null>(
+    initialConversation?.id ?? null
+  );
   const [isSending, setIsSending] = useState(false);
+
+  // The open thread is always addressable: a copied URL reopens the same thread.
+  useEffect(() => {
+    const current = searchParams.get("c") ?? "";
+    const next = activeConversation === null ? "" : String(activeConversation);
+    if (next !== current) {
+      router.replace(next ? `/coach/messages?c=${next}` : "/coach/messages", { scroll: false });
+    }
+  }, [activeConversation, router, searchParams]);
 
   const handleSendMessage = async () => {
     if (!message.trim() || !selectedAthlete) return;

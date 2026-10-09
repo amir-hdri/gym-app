@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, UserCircle2, CreditCard, DollarSign, Settings2, Bell, UserRound } from "lucide-react";
+import { LayoutDashboard, Users, UserCircle2, CreditCard, DollarSign, Settings2, Bell, UserRound, ScanLine, ClipboardCheck } from "lucide-react";
 import type { NavItem } from "@/components/layout/Sidebar";
 import type { DockItem } from "@/components/twilight/DockNav";
 
@@ -10,6 +10,8 @@ export const adminNavItems: NavItem[] = [
   { label: "مربیان", href: "/admin/coaches", icon: <UserCircle2 {...p} /> },
   { label: "پلن‌های اشتراک", href: "/admin/plans", icon: <CreditCard {...p} /> },
   { label: "پرداخت‌ها", href: "/admin/payments", icon: <DollarSign {...p} /> },
+  { label: "میز پذیرش", href: "/admin/desk", icon: <ScanLine {...p} /> },
+  { label: "حضور امروز", href: "/admin/checkins", icon: <ClipboardCheck {...p} /> },
   { label: "اطلاع‌رسانی", href: "/admin/notifications", icon: <Bell {...p} /> },
   { label: "پروفایل", href: "/admin/profile", icon: <UserRound {...p} /> },
   { label: "تنظیمات", href: "/admin/settings", icon: <Settings2 {...p} /> },

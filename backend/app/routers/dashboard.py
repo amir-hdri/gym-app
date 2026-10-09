@@ -1,11 +1,10 @@
-from calendar import monthrange
-from datetime import UTC, date, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user, require_roles
+from app.auth import get_current_user, get_optional_user, require_roles
 from app.database import get_db
 from app.models import Branch, CheckIn, Goal, Membership, Payment, TrainingProgram, User
 from app.responses import error_response, success_response
@@ -24,21 +23,23 @@ STAFF_ROLES = {"admin", "coach"}
 
 
 def _utcnow_naive() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-def _shift_months(dt: datetime, months: int) -> datetime:
-    """Shift dt by a whole number of calendar months.
+def _shift_months(d: datetime, months: int) -> datetime:
+    """Shifts a datetime by a number of calendar months without skipping
+    short months (the naive `calculate + timedelta(days=30*n)` skips February
+    in a 3-month view: Jan 30 + 60d lands in April). The day is clamped to the
+    target month's length (Jan 31 + 1 month -> Feb 28)."""
+    month_index = d.year * 12 + (d.month - 1) + months
+    year, month_div = divmod(month_index, 12)
+    month = month_div + 1
+    # Clamp day-of-month to the target month's real length.
+    import calendar as _calendar
 
-    Day-of-month arithmetic via timedelta skips short months (e.g. February),
-    so revenue labels were wrong; calendar-month shifting is exact. The day is
-    clamped to the target month's length (Jan 31 + 1 month -> Feb 28/29).
-    """
-    month = dt.month - 1 + months
-    year = dt.year + month // 12
-    month = month % 12 + 1
-    last_day = monthrange(year, month)[1]
-    return dt.replace(year=year, month=month, day=min(dt.day, last_day))
+    last_day = _calendar.monthrange(year, month)[1]
+    day = min(d.day, last_day)
+    return d.replace(year=year, month=month, day=day, tzinfo=None)
 
 
 def _program_to_dict(program: TrainingProgram) -> dict:
@@ -53,10 +54,10 @@ def _program_to_dict(program: TrainingProgram) -> dict:
     return d
 
 
-def _compute_streaks(check_in_times: list[datetime | None]) -> tuple[int, int]:
+def _compute_streaks(checkins: list) -> tuple[int, int]:
     """Consecutive-day streaks from check-in timestamps (date part only)."""
     days = sorted(
-        {t.date() for t in check_in_times if t},
+        {c.check_in_time.date() for c in checkins if c.check_in_time},
         reverse=True,
     )
     if not days:
@@ -69,7 +70,7 @@ def _compute_streaks(check_in_times: list[datetime | None]) -> tuple[int, int]:
             current = 0
         else:
             current = 0
-            expected: date | None = days[0]
+            expected = days[0]
             for d in days:
                 if d == expected:
                     current += 1
@@ -109,7 +110,7 @@ def _compute_streaks(check_in_times: list[datetime | None]) -> tuple[int, int]:
 @router.get("/stats")
 def dashboard_stats(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("admin", "coach")),
+    current_user: User = Depends(require_roles("admin", "coach", "receptionist")),
 ):
     today_start = _utcnow_naive().replace(hour=0, minute=0, second=0, microsecond=0)
     month_start = today_start.replace(day=1)
@@ -128,6 +129,9 @@ def dashboard_stats(
     return success_response(
         data={
             "totalUsers": total_users,
+            "totalMembers": db.query(User).filter(User.role == "athlete").count(),
+            "totalCoaches": db.query(User).filter(User.role == "coach").count(),
+            "expiringMemberships": db.query(Membership).filter(Membership.status == "active", Membership.end_date >= today_start, Membership.end_date <= today_start + timedelta(days=7)).count(),
             "activeMembers": active_members,
             "todayCheckins": today_checkins,
             "activeMemberships": active_memberships,
@@ -141,7 +145,7 @@ def revenue_data(
     period: str = Query("monthly", pattern="^(daily|monthly)$"),
     months: int = Query(6, ge=1, le=24),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("admin", "coach")),
+    current_user: User = Depends(require_roles("admin", "coach", "receptionist")),
 ):
     today = _utcnow_naive().replace(hour=0, minute=0, second=0, microsecond=0)
     labels = []
@@ -162,8 +166,9 @@ def revenue_data(
             values.append(float(total))
     else:
         for i in range(months):
-            first_of_month = _shift_months(today.replace(day=1), -(months - 1 - i))
-            labels.append(first_of_month.strftime("%Y-%m"))
+            first = _shift_months(today.replace(day=1), -(months - 1 - i))
+            labels.append(first.strftime("%Y-%m"))
+            first_of_month = first.replace(day=1)
             if first_of_month.month == 12:
                 next_month = first_of_month.replace(year=first_of_month.year + 1, month=1)
             else:
@@ -196,24 +201,14 @@ def athlete_dashboard(
     if not user:
         return error_response("Athlete not found", 404)
 
-    # Recent check-ins: ordered + limited query (was: load ALL history, slice in Python)
-    recent_checkins = (
-        db.query(CheckIn).filter(CheckIn.user_id == athlete_id).order_by(CheckIn.check_in_time.desc()).limit(5).all()
+    all_checkins = (
+        db.query(CheckIn)
+        .filter(CheckIn.user_id == athlete_id)
+        .order_by(CheckIn.check_in_time.desc())
+        .all()
     )
-    # Today's count and totals via COUNT queries
-    today_checkins = (
-        db.query(func.count(CheckIn.id))
-        .filter(CheckIn.user_id == athlete_id, CheckIn.check_in_time >= today_start)
-        .scalar()
-    )
-    total_sessions = db.query(func.count(CheckIn.id)).filter(CheckIn.user_id == athlete_id).scalar()
-    completed_sessions = (
-        db.query(func.count(CheckIn.id))
-        .filter(CheckIn.user_id == athlete_id, CheckIn.check_out_time.isnot(None))
-        .scalar()
-    )
-    # Streaks only need check-in timestamps — select the single column, not full rows
-    checkin_times = [t for (t,) in db.query(CheckIn.check_in_time).filter(CheckIn.user_id == athlete_id).all()]
+    today_checkins = sum(1 for c in all_checkins if c.check_in_time and c.check_in_time >= today_start)
+    recent_checkins = all_checkins[:5]
 
     active_membership = (
         db.query(Membership)
@@ -226,7 +221,9 @@ def athlete_dashboard(
     membership_data = None
     if active_membership:
         membership_data = MembershipResponse.model_validate(active_membership).model_dump(by_alias=True)
-        membership_data["sessionsRemaining"] = active_membership.sessions_total - active_membership.sessions_used
+        membership_data["sessionsRemaining"] = (
+            active_membership.sessions_total - active_membership.sessions_used
+        )
 
     current_program = (
         db.query(TrainingProgram)
@@ -245,18 +242,29 @@ def athlete_dashboard(
         .count()
     )
     current_program_data = _program_to_dict(current_program) if current_program else None
-    today_exercises = current_program_data["exercises"] if current_program_data else []
+    from zoneinfo import ZoneInfo
+    today_index = (datetime.now(ZoneInfo("Asia/Tehran")).weekday() + 2) % 7
+    today_exercises = [e for e in current_program_data["exercises"] if e["dayOfWeek"] == today_index] if current_program_data else []
 
-    goals = db.query(Goal).filter(Goal.athlete_id == athlete_id).order_by(Goal.target_date.asc()).all()
+    goals = (
+        db.query(Goal)
+        .filter(Goal.athlete_id == athlete_id)
+        .order_by(Goal.target_date.asc())
+        .all()
+    )
     upcoming_goals = [
         GoalResponse.model_validate(g).model_dump(by_alias=True)
         for g in goals
         if g.status not in ("achieved", "missed")
     ][:5]
 
-    current_streak, longest_streak = _compute_streaks(checkin_times)
+    total_sessions = len(all_checkins)
+    completed_sessions = sum(1 for c in all_checkins if c.check_out_time)
+    current_streak, longest_streak = _compute_streaks(all_checkins)
 
-    recent_payload = [CheckInResponse.model_validate(c).model_dump(by_alias=True) for c in recent_checkins]
+    recent_payload = [
+        CheckInResponse.model_validate(c).model_dump(by_alias=True) for c in recent_checkins
+    ]
 
     return success_response(
         data={
@@ -289,11 +297,12 @@ def coach_dashboard(
     current_user: User = Depends(get_current_user),
 ):
     # Authorization: admins may view any coach dashboard; coaches may only view
-    # their own dashboard. All data below is additionally scoped to the
-    # requesting coach's branch.
+    # their own dashboard. Receptionists and others cannot view it at all.
+    # Previously `STAFF_ROLES` let any coach read any other coach's roster.
     if current_user.role == "coach":
         if current_user.id != coach_id:
             return error_response("Insufficient permissions", 403)
+        # All aggregations below are additionally scoped to the coach's branch.
         scope_branch_id: str | None = current_user.branch_id
         if scope_branch_id is None:
             # Single-branch deployment (LUMI only — no other branches will be
@@ -342,8 +351,7 @@ def coach_dashboard(
             db.query(CheckIn).filter(CheckIn.user_id.in_(athlete_ids)).order_by(CheckIn.check_in_time.desc()).all()
         )
         for c in ordered:
-            # First occurrence per user is that user's latest check-in
-            # (same row as `.order_by(desc).first()` per athlete).
+            # First occurrence per user is that user's latest check-in.
             last_checkin_by_athlete.setdefault(c.user_id, c)
 
     athletes_payload = []

@@ -12,6 +12,8 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { CtaButton } from "@/components/twilight/controls";
 import { ArrowRight } from "lucide-react";
+import { apiErrorMessage, homeForRole } from "@/components/auth/auth-helpers";
+import { useBranches } from "@/hooks/use-api";
 import { validateIranianPhone } from "@/lib/utils";
 
 const registerSchema = z
@@ -22,6 +24,7 @@ const registerSchema = z
     phone: z.string().min(1, "شماره موبایل را وارد کنید").refine((val) => validateIranianPhone(val), "شماره موبایل نامعتبر است"),
     password: z.string().min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
     confirmPassword: z.string().min(1, "تکرار رمز عبور را وارد کنید"),
+    branchId: z.string().optional(),
     acceptTerms: z.boolean().refine((accepted) => accepted, "پذیرش قوانین الزامی است"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -60,6 +63,8 @@ function Field({
 export default function RegisterPage() {
   const router = useRouter();
   const { register: registerUser } = useAuth();
+  const branches = useBranches();
+  const branchList = branches.data?.data ?? [];
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -75,6 +80,7 @@ export default function RegisterPage() {
       phone: "",
       password: "",
       confirmPassword: "",
+      branchId: "",
       acceptTerms: false,
     },
   });
@@ -82,19 +88,20 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true);
     try {
-      await registerUser({
+      // OUR contract: register mints tokens and signs the user in, so there
+      // is no separate login step — go straight to the caller's panel.
+      const created = await registerUser({
         email: data.email,
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
+        ...(data.branchId ? { branchId: data.branchId } : {}),
       });
-      // Register never signs the user in (backend mints no tokens on this
-      // path): route to login explicitly.
-      toast.success("ثبت‌نام انجام شد. لطفاً وارد شوید.");
-      router.replace("/auth/login");
+      toast.success("حسابت ساخته شد؛ خوش آمدی");
+      router.replace(homeForRole(created.role));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "ثبت‌نام ناموفق بود";
+      const message = apiErrorMessage(error, "ثبت‌نام ناموفق بود");
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -137,6 +144,32 @@ export default function RegisterPage() {
           <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
             <Field id="phone" label="شماره موبایل" error={errors.phone?.message}>
               <input id="phone" type="tel" dir="ltr" placeholder="09123456789" autoComplete="tel" inputMode="tel" className={inputClassName} {...register("phone")} />
+            </Field>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
+            <Field id="branchId" label="شعبه (اختیاری)" error={errors.branchId?.message}>
+              <select
+                id="branchId"
+                aria-describedby="branchId-hint"
+                disabled={isSubmitting || branches.isLoading}
+                className={`${inputClassName} min-h-11 w-full`}
+                {...register("branchId")}
+              >
+                <option value="">بدون انتخاب</option>
+                {branchList.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+              <p id="branchId-hint" className="mt-1 text-[11px] leading-5 text-[#8e98a8]" aria-live="polite">
+                {branches.isLoading
+                  ? "در حال بارگذاری شعبه‌ها…"
+                  : branches.isError
+                    ? "شعبه‌ها بارگذاری نشد؛ می‌توانی بدون انتخاب ادامه دهی."
+                    : "شعبه محل تمرینت را انتخاب کن."}
+              </p>
             </Field>
           </motion.div>
 

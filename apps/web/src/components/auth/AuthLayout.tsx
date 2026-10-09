@@ -3,6 +3,7 @@
 import { Heart, Sparkles } from "lucide-react";
 import { GymBackdrop } from "@/components/twilight/GymBackdrop";
 import { MicroLabel } from "@/components/twilight/Page";
+import { LumiLogo } from "@/components/ui/LumiLogo";
 
 /**
  * Reference wordmark: cream dot + serif name + muted latin kicker
@@ -66,7 +67,7 @@ export function AuthLayout({ children, showLogo = true }: AuthLayoutProps) {
         {showLogo && (
           <div className="mb-6 flex items-center justify-center lg:justify-start">
             <div className="flex flex-col items-center gap-1.5 lg:items-start">
-              <LumiWordmark />
+              <LumiLogo variant="auto" size="sm" ariaLabel="Lumi Wellness" />
               <p className="text-[11px] leading-tight text-[#8e98a8]">پلتفرم مدیریت هوشمند باشگاه</p>
             </div>
           </div>

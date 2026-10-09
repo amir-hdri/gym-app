@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user, require_roles
 from app.database import get_db
-from app.models import Exercise, User
+from app.models import Exercise, ProgramExercise, User
 from app.responses import error_response, paginated_response, success_response
 from app.schemas import ExerciseCreate, ExerciseResponse, ExerciseUpdate
 
@@ -14,10 +15,10 @@ router = APIRouter(prefix="/api/v1/exercises", tags=["Exercises"])
 def list_exercises(
     page: int = Query(1, ge=1),
     page_size: int = Query(100, ge=1, le=500),
-    category: str | None = None,
-    muscle_group: str | None = None,
-    difficulty: str | None = None,
-    search: str | None = None,
+    category: str = None,
+    muscle_group: str = None,
+    difficulty: str = None,
+    search: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -29,10 +30,10 @@ def list_exercises(
     if difficulty:
         query = query.filter(Exercise.difficulty == difficulty)
     if search:
-        # Escape LIKE wildcards so a literal % or _ in the query can't match everything.
-        escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-        like = f"%{escaped}%"
-        query = query.filter(Exercise.name.ilike(like, escape="\\") | Exercise.name_en.ilike(like, escape="\\"))
+        query = query.filter(
+            Exercise.name.ilike(f"%{search}%")
+            | Exercise.name_en.ilike(f"%{search}%")
+        )
     total = query.count()
     exercises = query.offset((page - 1) * page_size).limit(page_size).all()
     return paginated_response(
@@ -86,3 +87,29 @@ def update_exercise(
         data=ExerciseResponse.model_validate(exercise).model_dump(by_alias=True),
         message="Exercise updated",
     )
+
+
+@router.delete("/{exercise_id}")
+def delete_exercise(
+    exercise_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("admin", "coach")),
+):
+    exercise = db.query(Exercise).filter(Exercise.id == exercise_id).first()
+    if not exercise:
+        return error_response("Exercise not found", 404)
+    references = (
+        db.query(func.count(ProgramExercise.id))
+        .filter(ProgramExercise.exercise_id == exercise_id)
+        .scalar()
+        or 0
+    )
+    if references:
+        return error_response(
+            f"Exercise is used by {references} program exercise(s); "
+            "set isActive=false instead of deleting",
+            409,
+        )
+    db.delete(exercise)
+    db.commit()
+    return success_response(message="Exercise deleted")

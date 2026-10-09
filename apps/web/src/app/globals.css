@@ -9,8 +9,13 @@
  * Serif = Playfair Display, Sans = Plus Jakarta Sans (Vazirmatn carries Persian glyphs).
  */
 @theme {
-  --font-serif: var(--font-playfair), var(--font-vazirmatn), Georgia, serif;
-  --font-sans: var(--font-jakarta), var(--font-vazirmatn), system-ui, -apple-system, sans-serif;
+  /*
+   * Type: self-hosted (see app/layout.tsx — no Google-CDN fetch). Estedad
+   * leads the Persian UI; Bodoni Moda is the Latin display serif (brand
+   * voice, cf. the LUMI wordmark); Vazirmatn is the glyph fallback.
+   */
+  --font-serif: var(--font-bodoni), var(--font-estedad), var(--font-vazirmatn), Georgia, serif;
+  --font-sans: var(--font-estedad), var(--font-estedad-latin), var(--font-vazirmatn), system-ui, -apple-system, sans-serif;
 
   --color-background: #0c0e12;
   --color-foreground: #f5f3ef;
@@ -44,6 +49,17 @@
   --color-brand-surface: #1a202a;
   --color-brand: #d2c0a5;
   --color-brand-2: #ded1bc;
+  /*
+   * Member-data accent (blush) + fixed inks + scrim. Kept from the shared
+   * token set: Meter/ActivityRings, LumiLogo and Sheet/WorkoutPlayer rely on
+   * them. Values are the dark-canonical ones — this file is dark-only.
+   */
+  --color-blush: #f0b8c8;
+  --color-blush-solid: #d98aa5;
+  --color-blush-foreground: #2a1218;
+  --color-logo-ink: #121417;
+  --color-logo-ink-inverse: #f5f3ef;
+  --color-scrim: #04060a;
   --radius: 1rem;
 }
 

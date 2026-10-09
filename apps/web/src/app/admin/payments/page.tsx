@@ -8,6 +8,7 @@ import { formatPersianNumber, formatCurrency, formatDateTime } from "@/lib/utils
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { usePayments } from "@/hooks/use-api";
 import { RevenueChart } from "@/components/analytics/Charts";
+import { PaymentRowActions } from "../_components/PaymentSheets";
 import { ReceiptText } from "lucide-react";
 
 const methodLabels: Record<string, string> = {
@@ -112,7 +113,10 @@ export default function PaymentsPage() {
                       </td>
                       <td className={`${tableCell} whitespace-nowrap text-[#c3cad6]`}>{formatDateTime(payment.paidAt || payment.createdAt)}</td>
                       <td className={tableCell}>
-                        <Link href={`/admin/payments/${payment.id}`} className="text-sm font-medium text-primary hover:underline">جزئیات</Link>
+                        <div className="flex items-center gap-1">
+                          <Link href={`/admin/payments/${payment.id}`} className="min-h-11 inline-flex items-center px-2 text-sm font-medium text-primary hover:underline">جزئیات</Link>
+                          <PaymentRowActions payment={payment} />
+                        </div>
                       </td>
                     </tr>
                   ))}

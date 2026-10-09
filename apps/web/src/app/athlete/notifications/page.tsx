@@ -1,11 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Dialog";
 import { cn, parseApiDate } from "@/lib/utils";
-import { Bell, Calendar, MessageSquare, CreditCard, Dumbbell, CheckCheck } from "lucide-react";
+import { Bell, Calendar, MessageSquare, CreditCard, Dumbbell, CheckCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from "@/hooks/use-api";
+import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { PageShell, PageHeader } from "@/components/twilight/Page";
 import { Badge } from "@/components/ui/Badge";
@@ -25,6 +34,8 @@ export default function NotificationsPage() {
   const { data, isLoading, isError, error } = useNotifications(athleteId);
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
+  const deleteNotification = useDeleteNotification();
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null);
 
   const notifications = data?.data || [];
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -39,6 +50,17 @@ export default function NotificationsPage() {
 
   const handleMarkRead = (id: string) => {
     markRead.mutate(id);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!pendingDelete) return;
+    deleteNotification.mutate(pendingDelete.id, {
+      onSuccess: () => {
+        toast.success("اعلان حذف شد");
+        setPendingDelete(null);
+      },
+      onError: (e) => toast.error((e as Error)?.message || "حذف اعلان ناموفق بود"),
+    });
   };
 
   if (isLoading) return <Loading />;
@@ -92,11 +114,42 @@ export default function NotificationsPage() {
                   </div>
                   <p className="mt-0.5 line-clamp-2 text-sm text-[#8e98a8]">{n.message}</p>
                 </div>
+                <button
+                  type="button"
+                  aria-label={`حذف اعلان: ${n.title}`}
+                  title={`حذف اعلان: ${n.title}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPendingDelete({ id: n.id, title: n.title });
+                  }}
+                  className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Trash2 className="h-5 w-5" strokeWidth={1.75} />
+                </button>
               </div>
             );
           })}
         </div>
       )}
+
+      <Dialog open={pendingDelete !== null} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>حذف اعلان</DialogTitle>
+            <DialogDescription>
+              «{pendingDelete?.title}» حذف شود؟ این عمل قابل بازگشت نیست.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingDelete(null)} disabled={deleteNotification.isPending}>
+              انصراف
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm} loading={deleteNotification.isPending}>
+              حذف اعلان
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageShell>
   );
 }

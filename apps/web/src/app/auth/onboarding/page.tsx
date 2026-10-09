@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { CtaButton } from "@/components/twilight/controls";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { useBranches, useUpdateUser } from "@/hooks/use-api";
 
 const onboardingSchema = z.object({
   height: z.string().min(1, "قد را وارد کنید"),
@@ -40,6 +42,11 @@ const inputClassName =
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const branches = useBranches();
+  const branchList = branches.data?.data ?? [];
+  const updateUser = useUpdateUser();
+  const [branchId, setBranchId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -65,6 +72,15 @@ export default function OnboardingPage() {
   const onSubmit = async () => {
     setIsSubmitting(true);
     try {
+      // Optional branch: the backend lets a user set their own branch while it
+      // is still unset, so a chosen value is persisted before leaving.
+      if (user && branchId) {
+        try {
+          await updateUser.mutateAsync({ id: user.id, data: { branchId } });
+        } catch {
+          toast.error("ذخیره شعبه ناموفق بود؛ بقیه اطلاعات ذخیره شد.");
+        }
+      }
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.success("اطلاعات با موفقیت ذخیره شد");
       router.replace("/athlete");
@@ -160,8 +176,37 @@ export default function OnboardingPage() {
             {errors.experience && <p className="mt-1 text-xs text-[#f87171]">{errors.experience.message}</p>}
           </motion.div>
 
+          {/* Branch (optional) */}
+          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.28 }}>
+            <label htmlFor="branch" className="mb-2 block text-xs text-[#8e98a8]">
+              شعبه (اختیاری)
+            </label>
+            <select
+              id="branch"
+              value={branchId}
+              onChange={(e) => setBranchId(e.target.value)}
+              disabled={isSubmitting || branches.isLoading || updateUser.isPending}
+              aria-describedby="branch-hint"
+              className={`${inputClassName} min-h-11`}
+            >
+              <option value="">بدون انتخاب</option>
+              {branchList.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
+            <p id="branch-hint" className="mt-1 text-[11px] leading-5 text-[#8e98a8]" aria-live="polite">
+              {branches.isLoading
+                ? "در حال بارگذاری شعبه‌ها…"
+                : branches.isError
+                  ? "شعبه‌ها بارگذاری نشد؛ می‌توانی بدون انتخاب ادامه دهی."
+                  : "شعبه محل تمرینت — بعداً هم قابل تغییر است."}
+            </p>
+          </motion.div>
+
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <CtaButton type="submit" disabled={isSubmitting} className="w-full text-sm">
+            <CtaButton type="submit" disabled={isSubmitting || updateUser.isPending} className="w-full text-sm">
               {isSubmitting ? "در حال ذخیره…" : "ذخیره و شروع"}
             </CtaButton>
           </motion.div>

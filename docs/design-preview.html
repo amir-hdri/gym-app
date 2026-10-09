@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumi Wellness — زبان طراحی</title>
+<style>
+  /* Token values copied verbatim from apps/web/src/app/globals.css so this
+     preview cannot drift from the app. Light is :root, dark is .dark. */
+  :root {
+    --background: 40 32% 96%;  --foreground: 30 11% 12%;
+    --card: 0 0% 100%;         --popover: 0 0% 100%;
+    --primary: 36 44% 29%;     --primary-solid: 36 42% 31%;  --primary-foreground: 0 0% 100%;
+    --blush: 338 46% 40%;      --blush-solid: 340 62% 87%;   --blush-foreground: 338 38% 16%;
+    --muted: 38 24% 92%;       --muted-foreground: 32 8% 40%;
+    --border: 38 22% 87%;      --input: 36 16% 53%;
+    --activity-stand: 205 42% 42%;
+  }
+  .dark {
+    --background: 30 11% 4%;   --foreground: 35 25% 93%;
+    --card: 30 7% 9%;          --popover: 30 7% 12%;
+    --primary: 38 34% 78%;     --primary-solid: 38 34% 74%;  --primary-foreground: 30 18% 7%;
+    --blush: 340 62% 85%;      --blush-solid: 340 58% 81%;   --blush-foreground: 338 32% 11%;
+    --muted: 30 5% 14%;        --muted-foreground: 35 9% 64%;
+    --border: 30 6% 19%;       --input: 30 8% 39%;
+    --activity-stand: 205 30% 70%;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    font-family: Vazirmatn, -apple-system, system-ui, sans-serif;
+    line-height: 1.6;
+    background: hsl(var(--background)); color: hsl(var(--foreground));
+  }
+  .panes { display: grid; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .panes { grid-template-columns: 1fr 1fr; } }
+  .pane { background: hsl(var(--background)); color: hsl(var(--foreground)); padding: 28px 24px 40px; min-height: 100vh; }
+
+  /* Display type: weight 500, tight, as the app now sets it. */
+  h1, h2 { font-weight: 500; letter-spacing: -0.025em; line-height: 1.25; margin: 0; }
+  h1 { font-size: 2.1rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-weight: 600; font-size: 1.0625rem; letter-spacing: -0.015em; margin: 0; }
+
+  .meta-label { font-size: .6875rem; font-weight: 500; letter-spacing: .06em; color: hsl(var(--muted-foreground)); }
+  .stat-figure { font-size: 2.1rem; font-weight: 300; line-height: 1.1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .stat-unit { font-size: .8125rem; font-weight: 500; color: hsl(var(--muted-foreground)); margin-inline-start: .25rem; }
+
+  .theme-name { font-size: .6875rem; letter-spacing: .08em; color: hsl(var(--muted-foreground)); }
+  .sub { color: hsl(var(--muted-foreground)); font-size: .875rem; margin: 6px 0 0; }
+  section { margin-top: 34px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+
+  /* Surfaces: hairline + surface step, no shadow. */
+  .card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 20px; padding: 20px; }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Chips — selected is a sand fill carrying its own foreground token. */
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { border-radius: 999px; padding: 9px 18px; font-size: .8125rem; font-weight: 500; border: 1px solid hsl(var(--border)); color: hsl(var(--muted-foreground)); background: transparent; }
+  .chip.on { background: hsl(var(--primary-solid)); color: hsl(var(--primary-foreground)); border-color: transparent; font-weight: 600; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 24px; border-radius: 16px; border: none; font-family: inherit; font-size: .875rem; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: hsl(var(--primary-solid)); color: hsl(var(--primary-foreground)); }
+  .btn-ghost { background: transparent; border: 1px solid hsl(var(--border)); color: hsl(var(--foreground)); }
+
+  /* Rows: circular icon container, not a rounded square. */
+  .row { display: flex; align-items: center; gap: 14px; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 18px; padding: 12px 14px; margin-bottom: 10px; }
+  .orb { width: 46px; height: 46px; border-radius: 999px; display: grid; place-items: center; flex-shrink: 0; background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+  .orb.sand { background: hsl(var(--primary) / .12); color: hsl(var(--primary)); }
+  .orb.blush { background: hsl(var(--blush) / .14); color: hsl(var(--blush)); }
+  .row .body { flex: 1; min-width: 0; }
+  .row .t { font-size: .9375rem; font-weight: 500; }
+  .row .m { font-size: .75rem; color: hsl(var(--muted-foreground)); }
+
+  /* Pill bars on a visible track — the chart signature. */
+  .chart { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; height: 170px; }
+  .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .track { position: relative; width: 26px; height: 140px; border-radius: 999px; background: hsl(var(--muted)); overflow: hidden; }
+  .fill { position: absolute; inset-inline: 0; bottom: 0; border-radius: 999px; background: hsl(var(--primary)); }
+  .fill.blush { background: hsl(var(--blush)); }
+  .day { font-size: .6875rem; color: hsl(var(--muted-foreground)); }
+
+  .ring { width: 96px; height: 96px; border-radius: 999px; display: grid; place-items: center;
+          background: conic-gradient(hsl(var(--blush)) 0 72%, hsl(var(--muted)) 72% 100%); }
+  .ring .hole { width: 74px; height: 74px; border-radius: 999px; background: hsl(var(--card)); display: grid; place-items: center; }
+
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+  .sw { border-radius: 14px; border: 1px solid hsl(var(--border)); overflow: hidden; }
+  .sw .chipc { height: 52px; }
+  .sw .lbl { padding: 7px 9px; font-size: .625rem; letter-spacing: .03em; color: hsl(var(--muted-foreground)); background: hsl(var(--card)); }
+  .legend { display: inline-flex; align-items: center; gap: 6px; font-size: .6875rem; color: hsl(var(--muted-foreground)); }
+  .dot { width: 8px; height: 8px; border-radius: 999px; background: hsl(var(--blush)); }
+  .note { font-size: .75rem; color: hsl(var(--muted-foreground)); border-inline-start: 2px solid hsl(var(--blush)); padding-inline-start: 12px; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="panes">
+
+  <!-- ============ DARK (canonical) ============ -->
+  <div class="pane dark">
+    <p class="theme-name">تم تیره — مرجع</p>
+    <h1>عصر بخیر</h1>
+    <p class="sub">آماده‌ای برای تمرین امروز؟</p>
+
+    <section>
+      <div class="section-head"><h2>مسیر تو</h2><span class="legend"><span class="dot"></span>دقیقه</span></div>
+      <div class="tiles">
+        <div class="card">
+          <p class="meta-label">زمان کل</p>
+          <div><span class="stat-figure">۱۲٫۵</span><span class="stat-unit">ساعت</span></div>
+        </div>
+        <div class="card">
+          <p class="meta-label">روزهای پیوسته</p>
+          <div><span class="stat-figure" style="color:hsl(var(--blush))">۵</span><span class="stat-unit">روز</span></div>
+        </div>
+      </div>
+      <p class="note">صورتی فقط داده‌ی شخصی عضو را نشان می‌دهد — روز پیوسته، پیشرفت هدف، حلقه‌ی فعالیت. رنگ شنی برای اجزای رابط است.</p>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>فعالیت هفته</h2></div>
+      <div class="card">
+        <div class="chart">
+          <div class="col"><div class="track"><div class="fill" style="height:46%"></div></div><span class="day">ش</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:68%"></div></div><span class="day">ی</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:34%"></div></div><span class="day">د</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:88%"></div></div><span class="day">س</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:60%"></div></div><span class="day">چ</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:14%"></div></div><span class="day">پ</span></div>
+          <div class="col"><div class="track"><div class="fill blush" style="height:72%"></div></div><span class="day">ج</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>دسته‌ها</h2></div>
+      <div class="chips">
+        <span class="chip on">همه</span><span class="chip">قدرتی</span><span class="chip">هوازی</span><span class="chip">کشش</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>محبوب</h2><span class="meta-label">دیدن همه</span></div>
+      <div class="row"><div class="orb sand">◷</div><div class="body"><div class="t">تمرین بالاتنه</div><div class="m">۴۵ دقیقه · با مربی</div></div><div class="orb" style="width:36px;height:36px">▷</div></div>
+      <div class="row"><div class="orb blush">✦</div><div class="body"><div class="t">هدف: کاهش وزن</div><div class="m">۷۲٪ پیشرفت</div></div></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>حلقه‌ی فعالیت</h2></div>
+      <div class="card" style="display:flex;align-items:center;gap:20px">
+        <div class="ring"><div class="hole"><span class="stat-figure" style="font-size:1.4rem">۷۲٪</span></div></div>
+        <div><p class="meta-label">هدف هفتگی</p><p class="sub" style="margin-top:4px">۵ جلسه از ۷ جلسه</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>کنش‌ها</h2></div>
+      <button class="btn btn-primary">شروع تمرین</button>
+      <button class="btn btn-ghost" style="margin-inline-start:8px">بعداً</button>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>پالت</h2></div>
+      <div class="swatches">
+        <div class="sw"><div class="chipc" style="background:hsl(var(--background))"></div><div class="lbl">background #0b0a09</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--card))"></div><div class="lbl">card #191715</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--primary))"></div><div class="lbl">sand #daccb4</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--blush))"></div><div class="lbl">blush #f0c1d1</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--foreground))"></div><div class="lbl">foreground #f2eee9</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--activity-stand))"></div><div class="lbl">stand (data)</div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ LIGHT ============ -->
+  <div class="pane">
+    <p class="theme-name">تم روشن — کاغذ گرم</p>
+    <h1>عصر بخیر</h1>
+    <p class="sub">آماده‌ای برای تمرین امروز؟</p>
+
+    <section>
+      <div class="section-head"><h2>مسیر تو</h2><span class="legend"><span class="dot"></span>دقیقه</span></div>
+      <div class="tiles">
+        <div class="card">
+          <p class="meta-label">زمان کل</p>
+          <div><span class="stat-figure">۱۲٫۵</span><span class="stat-unit">ساعت</span></div>
+        </div>
+        <div class="card">
+          <p class="meta-label">روزهای پیوسته</p>
+          <div><span class="stat-figure" style="color:hsl(var(--blush))">۵</span><span class="stat-unit">روز</span></div>
+        </div>
+      </div>
+      <p class="note">در تم روشن، صورتی پاستلی به‌صورت <em>پُرکننده</em> حفظ می‌شود و فقط نسخه‌ی متنی‌اش تیره‌تر می‌شود — صورتی پاستلی روی سفید خوانا نیست.</p>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>فعالیت هفته</h2></div>
+      <div class="card">
+        <div class="chart">
+          <div class="col"><div class="track"><div class="fill" style="height:46%"></div></div><span class="day">ش</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:68%"></div></div><span class="day">ی</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:34%"></div></div><span class="day">د</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:88%"></div></div><span class="day">س</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:60%"></div></div><span class="day">چ</span></div>
+          <div class="col"><div class="track"><div class="fill" style="height:14%"></div></div><span class="day">پ</span></div>
+          <div class="col"><div class="track"><div class="fill blush" style="height:72%"></div></div><span class="day">ج</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>دسته‌ها</h2></div>
+      <div class="chips">
+        <span class="chip on">همه</span><span class="chip">قدرتی</span><span class="chip">هوازی</span><span class="chip">کشش</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>محبوب</h2><span class="meta-label">دیدن همه</span></div>
+      <div class="row"><div class="orb sand">◷</div><div class="body"><div class="t">تمرین بالاتنه</div><div class="m">۴۵ دقیقه · با مربی</div></div><div class="orb" style="width:36px;height:36px">▷</div></div>
+      <div class="row"><div class="orb blush">✦</div><div class="body"><div class="t">هدف: کاهش وزن</div><div class="m">۷۲٪ پیشرفت</div></div></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>حلقه‌ی فعالیت</h2></div>
+      <div class="card" style="display:flex;align-items:center;gap:20px">
+        <div class="ring"><div class="hole"><span class="stat-figure" style="font-size:1.4rem">۷۲٪</span></div></div>
+        <div><p class="meta-label">هدف هفتگی</p><p class="sub" style="margin-top:4px">۵ جلسه از ۷ جلسه</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>کنش‌ها</h2></div>
+      <button class="btn btn-primary">شروع تمرین</button>
+      <button class="btn btn-ghost" style="margin-inline-start:8px">بعداً</button>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>پالت</h2></div>
+      <div class="swatches">
+        <div class="sw"><div class="chipc" style="background:hsl(var(--background))"></div><div class="lbl">background #f8f6f2</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--card))"></div><div class="lbl">card #ffffff</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--primary))"></div><div class="lbl">bronze #6a5029</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--blush-solid))"></div><div class="lbl">blush fill #f2c9d7</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--blush))"></div><div class="lbl">rose ink #953759</div></div>
+        <div class="sw"><div class="chipc" style="background:hsl(var(--activity-stand))"></div><div class="lbl">stand (data)</div></div>
+      </div>
+    </section>
+  </div>
+
+</div>
+</body>
+</html>

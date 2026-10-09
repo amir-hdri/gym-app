@@ -1,0 +1,35 @@
+Database migrations
+===================
+
+Run commands from backend/ with the same DATABASE_URL as the deployed service.
+Back up an existing database before migration. Production startup does not
+create, seed, or silently alter tables.
+
+Empty database:
+    ./venv/bin/python -m alembic upgrade head
+
+Existing pre-migration database:
+    1. Back up the database.
+    2. Verify its tables/columns/constraints match 0001_baseline.py. Do not stamp
+       an empty database, a partially migrated database, or an unknown schema.
+    3. ./venv/bin/python -m alembic stamp 0001
+    4. ./venv/bin/python -m alembic upgrade head
+
+Development databases created from the current models already include
+DailyReadiness. Verify the full schema before stamping head instead.
+
+Verification:
+    ./venv/bin/python -m alembic current
+    ./venv/bin/python -m alembic check
+
+A Docker image includes these scripts. Run `alembic upgrade head` once as a
+release job before starting the application containers. Do not run concurrent
+schema migrations from multiple replicas. Deployment of an old, unstamped
+production database requires the adoption steps above.
+
+0001: original schema (including password reset, messaging, and financial data)
+0002: daily_readiness, keyed by user and Asia/Tehran calendar day
+
+Downgrading 0002 deletes stored readiness data. Restore a backup when rollback
+must preserve it. Backups and adoption are operator actions, not automatic
+startup side effects.

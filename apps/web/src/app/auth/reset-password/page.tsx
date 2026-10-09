@@ -7,13 +7,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { CtaButton } from "@/components/twilight/controls";
 import { CheckCircle2 } from "lucide-react";
+import { useResetPassword } from "@/hooks/use-api";
+import { apiErrorMessage } from "@/components/auth/auth-helpers";
 
 const resetSchema = z
   .object({
-    password: z.string().min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
+    // Mirrors the server policy (8+ chars, ≥1 letter and ≥1 digit) so a
+    // rejection is caught here, not as a 422 round trip.
+    password: z
+      .string()
+      .min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد")
+      .regex(/[A-Za-z]/, "رمز عبور باید حداقل یک حرف داشته باشد")
+      .regex(/\d/, "رمز عبور باید حداقل یک رقم داشته باشد"),
     confirmPassword: z.string().min(1, "تکرار رمز عبور را وارد کنید"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -30,8 +39,9 @@ function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [tokenError, setTokenError] = useState<string | null>(null);
+  const reset = useResetPassword();
 
   useEffect(() => {
     if (!token) router.replace("/auth/forgot-password");
@@ -46,16 +56,15 @@ function ResetPasswordContent() {
     defaultValues: { password: "", confirmPassword: "" },
   });
 
-  const onSubmit = async () => {
-    setIsSubmitting(true);
+  const onSubmit = async (data: ResetFormData) => {
+    setTokenError(null);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await reset.mutateAsync({ token, password: data.password });
       toast.success("رمز عبور با موفقیت تغییر کرد");
       setIsDone(true);
-    } catch {
-      toast.error("خطا در تغییر رمز");
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) {
+      // Unknown, used, or expired grant — the only recovery is a fresh link.
+      setTokenError(apiErrorMessage(error, "این لینک معتبر نیست یا منقضی شده است"));
     }
   };
 
@@ -86,6 +95,14 @@ function ResetPasswordContent() {
           </motion.div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {tokenError && (
+              <p role="alert" className="rounded-xl border border-[#f87171]/30 bg-[#f87171]/10 px-4 py-3 text-xs leading-6 text-[#f87171]">
+                {tokenError}{" "}
+                <Link href="/auth/forgot-password" className="font-semibold underline underline-offset-4">
+                  دریافت لینک تازه
+                </Link>
+              </p>
+            )}
             <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
               <label htmlFor="password" className="mb-2 block text-xs text-[#8e98a8]">
                 رمز عبور جدید
@@ -117,8 +134,8 @@ function ResetPasswordContent() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <CtaButton type="submit" disabled={isSubmitting} className="w-full text-sm">
-                {isSubmitting ? "در حال تغییر…" : "تغییر رمز عبور"}
+              <CtaButton type="submit" disabled={reset.isPending} className="w-full text-sm">
+                {reset.isPending ? "در حال تغییر…" : "تغییر رمز عبور"}
               </CtaButton>
             </motion.div>
           </form>

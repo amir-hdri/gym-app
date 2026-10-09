@@ -12,17 +12,46 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run type-check --workspace=apps/web
       - run: npm run lint --workspace=apps/web
       - run: npm run test --workspace=apps/web
+      - run: npm run build --workspace=apps/web
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - run: pip install -r backend/requirements.txt
+      - run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+      - run: npm run test:e2e --workspace=apps/web
+      - run: npm run test:e2e:real --workspace=apps/web
+        env:
+          E2E_PYTHON: python
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-evidence
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7
 
   backend:
     runs-on: ubuntu-latest
     env:
-      SECRET_KEY: ci-only-test-key
+      SECRET_KEY: ci-only-test-key-with-at-least-32-bytes
       DATABASE_URL: sqlite:////tmp/ci.db
     steps:
       - uses: actions/checkout@v4
@@ -32,4 +61,8 @@ jobs:
       - run: pip install -r backend/requirements.txt
       - run: python -m compileall -q backend/app
       - run: python -m pytest tests -q
+        working-directory: backend
+      - run: python -m alembic upgrade head
+        working-directory: backend
+      - run: python -m alembic check
         working-directory: backend

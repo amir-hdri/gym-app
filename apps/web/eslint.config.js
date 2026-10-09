@@ -42,6 +42,6 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/**", ".next/**", "out/**", "next-env.d.ts"],
+    ignores: ["node_modules/**", ".next*/**", "test-results/**", "playwright-report/**", "out/**", "next-env.d.ts"],
   },
 ];

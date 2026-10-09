@@ -19,7 +19,12 @@ export interface PaginatedResponse<T> {
 }
 
 export type UserRole = "admin" | "coach" | "athlete" | "receptionist";
-export type UserStatus = "active" | "inactive" | "suspended";
+/**
+ * The four values `PATCH /users/{id}/status` accepts. Anything else comes back
+ * as a 400 — this union is the server's allow-list, not a superset of it. (It
+ * used to read `pending_verification`, which the server has never accepted.)
+ */
+export type UserStatus = "active" | "inactive" | "suspended" | "pending";
 
 export interface User {
   id: string;
@@ -64,7 +69,7 @@ export interface MembershipPlan {
   sessionsCount: number;
   price: number;
   discountPercent: number;
-  features: string[] | null;
+  features: string[];
   isActive: boolean;
   branchId?: string;
   createdAt: string;
@@ -92,6 +97,29 @@ export interface Membership {
   freezeEndDate?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * The body `POST /memberships` accepts, mirroring the server's
+ * `MembershipCreate`. `sessionsRemaining` is absent on purpose: the server
+ * derives it from `sessionsTotal - sessionsUsed` on every read, so sending it
+ * would be ignored.
+ *
+ * `price` and `finalPrice` are both required and must be > 0 — the server
+ * rejects zero with a 422 rather than treating it as "free".
+ */
+export interface MembershipInput {
+  userId: string;
+  planId: string;
+  branchId: string;
+  startDate: string;
+  endDate: string;
+  price: number;
+  finalPrice: number;
+  sessionsTotal?: number;
+  sessionsUsed?: number;
+  discountAmount?: number;
+  status?: Membership["status"];
 }
 
 export interface Exercise {
@@ -149,6 +177,20 @@ export interface ProgramExercise {
   actualWeight?: number;
 }
 
+/**
+ * The fields a coach may write when building a program's exercise list.
+ *
+ * Deliberately excludes `isCompleted` and the `actual*` trio: those belong to
+ * the athlete's own `…/complete` call, and the create endpoint does not accept
+ * them at all — it would drop them silently.
+ */
+export type ProgramExerciseInput = Partial<
+  Pick<
+    ProgramExercise,
+    "exerciseId" | "dayOfWeek" | "order" | "sets" | "reps" | "weight" | "restSeconds" | "notes"
+  >
+>;
+
 export interface Goal {
   id: string;
   athleteId: string;
@@ -180,15 +222,6 @@ export interface CheckIn {
   durationMinutes?: number;
   sessionDeducted: boolean;
   createdAt: string;
-}
-
-/** Shape of POST /api/v1/check-ins/qr/check-in (backend QRCheckInResponse). */
-export interface QRCheckInResponse {
-  id: string;
-  userId: string;
-  branchId: string;
-  checkInTime: string;
-  message: string;
 }
 
 export interface Payment {
@@ -263,4 +296,100 @@ export interface CoachDashboardData {
     lastCheckIn?: string;
     progress: number;
   }[];
+}
+
+// === Messaging (API contract v2 §1) ===
+
+/** The *other* party of a conversation, relative to the caller. */
+export interface ConversationParticipant {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  avatarUrl?: string | null;
+}
+
+/** Preview of the newest message in a conversation. */
+export interface ConversationLastMessage {
+  id: string;
+  body: string;
+  senderId: string;
+  createdAt: string;
+}
+
+export interface Conversation {
+  id: string;
+  athleteId: string;
+  coachId: string;
+  participant?: ConversationParticipant;
+  lastMessage?: ConversationLastMessage | null;
+  unreadCount: number;
+  lastMessageAt?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+/**
+ * A single message in a conversation.
+ *
+ * Named `ChatMessage` rather than `Message` on purpose: `Message` is a DOM
+ * global (the `postMessage` event type), so a bare `Message` silently resolves
+ * to the lib.dom type when an import is missing.
+ */
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  body: string;
+  readAt?: string | null;
+  createdAt: string;
+}
+
+// === Analytics (API contract v2 §5) ===
+
+/** One day of gym-wide attendance. `date` is `YYYY-MM-DD`. */
+export interface AttendanceTrendPoint {
+  date: string;
+  checkIns: number;
+  uniqueMembers: number;
+}
+
+/** One month of revenue. `month` is `YYYY-MM`. */
+export interface RevenueTrendPoint {
+  month: string;
+  revenue: number;
+  payments: number;
+}
+
+/**
+ * Revenue as two parallel arrays of equal length — `labels[i]` describes
+ * `values[i]`. Labels are `YYYY-MM-DD` for the daily period and `YYYY-MM` for
+ * the monthly one. Shaped for a chart library that takes categories and a
+ * series separately; `RevenueTrendPoint[]` is the shape to prefer when the
+ * monthly numbers are all that is needed.
+ */
+export interface RevenueSeries {
+  labels: string[];
+  values: number[];
+}
+
+export interface MembershipDistributionSlice {
+  planId: string;
+  planName: string;
+  count: number;
+  revenue: number;
+}
+
+/** Check-ins bucketed by hour of day. `hour` is 0–23; all 24 are present. */
+export interface PeakHourPoint {
+  hour: number;
+  checkIns: number;
+}
+
+/** One day of a single athlete's activity. `date` is `YYYY-MM-DD`. */
+export interface AthleteActivityPoint {
+  date: string;
+  checkedIn: boolean;
+  durationMinutes: number;
+  exercisesCompleted: number;
 }

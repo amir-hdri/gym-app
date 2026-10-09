@@ -3,15 +3,70 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
-import { getInitials } from "@/lib/utils";
+import { formatPersianNumber, getInitials } from "@/lib/utils";
 import { toast } from "sonner";
 import { Save, Lock } from "lucide-react";
 import { PageShell, PageHeader } from "@/components/twilight/Page";
-import { TwilightCard, CtaButton } from "@/components/twilight/controls";
+import { TwilightCard, CtaButton, StatCard } from "@/components/twilight/controls";
+import { Button } from "@/components/ui/Button";
+import { useDashboardStats, useUsers } from "@/hooks/use-api";
 
 /** Twilight input override (ui/Input base carries old theme tokens + a dark: variant). */
 const inputClassName =
   "h-11 rounded-xl border-[#232934] bg-[#161a22] text-white placeholder:text-[#6b7280] focus-visible:ring-0 focus-visible:border-[#d2c0a5]/50";
+
+function StaffStats() {
+  const stats = useDashboardStats();
+  const athletes = useUsers("athlete");
+  const coaches = useUsers("coach");
+
+  const hasData = Boolean(stats.data || athletes.data || coaches.data);
+  const isLoading = (stats.isLoading || athletes.isLoading || coaches.isLoading) && !hasData;
+  const isError = (stats.isError || athletes.isError || coaches.isError) && !hasData;
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-3 gap-3" role="status" aria-live="polite">
+        {[0, 1, 2].map((i) => (
+          <StatCard key={i} label="..." value="…" />
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <TwilightCard className="flex flex-wrap items-center justify-between gap-3">
+        <p role="alert" className="text-xs text-muted-foreground">آمار باشگاه بارگذاری نشد</p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            void stats.refetch();
+            void athletes.refetch();
+            void coaches.refetch();
+          }}
+        >
+          تلاش دوباره
+        </Button>
+      </TwilightCard>
+    );
+  }
+
+  const dashboard = stats.data?.data;
+  const memberCount =
+    athletes.data?.data?.length ?? dashboard?.activeMembers ?? dashboard?.totalMembers ?? 0;
+  const coachCount = coaches.data?.data?.length ?? dashboard?.totalCoaches ?? 0;
+  const activeCount = dashboard?.activeMembers ?? memberCount;
+
+  return (
+    <div className="grid grid-cols-3 gap-3" aria-live="polite">
+      <StatCard label="ورزشکاران" value={formatPersianNumber(memberCount)} suffix="نفر" />
+      <StatCard label="مربیان" value={formatPersianNumber(coachCount)} suffix="نفر" />
+      <StatCard label="اعضای فعال" value={formatPersianNumber(activeCount)} suffix="نفر" />
+    </div>
+  );
+}
 
 export default function AdminProfilePage() {
   const [profile, setProfile] = useState({ firstName: "مدیر", lastName: "سیستم", email: "admin@gymapp.ir", phone: "۰۲۱-۱۲۳۴۵۶۷۸" });
@@ -43,6 +98,8 @@ export default function AdminProfilePage() {
           <p className="mt-1 text-xs text-[#8e98a8]">مدیر باشگاه</p>
         </div>
       </TwilightCard>
+
+      <StaffStats />
 
       <Tabs defaultValue="info" dir="rtl">
         <TabsList className="rounded-xl border border-[#232934] bg-[#161a22] p-1">

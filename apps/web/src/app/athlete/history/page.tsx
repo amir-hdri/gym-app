@@ -16,7 +16,9 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { formatDate, formatCurrency, formatPersianNumber } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useCheckIns, usePayments, useTrainingPrograms } from "@/hooks/use-api";
+import { useCheckIns, usePayments, useTrainingPrograms, useAthleteActivity } from "@/hooks/use-api";
+import { useReadinessHistory } from "@/hooks/use-readiness";
+import { AthleteActivityChart } from "@/components/analytics/Charts";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { WeeklyCapsuleChart } from "@/components/twilight/CapsuleChart";
 import { PageShell, PageHeader, SectionTitle, MicroLabelFa } from "@/components/twilight/Page";
@@ -36,6 +38,22 @@ const TAB_LABELS: Record<TabValue, string> = {
   checkins: "چک‌این‌ها",
   workouts: "تمرینات",
   payments: "پرداخت‌ها",
+};
+
+const READINESS_LABELS: Record<string, string> = {
+  energized: "پرانرژی",
+  pumped: "پمپ عضلانی",
+  sore: "کوفتگی عضلانی",
+  recovered: "ریکاوری کامل",
+  fatigued: "خسته",
+};
+
+const READINESS_DOT: Record<string, string> = {
+  energized: "bg-activity-exercise",
+  pumped: "bg-activity-move",
+  sore: "bg-warning",
+  recovered: "bg-activity-stand",
+  fatigued: "bg-muted-foreground",
 };
 
 const READINESS_STATES = [
@@ -130,10 +148,14 @@ export default function HistoryPage() {
   const { data: checkinsData, isLoading: checkinsLoading, isError: checkinsError, error: checkinsErr } = useCheckIns(userId);
   const { data: paymentsData, isLoading: paymentsLoading, isError: paymentsError, error: paymentsErr } = usePayments(userId);
   const { data: programsData, isLoading: programsLoading, isError: programsError, error: programsErr } = useTrainingPrograms();
+  const { data: energyData, isLoading: energyLoading, isError: energyError, error: energyErr } = useReadinessHistory(userId, 7);
+  const { data: activityData, isLoading: activityLoading, isError: activityError, error: activityErr } = useAthleteActivity(userId, 30);
 
   const checkinHistory = checkinsData?.data || [];
   const paymentHistory = paymentsData?.data || [];
   const workoutHistory = programsData?.data || [];
+  const energyHistory = (energyData?.data || []).slice(0, 7);
+  const activityHistory = activityData?.data || [];
 
   const checkinsLoadingOrError = checkinsLoading || checkinsError;
   const paymentsLoadingOrError = paymentsLoading || paymentsError;
@@ -215,6 +237,7 @@ export default function HistoryPage() {
       />
 
       {tab === "checkins" && (
+        <>
         <TwilightCard>
           <SectionTitle>حجم فعالیت و جلسات هفتگی</SectionTitle>
           <p className="mt-1 text-xs text-[#8e98a8]">مدت جلسات تکمیل‌شده در ۷ روز اخیر</p>
@@ -254,6 +277,53 @@ export default function HistoryPage() {
             )}
           </div>
         </TwilightCard>
+
+        <TwilightCard>
+          <SectionTitle>انرژی ۷ روز اخیر</SectionTitle>
+          <p className="mt-1 text-xs text-muted-foreground">وضعیت‌های ثبت‌شده آمادگی جسمانی</p>
+          <div className="mt-4">
+            {energyLoading ? (
+              <Loading />
+            ) : energyError ? (
+              <ErrorDisplay message={energyErr?.message} />
+            ) : energyHistory.length === 0 ? (
+              <EmptyState title="وضعیتی ثبت نشده" description="وضعیت آمادگی خود را از داشبورد ثبت کنید" />
+            ) : (
+              <ol aria-live="polite" className="flex items-stretch gap-1.5 overflow-x-auto">
+                {energyHistory.map((row) => (
+                  <li
+                    key={row.day}
+                    title={`${formatDate(row.day)}: ${READINESS_LABELS[row.state] ?? row.state}`}
+                    className="flex min-w-[44px] flex-1 flex-col items-center gap-1.5 rounded-lg border border-border bg-card px-1 py-2"
+                  >
+                    <span aria-hidden="true" className={cn("h-2.5 w-2.5 rounded-full", READINESS_DOT[row.state] ?? "bg-muted-foreground")} />
+                    <span className="text-[10px] text-muted-foreground">
+                      {formatDate(row.day, { weekday: "short" })}
+                    </span>
+                    <span className="sr-only">{`${formatDate(row.day)}: ${READINESS_LABELS[row.state] ?? row.state}`}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </TwilightCard>
+
+        <TwilightCard>
+          <SectionTitle>فعالیت ۳۰ روز اخیر</SectionTitle>
+          <p className="mt-1 text-xs text-muted-foreground">مدت حضور و حرکات تکمیل‌شده روزانه</p>
+          <div className="mt-4">
+            {activityLoading ? (
+              <Loading />
+            ) : activityError ? (
+              <ErrorDisplay message={activityErr?.message} />
+            ) : activityHistory.length === 0 ? (
+              <EmptyState title="فعالیتی ثبت نشده" description="هنوز جلسه‌ای در ۳۰ روز اخیر ثبت نشده است" />
+            ) : (
+              <AthleteActivityChart data={activityHistory} />
+            )}
+          </div>
+        </TwilightCard>
+        </>
       )}
 
       {tab === "workouts" && (

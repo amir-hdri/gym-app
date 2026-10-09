@@ -1,9 +1,15 @@
 # FINAL ENGINEERING REPORT — GYM APP (UNIFIED)
 
-**Date:** 2026-08-15
+**Date:** 2026-08-15 · last updated 2026-10-02 (§9–§11)
 **Repository:** https://github.com/amir-hdri/gym-app
 **Branch:** `main`
-**Build Status:** PASS — type-check clean, 5/5 tests pass, lint clean (0 errors, 0 warnings), backend loads with 69 routes
+**Build Status:** type-check clean, lint clean (0 errors, 0 warnings), 104 frontend unit tests, 94 backend tests, backend loads 60 paths / 92 operations. `npm run build` cannot complete in the development sandbox — see §11.4.
+
+> Sections 1–8 are a dated record of earlier passes and are left as written.
+> Where a fact in them has since changed, §9 onward says so explicitly rather
+> than rewriting history. The route count, the zod major version and the
+> password-reset status are the three that moved in §9; §11 replaces §1's
+> stated visual direction wholesale.
 
 ---
 
@@ -240,4 +246,304 @@ Full report: **[`docs/PERFORMANCE_AUDIT.md`](docs/PERFORMANCE_AUDIT.md)** (metho
 
 ---
 
-*Report updated by unification & hardening pass (2026-09-26) — all claims backed by executed verification commands.*
+## 9. CAPABILITY COMPLETION PASS (2026-10-02)
+
+Scope: finish every half-built capability, then rebuild the UI on a coherent
+design system. Coordinated across parallel agents against a written contract,
+[`docs/API_CONTRACT_V2.md`](docs/API_CONTRACT_V2.md), so that no two workstreams
+could rename the same field out from under each other. Everything that could not
+be implemented as specified is recorded in that file's `## Deviations` section —
+thirteen entries, written from the code afterwards, not aspirationally.
+
+### 9.1 What was missing
+
+The audit that opened this pass found four kinds of gap:
+
+1. **Features with a UI but no backend.** Password reset was a 1-second
+   `setTimeout` pretending to succeed (§6.2 above). Messaging did not exist at
+   all. Analytics charts rendered hard-coded arrays.
+2. **Backend routes with no client method.** `PATCH /users/{id}/status`,
+   `POST /users/{id}/password`, `PATCH /payments/{id}/status` and the whole
+   program-exercise CRUD trio existed server-side and were unreachable from the
+   app — which is why the admin member table had no status control and the coach
+   had no program builder.
+3. **CRUD holes.** No `PUT`/`DELETE` for exercises or goals, no branch writes, no
+   way to delete a plan, no way for staff to send a notification.
+4. **A type that had never matched the server.** `UserStatus` declared
+   `pending_verification`, which the API has never accepted, and omitted
+   `pending`, which it does.
+
+### 9.2 Backend additions
+
+| Area | Added |
+|---|---|
+| Messaging | `Conversation` + `Message` models, 7 routes under `/messages`, participant-scoped |
+| Password reset | `PasswordResetToken` model (SHA-256 hash stored, 30-min TTL, single use), `forgot-password` / `reset-password` / `change-password` |
+| Profile | `PUT /auth/profile` |
+| Analytics | attendance trend, revenue trend, membership distribution, peak hours, per-athlete activity — all **dense** series (zero-filled gaps) so no chart interpolates |
+| CRUD | exercise update/delete (409 when referenced), goal update/delete, branch create/update/delete (409 when occupied), plan delete (soft when referenced), notification create + broadcast, payment update |
+
+Password policy is shared across register / reset / change: ≥8 characters, at
+least one letter and one digit; violations are a 422.
+
+**One schema had to be split.** `PasswordChangeRequest` makes `currentPassword`
+required, which is right for `/auth/change-password` but made the admin
+password-reset path unreachable — an admin has no current password to send, so
+the request died at validation with a 422 *before* the handler could apply its
+own "admin bypasses" rule. `POST /users/{id}/password` now takes a
+`PasswordSetRequest` where the field is optional and the handler enforces it
+(401 when a self-service call omits or mis-states it). `/auth/change-password`
+is untouched. Deviation 6.
+
+### 9.3 Frontend data layer
+
+`ApiClient` gained 28 methods for the new routes and 7 for backend routes that
+already existed but had never been reachable from the app — the four that
+blocked the admin and coach screens (`updateUserStatus`, `setUserPassword`,
+`updatePaymentStatus`, the program-exercise trio) plus `updateMembership`, which
+had a `PUT /memberships/{id}` route and no client method at all.
+
+That leaves 82 client methods against 75 in the mock service. The seven-method
+difference is now entirely deliberate: `login`, `logout`, `register`,
+`refreshToken` and `getProfile` are session plumbing that mock mode handles
+through its own fixture passwords; `getBranch` is a single-row fetch with no
+screen behind it; and `qrCheckIn` is explicitly rejected in mock mode with a
+readable message, because a scanner demo that silently "succeeds" against no
+hardware is worse than one that says it is unavailable. Everything a hook can
+reach is implemented, including a working in-memory message thread and every
+analytics series, so `NEXT_PUBLIC_USE_MOCKS=true` is a complete offline demo
+rather than a half-populated one. 64 hooks in total.
+
+Three architectural constraints from the performance pass (§8) survived intact
+and are now written into the contract so a later change cannot quietly undo
+them: axios stays behind the lazy `lib/api.ts` proxy, the mock layer stays
+behind a lazy `import()`, and recharts stays behind `React.lazy` with a
+fixed-height skeleton.
+
+Mutations that can be predicted locally are optimistic against a documented
+four-step contract (`onMutate` cancel → snapshot → patch → return;
+`onError` restore; `onSettled` invalidate), with shared helpers in
+`hooks/api-source.ts`. The patch helpers deliberately never *create* a cache
+entry, so a rollback can never delete one that a concurrent query just filled.
+The program-builder writes are **not** optimistic, and the hook says why: the
+server assigns the row id, resolves the joined exercise and settles `order`, so
+a guessed row would flicker into a different one.
+
+### 9.4 Bugs found and fixed during the pass
+
+| # | Severity | Issue | Fix |
+|---|---|---|---|
+| 17 | **High** | Admin password reset was unreachable — required `currentPassword` 422'd before the handler's admin bypass could run | Split `PasswordSetRequest`; enforcement moved into the handler; 2 tests |
+| 18 | **High** | `createTrainingProgram` in the mock service never pushed to the shared store, so in mock mode a coach could create a program and then never fetch it or add exercises to it — the program builder was impossible on the dev and E2E path | `getMockPrograms().push(prog)`; test |
+| 19 | **Medium** | `UserStatus` union never matched the server's allow-list | Corrected; a backend test now asserts the server 400s on `pending_verification` |
+| 20 | **Medium** | Mock users were seeded on `@gympro.ir` while the backend seeds `@gymapp.ir`, so credentials copied from the README did not work in mock mode | 15 addresses aligned; the password difference is now documented instead of silent |
+| 21 | **Low** | `mock-service.test.ts` took 13.4 s because every mock method awaits a real 200–400 ms `sleep` | Partial `vi.mock("./utils")` stubbing only `sleep`; suite back to ~5 s |
+| 22 | **Medium** | `POST /memberships`, `/freeze` and `/unfreeze` returned `sessionsRemaining: null`. There is no such column — it is `total - used`, and four handlers patched it into the dumped dict by hand while these three forgot. The TypeScript `Membership` type declares it as a required `number`, so those three responses had always contradicted it | Derived on `MembershipResponse` with a pydantic `model_validator`, and the four hand-patches deleted. One place computes it now, so no future handler can omit it. 2 tests |
+
+Bug 22 is the kind this pass was looking for: not a crash, just a field that
+was quietly null on three of seven endpoints, in a shape the frontend type said
+could not be null. It surfaced only because the new membership tests asserted
+the derived value on a **created** row rather than a listed one.
+
+### 9.4.1 Membership management was unreachable
+
+Beyond the bugs, one whole capability turned out to be stranded. The backend
+has had `POST /memberships`, `PUT /memberships/{id}`, `/freeze` and `/unfreeze`
+since before this pass; `freezeMembership` and `unfreezeMembership` existed on
+the client. But there were no hooks, no mock implementations and no UI, so
+assigning a plan to a member and freezing a membership — core gym desk work —
+could not be done from the app at all. Closed here: `MembershipInput` type,
+`updateMembership` client method, four mock implementations and four hooks
+(`useCreateMembership`, `useUpdateMembership`, `useFreezeMembership`,
+`useUnfreezeMembership`).
+
+Freeze and unfreeze are **not** optimistic, and the hook says why: both are
+state transitions the server rejects outright unless the membership is in the
+one state they accept, so a predicted flip would display the new state for a
+round trip and then snap back on a 400. The mock mirrors both 400s, and a new
+backend test asserts the server really does reject a double freeze — a mock
+stricter than the API would be its own bug.
+
+### 9.5 Testing
+
+| Suite | Before | After |
+|---|---:|---:|
+| Backend (pytest, contract + RBAC) | 79 | **88** |
+| Frontend (vitest) | 5 | **94** |
+
+The backend tests share one session-scoped temp database, so the new tests
+admin-create their own throwaway accounts rather than mutating a seeded one —
+mutating `athlete1@` would break every later test that logs in as them. That
+reasoning is in the helper's docstring so the next person does not "simplify" it
+back out.
+
+The mock-service tests assert the rules the FastAPI handlers enforce, not the
+mock's conveniences. A mock that accepts what the server rejects sends the UI
+down a branch it will never take in production, and `NEXT_PUBLIC_USE_MOCKS=true`
+is the dev and E2E path — so the mock refuses a bad status, refuses a
+self-service password change without the current one, and refuses a non-admin
+acting on someone else's account, exactly as the server does.
+
+### 9.6 Limitations of this pass
+
+- **Password reset still cannot complete in production.** It is no longer a
+  front-end mock — there is a real token model with hashing, TTL and single-use
+  semantics — but there is no mail transport, so outside production the token
+  comes back as `devToken` and in production the flow is a dead end. This is the
+  single largest remaining functional gap, and it is stated in the README, in
+  the contract (Deviation 1) and here.
+- **The end-to-end suite has never been executed locally.** `apps/web/e2e/` and
+  `playwright.config.ts` are committed, but `@playwright/test` is not in
+  `package.json`: this environment cannot reach `registry.npmjs.org`, and adding
+  a dependency without regenerating `package-lock.json` would break `npm ci` and
+  with it all of CI. The `e2e` CI job installs it ad hoc and is
+  `continue-on-error`. **CI will be the first run of those specs.** Deviation 10.
+- **The GitHub review the task asked for could not be done.** `api.github.com`
+  and `github.com` are both blocked by the sandbox, so every statement in this
+  report is from the local checkout at `445b0a5`, which matched `origin/main` at
+  the time.
+- **No Lighthouse re-measurement.** Local port binding returns EPERM in this
+  sandbox, so no dev server, no browser driving and no new Lighthouse run. The
+  numbers in §8 are the last measured ones and have **not** been re-verified
+  against the new UI; treat them as the state before this pass, not after it.
+- **Still no migrations** (`Base.metadata.create_all`), and `packages/`
+  workspaces remain reserved and empty.
+
+---
+
+*§9 added 2026-10-02. Every number above is from a command that was run; the
+four limitations in §9.6 are the things that were not verified, stated as such.*
+---
+
+## 10. ROUTE COVERAGE SWEEP (2026-10-02)
+
+§9 closed the membership gap after it turned up by accident, while checking an
+unrelated claim. That raised an obvious question — how many more were there? —
+so every mounted operation was diffed against every `ApiClient` call.
+
+### 10.1 Method
+
+`app.routes` gives the authoritative server list; the client side is every
+`this.client.<verb>(…)` URL in `api-client.ts`. Both sides normalise path
+params to `{x}` so they compare. The first run of this reported 81 of 90 routes
+uncovered, which was wrong: the regex matched the TypeScript generic with
+`[^>]*`, which stops at the first `>` and so missed every nested generic like
+`ApiResponse<Membership[]>` — 73 of the 82 calls in the file. Using `[^(]*`
+instead is safe, because a generic never contains a paren.
+
+### 10.2 Result
+
+96 server operations, 85 distinct client calls. Of the gap:
+
+- **6 are FastAPI's own** — `/`, `/health`, `/docs`, `/docs/oauth2-redirect`,
+  `/redoc`, `/openapi.json`. A typed client has no reason to call its own schema.
+- **5 are decorator aliases** — one handler registered twice, where the client
+  already calls the twin. Four are a second *verb* on the same path
+  (`PATCH` beside `POST` on notifications read / read-all, goal progress,
+  program-exercise complete); one is a second *path* on the same verb
+  (`/memberships/{id}/deduct` beside `/deduct-session`). Left alone: the
+  duplicate costs nothing and removing one would break any caller that guessed
+  the other.
+- **3 were real gaps**, now closed — see the table.
+
+| Route | Why it mattered | Added |
+|---|---|---|
+| `DELETE /notifications/{id}` | the notification list had no way to dismiss a row | `deleteNotification`, mock, `useDeleteNotification` (optimistic) |
+| `GET /dashboard/revenue` | the only source of a **daily** revenue series; `/revenue-trend` is monthly-only | `getRevenueSeries`, mock, `useRevenueSeries`, `RevenueSeries` type, `RevenueSeriesChart` |
+| `PUT /check-ins/{id}/checkout` | reception's only way to close a session someone left without ending — the POST route always stamps *now* | `checkOutAt`, mock, `useCheckOutAt` |
+
+Nothing in the reverse direction: **0 client calls hit a route that does not
+exist.**
+
+### 10.3 The check now runs in CI
+
+`backend/tests/test_route_coverage.py` performs the same diff on every run, so
+a route added without a caller fails the build instead of shipping unreachable.
+Three tests: no uncovered route, no bogus client URL, and — because an
+exemption list rots — each declared alias must still have the twin it claims to
+be covered by. That third test caught its own first draft, which assumed every
+alias was a sibling *verb* and so mis-handled `/deduct`.
+
+### 10.4 Two behaviours pinned while closing these
+
+- `durationMinutes` is `int(seconds / 60)`; it **truncates**. The stored
+  check-in time carries microseconds, so a checkout time with its microseconds
+  zeroed falls a fraction short and reports 94 minutes where 95 was intended.
+- The mock's `checkOutAt` rejects a checkout earlier than the check-in. The
+  server has no such guard and would store the inversion. This is the one place
+  the mock is deliberately **stricter** than the API: a demo rendering a
+  negative session length is worse than one that refuses the input.
+
+Backend tests went 88 → 94, frontend 94 → 104.
+
+---
+
+## 11. VISUAL LANGUAGE CHANGE (2026-10-02)
+
+§1 describes an Apple-Fitness-inspired look with a saturated rose accent. That
+is no longer what the product looks like. The direction was changed on request,
+against supplied reference screenshots of a meditation app.
+
+### 11.1 The direction
+
+Calm, warm, premium — the register of a meditation app rather than a fitness
+dashboard. Warm near-black surfaces, two desaturated accents, hairline borders
+**instead of** shadows, generous rounding, large light-weight numerals, a lot of
+air. Dark is canonical; light is its warm-paper counterpart.
+
+### 11.2 Two accents, two jobs
+
+The rule that stops a second colour becoming decoration:
+
+| Token | Colour | Job |
+|---|---|---|
+| `--primary` | sand (dark) · bronze (light) | interface furniture — buttons, selected chips, active nav, focus rings |
+| `--blush` | soft pastel pink, in both themes | the member's own living data — streaks, goal progress, activity rings, unread dots |
+
+Anything that is neither takes no accent at all.
+
+`--blush` / `--blush-solid` / `--blush-foreground` are new tokens, wired through
+`@theme` so `bg-blush`, `text-blush` and friends generate.
+
+### 11.3 Things that needed care
+
+- **The themes invert.** In dark, `--primary-solid` is *pale* sand carrying
+  near-black ink; in light it is deep bronze carrying white. So `text-white` on
+  a primary fill is correct in light and invisible in dark. DESIGN_SYSTEM §2
+  rule 3 said "white text only on `--primary-solid`" and is now wrong — it was
+  rewritten. Exactly one `text-white` existed in the app; it is in a page being
+  rebuilt.
+- **Contrast was measured, not estimated.** Every text pair clears AA in both
+  themes: foreground 17.08:1 dark / 15.24:1 light, muted 7.30 / 5.60, sand ink
+  11.31 / 7.47, blush ink 11.31 / 7.07, and both accent fills under their own
+  foreground token (10.77 / 6.88 and 9.88 / 10.58).
+- **The hairline is 1.3:1 and that is correct.** WCAG 1.4.11's 3:1 applies to
+  borders that *identify a control*, not to decorative dividers. `--input` and
+  `--ring` do identify controls, so both were solved to ≥3:1 against every
+  surface they sit on (`--input` 3.05 dark / 3.07 light; `--ring` 12.49 / 6.91).
+- **Persian has no serif and no uppercase.** The reference carries its headings
+  in a light display serif and its captions in tracked ALL-CAPS; neither device
+  exists in this script. The equivalent calm is built from scale, weight and
+  tracking instead: `h1`/`h2` dropped from 700 to 500 with `-0.025em`, `h3`+
+  stay 600, and `.meta-label` gets its quiet from size and letter-spacing with
+  no `text-transform`. `.fitness-kicker` remains the uppercasing variant, for
+  genuinely Latin text only.
+- **`generateAvatarColor` returned `bg-rose-500` and friends** — banned palette
+  classes, and a ring of saturated rainbow circles fights the new calm. It now
+  returns a token-based background+ink pair, so callers no longer add their own
+  `text-white`.
+- **Bar charts are pills on a visible track** (design system §6), with radius
+  set to half `maxBarSize` so the cap stays a true semicircle at any height.
+
+### 11.4 The production build cannot run in this sandbox
+
+`npm run build --workspace=apps/web` fails, and did before any of this work:
+`next/font/google` fetches Vazirmatn at build time and `fonts.googleapis.com`
+is blocked here. The failure is the font fetch alone — nothing to do with the
+CSS. CI has network and is unaffected.
+
+The stylesheet was therefore verified directly through the Tailwind compiler
+API instead, confirming it compiles and that every new `blush` utility
+generates. Self-hosting the font with `next/font/local` would remove the
+dependency and is the right long-term fix, but the font files cannot be
+downloaded here to do it.

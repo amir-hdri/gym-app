@@ -10,23 +10,20 @@ export function formatPersianNumber(num: number | string): string {
   return String(num).replace(/\d/g, (digit) => persianDigits[parseInt(digit)]);
 }
 
+export function formatCurrency(amount: number, currency = "ریال"): string {
+  return new Intl.NumberFormat("fa-IR").format(amount) + " " + currency;
+}
+
 /**
- * Backend stores naive UTC datetimes (e.g. "2026-10-02T03:00:00"). `new Date()`
- * parses an offset-less ISO string as LOCAL time, shifting displayed times by
- * the UTC offset (and possibly flipping the Jalali day near midnight). This
- * helper treats offset-less datetimes as UTC ("Z") before constructing the
- * Date. Strings that already carry a designator (Z or ±hh:mm) pass through
- * untouched, as do Date instances and date-only strings (already UTC per spec).
+ * Parses an API datetime. Offset-less ISO strings are UTC instants (the
+ * backend stores naive UTC) — `new Date("…T…")` would read them as local
+ * time and shift every timestamp by the device timezone.
  */
 export function parseApiDate(date: string | Date): Date {
   if (typeof date !== "string") return date;
   const naive = date.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)$/);
   if (naive) return new Date(`${naive[1]}T${naive[2]}Z`);
   return new Date(date);
-}
-
-export function formatCurrency(amount: number, currency = "تومان"): string {
-  return new Intl.NumberFormat("fa-IR").format(amount) + " " + currency;
 }
 
 export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOptions): string {
@@ -51,7 +48,7 @@ export function formatDateTime(date: string | Date): string {
 }
 
 export function formatRelativeTime(date: string | Date): string {
-  const d = typeof date === "string" ? parseApiDate(date) : date;
+  const d = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffMins = Math.floor(diffMs / 60000);
@@ -74,20 +71,35 @@ export function getInitials(name: string): string {
     .toUpperCase();
 }
 
-export function generateAvatarColor(name: string): string {
-  // Twilight: monochrome avatars — dark tile with cream initials.
-  // Subtle variants (by name hash) keep users distinguishable without color.
-  const variants = [
-    "bg-[#202634] text-[#d2c0a5]",
-    "bg-[#1e2430] text-[#e0d3bc]",
-    "bg-[#232b38] text-[#c9cfd9]",
-  ];
+/**
+ * A stable background+ink pair for an avatar fallback, derived from the name.
+ *
+ * Returns both halves of the pair, so a caller never has to add its own text
+ * colour — the old version returned only a background and left callers writing
+ * `text-white`, which is unreadable in the dark theme now that the palette's
+ * light accents carry dark ink.
+ *
+ * The pairs are deliberately drawn from the design tokens rather than Tailwind's
+ * palette (`bg-rose-500` and friends, which this used to return). Two reasons:
+ * the design system forbids raw palette classes outright, and a ring of
+ * saturated rainbow circles fights the calm the rest of the product is built
+ * around. Four quiet on-palette tints keep people distinguishable without
+ * shouting — and each one is an accent over its own tint, so both themes work
+ * without further checking.
+ */
+const AVATAR_TINTS = [
+  "bg-primary/15 text-primary",
+  "bg-blush/15 text-blush",
+  "bg-activity-stand/15 text-activity-stand",
+  "bg-muted text-muted-foreground",
+] as const;
 
+export function generateAvatarColor(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return variants[Math.abs(hash) % variants.length];
+  return AVATAR_TINTS[Math.abs(hash) % AVATAR_TINTS.length];
 }
 
 export function truncate(str: string, length: number): string {
@@ -96,13 +108,15 @@ export function truncate(str: string, length: number): string {
 }
 
 export function calculateProgress(current: number, target: number): number {
-  if (target === 0) return 0;
+  // Callers feed this straight into <Progress value={...} />, where a NaN
+  // silently renders a broken bar. Clamp missing/partial data to 0 instead.
+  if (!Number.isFinite(current) || !Number.isFinite(target) || target === 0) return 0;
   const progress = (current / target) * 100;
   return Math.min(Math.max(progress, 0), 100);
 }
 
 export function calculateDaysRemaining(targetDate: string | Date): number {
-  const target = typeof targetDate === "string" ? parseApiDate(targetDate) : targetDate;
+  const target = typeof targetDate === "string" ? new Date(targetDate) : targetDate;
   const now = new Date();
   const diffMs = target.getTime() - now.getTime();
   return Math.ceil(diffMs / 86400000);
@@ -139,14 +153,20 @@ export function toJalaliDate(date: Date): string {
 }
 
 export function validateIranianPhone(phone: string): boolean {
+  // Digits only, so the leading "+" of "+98..." is gone by the time we match —
+  // the country code has to be matched as bare digits.
   const cleaned = phone.replace(/\D/g, "");
-  return /^(?:\+98|0)?9\d{9}$/.test(cleaned);
+  return /^(?:0098|98|0)?9\d{9}$/.test(cleaned);
 }
 
 export function validateIranianNationalCode(code: string): boolean {
   const cleaned = code.replace(/\D/g, "");
   if (!/^\d{10}$/.test(cleaned)) return false;
-  
+
+  // Repeated-digit codes (0000000000, 1111111111, …) satisfy the checksum but
+  // are not issued.
+  if (/^(\d)\1{9}$/.test(cleaned)) return false;
+
   const check = parseInt(cleaned[9], 10);
   let sum = 0;
   for (let i = 0; i < 9; i++) {

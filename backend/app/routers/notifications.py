@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, require_roles
 from app.database import get_db
 from app.models import Notification, User
 from app.responses import error_response, paginated_response, success_response
-from app.schemas import NotificationCreate, NotificationResponse
+from app.schemas import NotificationBroadcast, NotificationCreate, NotificationResponse
 
 router = APIRouter(prefix="/api/v1/notifications", tags=["Notifications"])
 
@@ -36,11 +36,11 @@ def list_notifications(
 def create_notification(
     req: NotificationCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "receptionist")),
 ):
-    # Only staff/system can create notifications for others
-    if current_user.role == "athlete" and req.user_id != current_user.id:
-        return error_response("Insufficient permissions", 403)
+    recipient = db.query(User).filter(User.id == req.user_id).first()
+    if not recipient:
+        return error_response("User not found", 404)
     notification = Notification(**req.model_dump(by_alias=False))
     db.add(notification)
     db.commit()
@@ -48,6 +48,41 @@ def create_notification(
     return success_response(
         data=NotificationResponse.model_validate(notification).model_dump(by_alias=True),
         message="Notification created",
+    )
+
+
+@router.post("/broadcast")
+def broadcast_notification(
+    req: NotificationBroadcast,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("admin", "receptionist")),
+):
+    query = db.query(User).filter(User.status == "active")
+    if req.role:
+        allowed_roles = {"athlete", "coach", "admin", "receptionist"}
+        if req.role not in allowed_roles:
+            return error_response(
+                f"Invalid role. Allowed: {', '.join(sorted(allowed_roles))}", 400
+            )
+        query = query.filter(User.role == req.role)
+    if req.branch_id:
+        query = query.filter(User.branch_id == req.branch_id)
+
+    recipients = query.all()
+    for recipient in recipients:
+        db.add(
+            Notification(
+                user_id=recipient.id,
+                title=req.title,
+                message=req.message,
+                type=req.type,
+                action_url=req.action_url,
+            )
+        )
+    db.commit()
+    return success_response(
+        data={"sent": len(recipients)},
+        message=f"Notification sent to {len(recipients)} user(s)",
     )
 
 

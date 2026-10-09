@@ -1,20 +1,13 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, require_roles
 from app.database import get_db
 from app.models import Branch, CheckIn, User
 from app.responses import error_response, paginated_response, success_response
-from app.schemas import (
-    CheckInCreate,
-    CheckInResponse,
-    CheckOutRequest,
-    CheckOutUpdate,
-    QRCheckInRequest,
-    QRCheckInResponse,
-)
+from app.schemas import CheckInCreate, CheckInResponse, CheckOutRequest, CheckOutUpdate, QRCheckInRequest, QRCheckInResponse
 
 router = APIRouter(prefix="/api/v1/check-ins", tags=["Check-Ins"])
 
@@ -23,15 +16,15 @@ router = APIRouter(prefix="/api/v1/check-ins", tags=["Check-Ins"])
 def list_checkins(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    user_id: str | None = None,
-    userId: str | None = None,  # camelCase alias — frontend sends userId
-    branch_id: str | None = None,
-    date_from: str | None = None,
-    date_to: str | None = None,
+    user_id: str = None,
+    userId: str = None,
+    branch_id: str = None,
+    date_from: str = None,
+    date_to: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # Accept both spellings of the user filter
+    # Accept both camelCase and snake_case filter spellings (the frontend mixes them).
     user_id = user_id or userId
     # Non-staff can only see their own check-ins
     if current_user.role not in {"admin", "coach", "receptionist"} and user_id and user_id != current_user.id:
@@ -87,13 +80,17 @@ def check_in(
     if current_user.role == "athlete" and req.user_id != current_user.id:
         return error_response("Insufficient permissions", 403)
     # Prevent double check-in (open session exists)
-    open_session = db.query(CheckIn).filter(CheckIn.user_id == req.user_id, CheckIn.check_out_time.is_(None)).first()
+    open_session = (
+        db.query(CheckIn)
+        .filter(CheckIn.user_id == req.user_id, CheckIn.check_out_time.is_(None))
+        .first()
+    )
     if open_session:
         return error_response("User already checked in", 400)
     checkin = CheckIn(
         user_id=req.user_id,
         branch_id=req.branch_id,
-        check_in_time=req.check_in_time or datetime.now(UTC).replace(tzinfo=None),
+        check_in_time=req.check_in_time or datetime.now(timezone.utc).replace(tzinfo=None),
     )
     db.add(checkin)
     db.commit()
@@ -118,7 +115,7 @@ def check_out_post(
     # Athletes can only check out their own sessions
     if current_user.role == "athlete" and checkin.user_id != current_user.id:
         return error_response("Insufficient permissions", 403)
-    checkin.check_out_time = datetime.now(UTC).replace(tzinfo=None)
+    checkin.check_out_time = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
     db.refresh(checkin)
     d = CheckInResponse.model_validate(checkin).model_dump(by_alias=True)
@@ -141,6 +138,10 @@ def check_out(
         return error_response("Already checked out", 400)
     if current_user.role == "athlete" and checkin.user_id != current_user.id:
         return error_response("Insufficient permissions", 403)
+    out_time = req.check_out_time.replace(tzinfo=None) if req.check_out_time.tzinfo else req.check_out_time
+    in_time = checkin.check_in_time.replace(tzinfo=None) if checkin.check_in_time.tzinfo else checkin.check_in_time
+    if out_time <= in_time:
+        return error_response("Check-out time must be after check-in time", 400)
     checkin.check_out_time = req.check_out_time
     db.commit()
     db.refresh(checkin)
@@ -152,6 +153,22 @@ def check_out(
 
 
 STAFF_ROLES = {"admin", "coach", "receptionist"}
+
+
+@router.delete("/{checkin_id}")
+def void_check_in(
+    checkin_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("admin", "receptionist")),
+):
+    """Void an erroneous check-in record (wrong member, accidental scan).
+    There was previously no way to correct one short of direct DB access."""
+    checkin = db.query(CheckIn).filter(CheckIn.id == checkin_id).first()
+    if not checkin:
+        return error_response("Check-in not found", 404)
+    db.delete(checkin)
+    db.commit()
+    return success_response(message="Check-in voided")
 
 
 @router.post("/qr/check-in")
@@ -172,14 +189,18 @@ def qr_check_in(
         return error_response("Staff member has no assigned branch", 400)
 
     # Prevent double check-in for member
-    open_session = db.query(CheckIn).filter(CheckIn.user_id == member.id, CheckIn.check_out_time.is_(None)).first()
+    open_session = (
+        db.query(CheckIn)
+        .filter(CheckIn.user_id == member.id, CheckIn.check_out_time.is_(None))
+        .first()
+    )
     if open_session:
         return error_response("Member already checked in", 400)
 
     checkin = CheckIn(
         user_id=member.id,
         branch_id=branch_id,
-        check_in_time=datetime.now(UTC).replace(tzinfo=None),
+        check_in_time=datetime.now(timezone.utc).replace(tzinfo=None),
     )
     db.add(checkin)
     db.commit()

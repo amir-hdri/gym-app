@@ -1,5 +1,5 @@
-import logging
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,8 +7,10 @@ from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.database import Base, engine
-from app.responses import success_response
+from app.responses import error_response, success_response
 from app.routers import (
+    analytics,
+    readiness,
     auth,
     branches,
     checkins,
@@ -17,6 +19,7 @@ from app.routers import (
     goals,
     membership_plans,
     memberships,
+    messages,
     notifications,
     payments,
     training_programs,
@@ -28,11 +31,11 @@ from app.seed import seed_database
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    Base.metadata.create_all(bind=engine)
-    # Seed demo data in local dev (ENVIRONMENT=development) or when explicitly
-    # opted in via SEED_DEMO_DATA. Staging (non-dev, non-production) no longer
-    # gets default credentials unless the operator sets SEED_DEMO_DATA=true.
-    if (not settings.is_production) and (settings.ENVIRONMENT == "development" or settings.SEED_DEMO_DATA):
+    # Seed in local development by default; other non-production environments
+    # (e.g. staging) seed only on explicit SEED_DEMO_DATA opt-in — otherwise
+    # every staging deploy would manufacture weak-credential demo accounts.
+    if not settings.is_production and (settings.ENVIRONMENT == "development" or settings.SEED_DEMO_DATA):
+        Base.metadata.create_all(bind=engine)
         try:
             seed_database()
         except Exception:
@@ -45,7 +48,8 @@ app = FastAPI(
     title="Gym Management API",
     description="Backend API for gym management application",
     version="1.0.0",
-    docs_url=None if settings.is_production else "/docs",
+    docs_url="/docs" if not settings.is_production else None,
+    redoc_url="/redoc" if not settings.is_production else None,
     lifespan=lifespan,
 )
 
@@ -58,6 +62,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(readiness.router)
 app.include_router(users.router)
 app.include_router(branches.router)
 app.include_router(membership_plans.router)
@@ -68,7 +73,11 @@ app.include_router(goals.router)
 app.include_router(checkins.router)
 app.include_router(payments.router)
 app.include_router(dashboard.router)
+# Analytics shares the /dashboard prefix — included after it so the existing
+# dashboard reads keep priority on overlapping paths.
+app.include_router(analytics.router)
 app.include_router(notifications.router)
+app.include_router(messages.router)
 
 
 @app.exception_handler(Exception)

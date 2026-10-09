@@ -23,6 +23,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useAthleteDashboard, useCompleteProgramExercise } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { WorkoutExerciseRow } from "./WorkoutExerciseRow";
+import { ReadinessWidget } from "./_components/ReadinessWidget";
 import { SessionDurationChart } from "@/components/analytics/Charts";
 import { PageShell, MicroLabelFa, SectionTitle } from "@/components/twilight/Page";
 import { TwilightCard, RowCard, CtaButton, EmptyState } from "@/components/twilight/controls";
@@ -217,6 +218,9 @@ export default function AthleteDashboard() {
           }
         />
       </Link>
+
+      {/* Today's readiness */}
+      <ReadinessWidget />
 
       {/* Today's exercises */}
       <div className="flex flex-col gap-3">

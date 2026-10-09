@@ -1,41 +1,86 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, ShieldCheck, Loader2 } from "lucide-react";
 import { CtaButton } from "@/components/twilight/controls";
 import { GymBackdrop } from "@/components/twilight/GymBackdrop";
 import { LumiWordmark } from "@/components/auth/AuthLayout";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { homeForRole, panelLabelForRole } from "@/components/auth/auth-helpers";
+import { USE_MOCK } from "@/hooks/api-source";
 
 const inputClassName =
   "h-12 w-full rounded-xl border border-[#232934] bg-[#161a22] pe-11 ps-4 text-sm text-white placeholder:text-[#5b6472] transition-all duration-200 focus:border-[#d2c0a5]/60 focus:outline-none focus:ring-2 focus:ring-[#d2c0a5]/15 disabled:opacity-60";
 
+interface DemoAccount {
+  email: string;
+  password: string;
+  label: string;
+}
+
+/**
+ * Mock mode signs in against the offline fixtures (every seeded mock user
+ * shares one password); the real backend signs in against its seed rows.
+ */
+const MOCK_DEMO_ACCOUNTS: DemoAccount[] = [
+  { email: "mohammadi@gymapp.ir", password: "Lumi1234", label: "ورزشکار" },
+  { email: "mohseni@gymapp.ir", password: "Lumi1234", label: "مربی" },
+  { email: "reception@gymapp.ir", password: "Lumi1234", label: "پذیرش" },
+  { email: "admin@gymapp.ir", password: "Lumi1234", label: "مدیر" },
+];
+
+const SEED_DEMO_ACCOUNTS: DemoAccount[] = [
+  { email: "athlete1@gymapp.ir", password: "athlete123", label: "ورزشکار" },
+  { email: "coach1@gymapp.ir", password: "coach123", label: "مربی" },
+  { email: "reception@gymapp.ir", password: "reception123", label: "پذیرش" },
+  { email: "admin@gymapp.ir", password: "admin123", label: "مدیر" },
+];
+
+const DEMO_ACCOUNTS = USE_MOCK ? MOCK_DEMO_ACCOUNTS : SEED_DEMO_ACCOUNTS;
+const SHOW_DEMO_ACCOUNTS = process.env.NODE_ENV !== "production";
+
 function SignInContent() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: { email: "", password: "", rememberMe: false },
   });
 
+  // A restored session makes this page a dead end; send it where it belongs.
+  useEffect(() => {
+    if (isAuthenticated && user) router.replace(homeForRole(user.role));
+  }, [isAuthenticated, user, router]);
+
   const onSubmit = async (data: { email: string; password: string; rememberMe?: boolean }) => {
     setSubmitError(null);
     try {
-      await login(data.email, data.password, data.rememberMe);
-      router.push("/athlete");
+      const signedIn = await login(data.email, data.password, data.rememberMe);
+      toast.success(`خوش آمدی — ${panelLabelForRole(signedIn.role)}`);
+      router.replace(homeForRole(signedIn.role));
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "ورود ناموفق بود");
+      const message = err instanceof Error ? err.message : "ورود ناموفق بود";
+      setSubmitError(message);
+      toast.error(message);
     }
+  };
+
+  const fillDemoAccount = (account: DemoAccount) => {
+    setSubmitError(null);
+    setValue("email", account.email, { shouldValidate: true });
+    setValue("password", account.password, { shouldValidate: true });
   };
 
   return (
@@ -172,6 +217,27 @@ function SignInContent() {
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
         </Link>
       </motion.p>
+
+      {SHOW_DEMO_ACCOUNTS && (
+        <div className="rounded-2xl border border-dashed border-[#232934] bg-[#161a22]/60 p-4">
+          <p className="text-xs font-semibold text-white">حساب‌های نمایشی (فقط محیط توسعه)</p>
+          <p className="mt-1 text-[11px] leading-5 text-[#8e98a8]">
+            یکی را انتخاب کن تا فرم پر شود؛ بعد «ورود به حساب» را بزن.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2" aria-live="polite">
+            {DEMO_ACCOUNTS.map((account) => (
+              <button
+                key={account.email}
+                type="button"
+                onClick={() => fillDemoAccount(account)}
+                className="inline-flex min-h-11 items-center rounded-xl border border-[#232934] bg-[#10141a] px-3 text-xs font-medium text-white transition-colors hover:border-[#d2c0a5]/60 hover:text-[#d2c0a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/40"
+              >
+                {account.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </form>
   );
 }

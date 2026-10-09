@@ -5,10 +5,11 @@ interface ActivityRingsProps {
   progress?: [number, number, number];
 }
 
-// Apple Fitness — exact ring palette on #000
-// Move   #FF2D55  hsl 346 100% 58%
-// Exercise #30D158 hsl 142 76% 50%  (Apple's #30D158)
-// Stand  #0A84FF  hsl 211 100% 50%
+// Ring hues come from the data-only activity tokens in globals.css
+// (`--activity-move`, `--activity-exercise`, `--activity-stand`). They are
+// Apple-Fitness-inspired but darkened in the light theme so each ring still
+// reads against `--background`; the dark theme keeps the vivid originals.
+// Change the hues there, never here.
 export function ActivityRings({ className, progress = [86, 68, 78] }: ActivityRingsProps) {
   const rings = [
     { radius: 42, color: "hsl(var(--activity-move))", value: progress[0] },
@@ -24,7 +25,7 @@ export function ActivityRings({ className, progress = [86, 68, 78] }: ActivityRi
         const offset = circumference * (1 - Math.max(0, Math.min(100, ring.value)) / 100);
         return (
           <g key={ring.radius}>
-            {/* track — Apple #2C2C2E */}
+            {/* track */}
             <circle
               cx="50"
               cy="50"

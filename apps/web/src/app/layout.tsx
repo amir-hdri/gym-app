@@ -1,36 +1,41 @@
 import type { Metadata, Viewport } from "next";
-import { Vazirmatn, Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { PwaRegister } from "@/components/PwaRegister";
 
-const vazirmatn = Vazirmatn({
-  // `latin` is preloaded too (not just the Persian/Arabic glyphs) so the
-  // "Lumi Wellness" wordmark never waits for a second, CSS-discovered request.
-  subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700", "900"],
+/**
+ * Self-hosted faces (no `next/font/google` — the Google-CDN fetch breaks
+ * offline/proxied builds). Estedad leads the Persian UI; the classic
+ * Vazirmatn stays behind it as a glyph fallback. Bodoni Moda + Montserrat
+ * set the LUMI WELLNESS wordmark, matching the supplied brand SVG.
+ */
+const estedad = localFont({
+  src: "./fonts/Estedad-arabic.woff2",
+  weight: "100 900",
+  variable: "--font-estedad",
+  display: "swap",
+  preload: true,
+  fallback: ["Vazirmatn", "system-ui", "sans-serif"],
+});
+const estedadLatin = localFont({
+  src: "./fonts/Estedad-latin.woff2",
+  weight: "100 900",
+  variable: "--font-estedad-latin",
+  display: "swap",
+  preload: false,
+});
+
+const vazirmatn = localFont({
+  src: "./fonts/Vazirmatn.ttf",
+  weight: "100 900",
   variable: "--font-vazirmatn",
   display: "swap",
-  preload: true,
+  preload: false,
 });
 
-// Twilight Meditation reference typefaces — Playfair Display (serif display)
-// and Plus Jakarta Sans (sans body). Persian glyphs fall through to Vazirmatn.
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-playfair",
-  display: "swap",
-  preload: true,
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-jakarta",
-  display: "swap",
-  preload: true,
-});
+const bodoni = localFont({ src: "./fonts/BodoniModa-latin.woff2", weight: "400 900", variable: "--font-bodoni", display: "swap" });
+const montserrat = localFont({ src: "./fonts/Montserrat-latin.woff2", weight: "100 900", variable: "--font-montserrat", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://gymapp.ir"),
@@ -96,7 +101,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" suppressHydrationWarning className={`${vazirmatn.variable} ${playfair.variable} ${jakarta.variable}`}>
+    <html lang="fa" dir="rtl" suppressHydrationWarning className={`${estedad.variable} ${estedadLatin.variable} ${vazirmatn.variable} ${bodoni.variable} ${montserrat.variable}`}>
       <body className="min-h-screen bg-background font-sans antialiased">
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:right-4 focus:top-4 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">پرش به محتوا</a>
         <Providers>{children}</Providers>

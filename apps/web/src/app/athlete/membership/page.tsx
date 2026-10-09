@@ -1,17 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { Input } from "@/components/ui/Input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Dialog";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { Progress } from "@/components/ui/Progress";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/Table";
 import { formatPersianNumber, formatCurrency, formatDate, calculateProgress } from "@/lib/utils";
-import { CreditCard, Calendar, Award, CheckCircle, AlertTriangle, Crown, Check, ShieldCheck } from "lucide-react";
+import { CreditCard, Calendar, Award, CheckCircle, AlertTriangle, Crown, Check, ShieldCheck, RefreshCw, Receipt } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useMemberships, usePayments, useMembershipPlans } from "@/hooks/use-api";
+import { useMemberships, usePayments, useMembershipPlans, useRenewMembership, useCreatePayment } from "@/hooks/use-api";
+import type { Payment } from "@/lib/types";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { PageShell, PageHeader, SectionTitle, MicroLabelFa } from "@/components/twilight/Page";
 import { TwilightCard, CtaButton, EmptyState } from "@/components/twilight/controls";
+import { paymentMethodLabels } from "../payment-meta";
+
+const PAYMENT_METHODS: Payment["method"][] = ["card", "cash", "wallet", "bank_transfer"];
 
 export default function MembershipPage() {
   const { user } = useAuth();
@@ -22,12 +39,92 @@ export default function MembershipPage() {
   const { data: plansData, isLoading: plansLoading } = useMembershipPlans();
 
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-  const [isRenewed, setIsRenewed] = useState(false);
+  const renewMutation = useRenewMembership();
+  const createPaymentMutation = useCreatePayment();
+
+  // Renew dialog state (reset checkbox defaults to on)
+  const [renewOpen, setRenewOpen] = useState(false);
+  const [renewEndDate, setRenewEndDate] = useState("");
+  const [renewSessionsTotal, setRenewSessionsTotal] = useState("");
+  const [renewResetUsed, setRenewResetUsed] = useState(true);
+  const [renewDone, setRenewDone] = useState(false);
+
+  // Payment form state — amount prefills from the membership's final price
+  const [payAmount, setPayAmount] = useState("");
+  const [amountTouched, setAmountTouched] = useState(false);
+  const [payMethod, setPayMethod] = useState<Payment["method"]>("card");
+  const [payDescription, setPayDescription] = useState("");
+  const [createdPaymentId, setCreatedPaymentId] = useState<string | null>(null);
 
   const allMemberships = membershipsData?.data || [];
   const membership = allMemberships.find((m) => m.userId === user?.id) || allMemberships[0];
   const payments = paymentsData?.data || [];
   const plans = plansData?.data || [];
+  const todayInput = new Date().toISOString().slice(0, 10);
+
+  useEffect(() => {
+    if (!amountTouched && membership && payAmount === "") {
+      setPayAmount(String(membership.finalPrice));
+    }
+  }, [membership, amountTouched, payAmount]);
+
+  const handleRenewConfirm = () => {
+    if (!membership) return;
+    if (!renewEndDate) {
+      toast.error("تاریخ پایان جدید را انتخاب کنید");
+      return;
+    }
+    if (renewEndDate < todayInput) {
+      toast.error("تاریخ پایان نمی‌تواند قبل از امروز باشد");
+      return;
+    }
+    const sessionsTotal = renewSessionsTotal === "" ? undefined : Number(renewSessionsTotal);
+    if (sessionsTotal !== undefined && (!Number.isFinite(sessionsTotal) || sessionsTotal <= 0)) {
+      toast.error("تعداد جلسات باید عدد مثبت باشد");
+      return;
+    }
+    renewMutation.mutate(
+      {
+        id: membership.id,
+        endDate: new Date(renewEndDate).toISOString(),
+        ...(sessionsTotal !== undefined ? { sessionsTotal } : {}),
+        resetSessionsUsed: renewResetUsed,
+      },
+      {
+        onSuccess: () => {
+          toast.success("اشتراک با موفقیت تمدید شد");
+          setRenewDone(true);
+          setRenewOpen(false);
+        },
+        onError: (e) => toast.error((e as Error)?.message || "تمدید اشتراک ناموفق بود"),
+      }
+    );
+  };
+
+  const handleCreatePayment = () => {
+    if (!athleteId || !membership) return;
+    const amount = Number(payAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast.error("مبلغ معتبر وارد کنید");
+      return;
+    }
+    createPaymentMutation.mutate(
+      {
+        userId: athleteId,
+        membershipId: membership.id,
+        amount,
+        method: payMethod,
+        description: payDescription || undefined,
+      },
+      {
+        onSuccess: (res) => {
+          toast.success("درخواست پرداخت ثبت شد و در انتظار تأیید است");
+          setCreatedPaymentId(res.data?.id ?? null);
+        },
+        onError: (e) => toast.error((e as Error)?.message || "ثبت پرداخت ناموفق بود"),
+      }
+    );
+  };
 
   if (membershipsLoading || paymentsLoading || plansLoading) return <Loading />;
   if (membershipsError) return <ErrorDisplay message={membershipsErr?.message} />;
@@ -193,16 +290,65 @@ export default function MembershipPage() {
             </div>
           )}
 
-          {isRenewed ? (
-            <div className="flex items-center justify-center gap-2 rounded-xl border border-[#d2c0a5]/50 bg-[#161c26] p-3.5 text-center text-xs text-[#f3eedf]">
-              <Check className="h-4 w-4 text-[#d2c0a5]" strokeWidth={1.75} />
-              <span>درخواست تمدید شما ثبت شد؛ پس از پرداخت، اشتراک فعال می‌شود</span>
+          {renewDone ? (
+            <div role="status" aria-live="polite" className="flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3.5 text-center text-xs text-primary">
+              <Check className="h-4 w-4" strokeWidth={1.75} />
+              <span>اشتراک شما تمدید شد؛ پس از پرداخت، اشتراک فعال می‌شود</span>
             </div>
           ) : (
-            <CtaButton variant="orange" onClick={() => setIsRenewed(true)}>
-              تمدید عضویت و پرداخت آنلاین
+            <CtaButton variant="orange" onClick={() => setRenewOpen(true)} className="min-h-11">
+              <RefreshCw className="h-4 w-4" strokeWidth={1.75} />
+              <span>تمدید اشتراک</span>
             </CtaButton>
           )}
+
+          <Dialog open={renewOpen} onOpenChange={setRenewOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>تمدید اشتراک</DialogTitle>
+                <DialogDescription>
+                  تاریخ پایان جدید و تعداد جلسات دوره بعد را مشخص کنید
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                <Input
+                  type="date"
+                  label="تاریخ پایان جدید"
+                  required
+                  value={renewEndDate}
+                  min={todayInput}
+                  onChange={(e) => setRenewEndDate(e.target.value)}
+                  className="min-h-11"
+                />
+                <Input
+                  type="number"
+                  label="تعداد جلسات دوره جدید (اختیاری)"
+                  hint="خالی بگذارید تا بدون تغییر بماند"
+                  value={renewSessionsTotal}
+                  min={1}
+                  inputMode="numeric"
+                  onChange={(e) => setRenewSessionsTotal(e.target.value)}
+                  className="min-h-11"
+                />
+                <label htmlFor="renew-reset-used" className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+                  <Checkbox
+                    id="renew-reset-used"
+                    checked={renewResetUsed}
+                    onCheckedChange={(v) => setRenewResetUsed(v === true)}
+                  />
+                  <span>شمارنده جلسات استفاده‌شده صفر شود</span>
+                </label>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setRenewOpen(false)} disabled={renewMutation.isPending}>
+                  انصراف
+                </Button>
+                <Button onClick={handleRenewConfirm} loading={renewMutation.isPending}>
+                  تأیید تمدید
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#6b7280]">
             <ShieldCheck className="h-3.5 w-3.5 text-[#d2c0a5]" strokeWidth={1.75} />
@@ -210,6 +356,77 @@ export default function MembershipPage() {
           </div>
         </section>
       )}
+
+      {/* Payment — creates a pending payment receipt */}
+      <TwilightCard className="flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#2c3444] bg-[#202632] text-[#d2c0a5]">
+            <Receipt className="h-5 w-5" strokeWidth={1.75} />
+          </div>
+          <div>
+            <SectionTitle>پرداخت</SectionTitle>
+            <p className="mt-0.5 text-xs text-muted-foreground">ثبت پرداخت جدید برای این اشتراک</p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-3">
+          <Input
+            type="number"
+            label="مبلغ (تومان)"
+            required
+            value={payAmount}
+            min={1}
+            inputMode="numeric"
+            onChange={(e) => {
+              setPayAmount(e.target.value);
+              setAmountTouched(true);
+            }}
+            className="min-h-11"
+          />
+          <div>
+            <MicroLabelFa className="mb-1.5 block">روش پرداخت</MicroLabelFa>
+            <Select value={payMethod} onValueChange={(v) => setPayMethod(v as Payment["method"])}>
+              <SelectTrigger className="min-h-11 w-full">
+                <SelectValue placeholder="انتخاب روش پرداخت" />
+              </SelectTrigger>
+              <SelectContent>
+                {PAYMENT_METHODS.map((m) => (
+                  <SelectItem key={m} value={m}>{paymentMethodLabels[m]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Input
+            type="text"
+            label="توضیحات (اختیاری)"
+            value={payDescription}
+            onChange={(e) => setPayDescription(e.target.value)}
+            className="min-h-11"
+          />
+        </div>
+        <CtaButton
+          variant="cream"
+          onClick={handleCreatePayment}
+          disabled={createPaymentMutation.isPending}
+          className="min-h-11"
+        >
+          <CreditCard className="h-4 w-4" strokeWidth={1.75} />
+          <span>{createPaymentMutation.isPending ? "در حال ثبت…" : "ثبت پرداخت"}</span>
+        </CtaButton>
+        <div role="status" aria-live="polite" className="text-center text-xs text-muted-foreground">
+          {createPaymentMutation.isError
+            ? (createPaymentMutation.error as Error)?.message || "ثبت پرداخت ناموفق بود"
+            : createdPaymentId
+              ? (
+                <span>
+                  پرداخت با موفقیت ثبت شد (در انتظار تأیید) —{" "}
+                  <Link href={`/athlete/membership/payments/${createdPaymentId}`} className="font-bold text-primary hover:underline">
+                    مشاهده رسید
+                  </Link>
+                </span>
+              )
+              : "پس از ثبت، رسید پرداخت در همین صفحه نمایش داده می‌شود"}
+        </div>
+      </TwilightCard>
 
       {/* Payment history */}
       <section className="flex flex-col gap-3">

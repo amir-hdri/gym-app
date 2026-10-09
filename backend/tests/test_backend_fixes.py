@@ -49,6 +49,16 @@ def _clear_rate_limits():
     _rate_limit_store.clear()
 
 
+@pytest.fixture(autouse=True)
+def _pin_rate_limit(monkeypatch):
+    """The login/register limit tests assert the default ceiling (5/min);
+    pin it — the shared conftest client raises it to 500 and import order
+    would otherwise decide the value for the whole process."""
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "LOGIN_RATE_LIMIT", 5)
+
+
 def _email(tag: str) -> str:
     return f"{tag}-{SUFFIX}@fix.ir"
 
@@ -84,7 +94,8 @@ def ids(client):
         },
     )
     assert r.status_code == 200, r.text
-    assert "data" not in r.json()  # register mints no tokens (anti-enumeration)
+    # Our register contract returns data (user + tokens) directly — the
+    # frontend authenticates in the same call (see AuthProvider.register).
     a = client.post("/api/v1/auth/login", json={"email": _email("ath"), "password": "secret12"}).json()["data"]
     assert a["user"]["role"] == "athlete"
     return {

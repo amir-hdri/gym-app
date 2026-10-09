@@ -9,6 +9,12 @@
  *
  * Every member of `ApiClient` is an `async` method, so each property access is
  * proxied to a function that resolves the module and then awaits the method.
+ *
+ * The proxy is generic over the property name: any method added to `ApiClient`
+ * (messaging, analytics, password reset, …) is reachable here with no change to
+ * this file, and `ApiClient` is the declared type so TypeScript keeps the two
+ * in sync. Never turn the dynamic `import()` below into a static one — that
+ * would pull `axios` back into the initial bundle of the public routes.
  */
 import type { ApiClient } from "./api-client";
 

@@ -8,6 +8,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
+COPY alembic.ini .
+COPY migrations ./migrations
 
 # Never bake secrets: SECRET_KEY (+ DATABASE_URL/CORS_ORIGINS for prod) come from env.
 ENV ENVIRONMENT=production

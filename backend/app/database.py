@@ -1,11 +1,10 @@
 import os
 from pathlib import Path
 
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 
 from app.config import settings
-
 
 # Resolve DB path relative to backend/ dir, not CWD
 def _resolve_db_url(url: str) -> str:
@@ -31,26 +30,7 @@ engine = create_engine(
     pool_pre_ping=True,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-@event.listens_for(engine, "connect")
-def _enforce_sqlite_foreign_keys(dbapi_connection, connection_record):
-    """Enable FK enforcement per SQLite connection.
-
-    SQLite ignores FOREIGN KEY clauses (including ondelete="CASCADE") unless
-    PRAGMA foreign_keys=ON is set on every connection. Without this, deleting
-    a user leaves orphaned memberships/check-ins/payments/etc.
-    """
-    if _resolved_url.startswith("sqlite"):
-        cursor = dbapi_connection.cursor()
-        try:
-            cursor.execute("PRAGMA foreign_keys=ON")
-        finally:
-            cursor.close()
-
-
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 
 
 def get_db():

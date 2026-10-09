@@ -56,3 +56,7 @@ dist/
 
 # Agent / browser tooling artifacts
 .playwright-mcp/
+.next-*/
+apps/web/test-results/
+apps/web/playwright-report/
+.design-review/

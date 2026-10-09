@@ -2,35 +2,33 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+interface ThemeToggleProps {
+  className?: string;
+}
 
-  // next-themes hydration guard — set once on mount to avoid SSR mismatch
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
-    return (
-      <button className="rounded-full p-2 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95" aria-label="تغییر تم">
-        <div className="h-5 w-5" />
-      </button>
-    );
-  }
-
-  const isDark = theme === "dark";
-  const label = isDark ? "حالت روشن" : "حالت تاریک";
+/**
+ * Theme switch with no hydration guard: which icon shows is decided in CSS by
+ * the `dark` class that next-themes' inline script writes before first paint,
+ * so the server and client render identical markup and nothing flashes.
+ */
+export function ThemeToggle({ className }: ThemeToggleProps) {
+  const { resolvedTheme, setTheme } = useTheme();
 
   return (
     <button
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="rounded-full p-2 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95"
-      aria-label={label}
-      title={label}
+      type="button"
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      className={cn(
+        "flex h-11 w-11 items-center justify-center rounded-xl border border-border/60 bg-secondary/70 text-foreground/90 backdrop-blur-md transition-colors hover:bg-accent active:bg-secondary ring-focus",
+        className
+      )}
     >
-      {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      <Moon aria-hidden className="h-5 w-5 dark:hidden" strokeWidth={1.75} />
+      <Sun aria-hidden className="hidden h-5 w-5 dark:block" strokeWidth={1.75} />
+      <span className="sr-only dark:hidden">حالت تاریک</span>
+      <span className="sr-only hidden dark:inline">حالت روشن</span>
     </button>
   );
 }

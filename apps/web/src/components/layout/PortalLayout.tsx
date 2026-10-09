@@ -21,7 +21,7 @@ export function PortalLayout({ children, navItems, dockItems, dockId }: PortalLa
 
   return (
     <TooltipProvider>
-      <div className="flex min-h-screen overflow-x-hidden bg-[#07090c]">
+      <div className="flex min-h-screen overflow-x-hidden bg-background">
         <Sidebar
           items={navItems}
           isOpen={sidebarOpen}

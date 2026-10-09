@@ -82,30 +82,30 @@ function CoachMessagesInner() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className={cn("lg:col-span-1", activeConversation !== null && "hidden lg:block")}>
-          <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
-            <div className="border-b border-[#1e2430] p-4">
-              <h2 className="font-serif text-lg font-normal text-white">مکالمات</h2>
-              <div className="mt-3 flex items-center gap-2 rounded-xl border border-[#232934] bg-[#1a202a] px-3 py-2.5 text-xs text-[#8e98a8]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="border-b border-border p-4">
+              <h2 className="font-serif text-lg font-normal text-foreground">مکالمات</h2>
+              <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-secondary px-3 py-2.5 text-xs text-muted-foreground">
                 <Search className="h-4 w-4 shrink-0" strokeWidth={1.75} />
                 جست‌وجو در شاگردان
               </div>
             </div>
-            <div className="max-h-[62dvh] divide-y divide-[#1e2430] overflow-y-auto lg:max-h-[calc(100dvh-17rem)]">
+            <div className="max-h-[62dvh] divide-y divide-border overflow-y-auto lg:max-h-[calc(100dvh-17rem)]">
               {conversations.map((conv) => (
                 <button
                   key={conv.id}
                   onClick={() => { setActiveConversation(conv.id); setSelectedAthlete(conv.athlete); }}
                   className={cn(
-                    "w-full px-4 py-3.5 text-right transition-colors hover:bg-[#1a202a] cursor-pointer",
-                    activeConversation === conv.id && "bg-[#1a202a]"
+                    "w-full px-4 py-3.5 text-right transition-colors hover:bg-secondary cursor-pointer",
+                    activeConversation === conv.id && "bg-secondary"
                   )}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-white">{conv.athlete}</span>
-                    {conv.unread && <span className="h-2 w-2 rounded-full bg-[#d2c0a5]" />}
+                    <span className="text-sm font-medium text-foreground">{conv.athlete}</span>
+                    {conv.unread && <span className="h-2 w-2 rounded-full bg-primary" />}
                   </div>
-                  <p className="mt-1 truncate text-xs text-[#8e98a8]">{conv.lastMessage}</p>
-                  <p className="mt-0.5 text-[11px] text-[#606a78]">{conv.time}</p>
+                  <p className="mt-1 truncate text-xs text-muted-foreground">{conv.lastMessage}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">{conv.time}</p>
                 </button>
               ))}
             </div>
@@ -113,39 +113,39 @@ function CoachMessagesInner() {
         </div>
 
         <div className={cn("lg:col-span-2", activeConversation === null && "hidden lg:block")}>
-          <div className="flex min-h-[65dvh] flex-col overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22] lg:h-[calc(100dvh-13rem)] lg:min-h-[34rem]">
-            <div className="flex items-center gap-3 border-b border-[#1e2430] p-4 md:p-5">
+          <div className="flex min-h-[65dvh] flex-col overflow-hidden rounded-2xl border border-border bg-card lg:h-[calc(100dvh-13rem)] lg:min-h-[34rem]">
+            <div className="flex items-center gap-3 border-b border-border p-4 md:p-5">
               <button
                 onClick={() => { setActiveConversation(null); setSelectedAthlete(""); }}
-                className="rounded-xl p-2 text-[#8e98a8] active:bg-[#1a202a] lg:hidden"
+                className="rounded-xl p-2 text-muted-foreground active:bg-secondary lg:hidden"
                 aria-label="بازگشت به فهرست مکالمات"
               >
                 <ArrowRight className="h-5 w-5" strokeWidth={1.75} />
               </button>
               <div>
-                <h2 className="text-sm font-semibold text-white">{selectedAthlete || "انتخاب شاگرد"}</h2>
-                {selectedAthlete && <p className="mt-0.5 text-[11px] text-[#d2c0a5]">آنلاین</p>}
+                <h2 className="text-sm font-semibold text-foreground">{selectedAthlete || "انتخاب شاگرد"}</h2>
+                {selectedAthlete && <p className="mt-0.5 text-[11px] text-primary">آنلاین</p>}
               </div>
             </div>
             <div className="flex min-h-0 flex-1 flex-col p-0">
               {!selectedAthlete ? (
                 <div className="m-auto py-8 text-center">
-                  <MessageSquare className="mx-auto mb-3 h-12 w-12 text-[#606a78] opacity-70" strokeWidth={1.25} />
-                  <p className="text-sm text-[#8e98a8]">مخاطبی را از لیست مکالمات انتخاب کنید</p>
+                  <MessageSquare className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-70" strokeWidth={1.25} />
+                  <p className="text-sm text-muted-foreground">مخاطبی را از لیست مکالمات انتخاب کنید</p>
                 </div>
               ) : (
                 <>
-                  <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-[#0c0e12] p-4 md:p-6">
-                    <div className="max-w-[85%] self-start rounded-2xl rounded-tr-md border border-[#232934] bg-[#202632] p-3 shadow-sm">
-                      <p className="text-sm text-white">سلام {selectedAthlete.split(" ")[0]} جان. تمرینات امروز رو چطور انجام دادی؟</p>
-                      <p className="mt-1 text-[11px] text-[#8e98a8]">۱۰:۳۰</p>
+                  <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-background p-4 md:p-6">
+                    <div className="max-w-[85%] self-start rounded-2xl rounded-tr-md border border-border bg-secondary p-3 shadow-sm">
+                      <p className="text-sm text-foreground">سلام {selectedAthlete.split(" ")[0]} جان. تمرینات امروز رو چطور انجام دادی؟</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">۱۰:۳۰</p>
                     </div>
-                    <div className="max-w-[85%] self-end rounded-2xl rounded-tl-md bg-[#d2c0a5] p-3 shadow-sm">
-                      <p className="text-sm text-[#121417]">عالی بود استاد. همه حرکت‌ها رو انجام دادم.</p>
-                      <p className="mt-1 text-[11px] text-[#121417]/60">۱۱:۱۵</p>
+                    <div className="max-w-[85%] self-end rounded-2xl rounded-tl-md bg-primary p-3 shadow-sm">
+                      <p className="text-sm text-primary-foreground">عالی بود استاد. همه حرکت‌ها رو انجام دادم.</p>
+                      <p className="mt-1 text-[11px] text-primary-foreground/60">۱۱:۱۵</p>
                     </div>
                   </div>
-                  <div className="sticky bottom-0 border-t border-[#1e2430] bg-[#10141a]/95 p-3 backdrop-blur-xl md:p-4">
+                  <div className="sticky bottom-0 border-t border-border bg-popover/95 p-3 backdrop-blur-xl md:p-4">
                     <div className="flex items-end gap-2">
                       <Textarea
                         placeholder="متن پیام خود را وارد کنید..."

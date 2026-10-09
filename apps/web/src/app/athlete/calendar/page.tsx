@@ -63,18 +63,18 @@ export default function CalendarPage() {
 
       <TwilightCard>
         <div className="flex items-center justify-between">
-          <CircleIconButton label="ماه قبل" onClick={() => changeMonth(-1)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/60">
+          <CircleIconButton label="ماه قبل" onClick={() => changeMonth(-1)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60">
             <ChevronRight className="h-5 w-5" strokeWidth={1.75} />
           </CircleIconButton>
-          <h2 className="font-serif text-lg font-normal text-white">{monthTitle}</h2>
-          <CircleIconButton label="ماه بعد" onClick={() => changeMonth(1)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/60">
+          <h2 className="font-serif text-lg font-normal text-foreground">{monthTitle}</h2>
+          <CircleIconButton label="ماه بعد" onClick={() => changeMonth(1)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60">
             <ChevronLeft className="h-5 w-5" strokeWidth={1.75} />
           </CircleIconButton>
         </div>
 
         <div className="mt-4 grid grid-cols-7 gap-0.5 sm:gap-2" role="grid" aria-label={`تقویم ${monthTitle}`}>
           {weekDays.map((day) => (
-            <div key={day.full} className="py-2 text-center text-xs font-bold text-[#8e98a8] sm:text-sm">
+            <div key={day.full} className="py-2 text-center text-xs font-bold text-muted-foreground sm:text-sm">
               <span className="sm:hidden" aria-hidden="true">{day.short}</span>
               <span className="hidden sm:inline">{day.full}</span>
               <span className="sr-only sm:hidden">{day.full}</span>
@@ -95,20 +95,20 @@ export default function CalendarPage() {
                 aria-label={`${formatPersianNumber(dayNum)} ${monthTitle}${hasCheckin ? `، ${formatPersianNumber(hasCheckin)} حضور` : ""}`}
                 aria-pressed={selectedDay === dayNum}
                 className={cn(
-                  "relative flex min-h-14 min-w-0 flex-col items-center rounded-lg px-0.5 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/60 sm:min-h-20 sm:p-2",
+                  "relative flex min-h-14 min-w-0 flex-col items-center rounded-lg px-0.5 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:min-h-20 sm:p-2",
                   selectedDay === dayNum
-                    ? "bg-[#d2c0a5]/15 ring-2 ring-[#d2c0a5]/60"
-                    : "hover:bg-[#1a202a]",
-                  isToday && selectedDay !== dayNum && "ring-1 ring-[#d2c0a5]/40"
+                    ? "bg-primary/15 ring-2 ring-primary/60"
+                    : "hover:bg-secondary",
+                  isToday && selectedDay !== dayNum && "ring-1 ring-primary/40"
                 )}
               >
-                <span className={cn("text-sm font-medium", isToday ? "text-[#d2c0a5]" : "text-white")}>
+                <span className={cn("text-sm font-medium", isToday ? "text-primary" : "text-foreground")}>
                   {formatPersianNumber(dayNum)}
                 </span>
                 {hasCheckin && (
                   <div className="mt-1 flex flex-col items-center gap-0.5">
-                    <Dumbbell className="h-3.5 w-3.5 text-[#d2c0a5]" strokeWidth={1.75} />
-                    <span className="hidden text-xs leading-tight text-[#d2c0a5] sm:inline">حضور</span>
+                    <Dumbbell className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
+                    <span className="hidden text-xs leading-tight text-primary sm:inline">حضور</span>
                   </div>
                 )}
               </button>
@@ -116,11 +116,11 @@ export default function CalendarPage() {
           })}
         </div>
 
-        <div className="mt-5 rounded-2xl border border-[#232934] bg-[#1a202a] p-4" aria-live="polite">
+        <div className="mt-5 rounded-2xl border border-border bg-secondary p-4" aria-live="polite">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-white">روز {formatPersianNumber(selectedDay)} {monthTitle}</p>
-              <p className="mt-1 text-sm text-[#8e98a8]">
+              <p className="text-sm font-bold text-foreground">روز {formatPersianNumber(selectedDay)} {monthTitle}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
                 {checkinDays[selectedDay]
                   ? `${formatPersianNumber(checkinDays[selectedDay])} چک‌این برای این روز ثبت شده است.`
                   : "برای این روز حضوری ثبت نشده است."}
@@ -132,7 +132,7 @@ export default function CalendarPage() {
       </TwilightCard>
 
       <TwilightCard>
-        <h2 className="font-serif text-lg font-normal text-white">برنامه امروز</h2>
+        <h2 className="font-serif text-lg font-normal text-foreground">برنامه امروز</h2>
         <div className="mt-3">
           {todayCheckinCount > 0 ? (
             <RowCard
@@ -142,7 +142,7 @@ export default function CalendarPage() {
               trailing={<Badge variant="success">امروز</Badge>}
             />
           ) : (
-            <p className="py-4 text-center text-[#8e98a8]">برنامه‌ای برای امروز ثبت نشده است</p>
+            <p className="py-4 text-center text-muted-foreground">برنامه‌ای برای امروز ثبت نشده است</p>
           )}
         </div>
       </TwilightCard>

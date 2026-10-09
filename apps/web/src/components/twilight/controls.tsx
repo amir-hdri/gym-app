@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 /* Cards                                                               */
 /* ------------------------------------------------------------------ */
 
-/** Primary surface card: `p-4 rounded-2xl bg-[#161a22] border border-[#232934]` */
+/** Primary surface card: `p-4 rounded-2xl bg-card border border-border` */
 export function TwilightCard({
   children,
   className,
@@ -27,8 +27,8 @@ export function TwilightCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-[#232934] bg-[#161a22] p-4",
-        hover && "transition-colors hover:border-[#333d4e]",
+        "rounded-2xl border border-border bg-card p-4",
+        hover && "transition-colors hover:border-border",
         className
       )}
     >
@@ -38,9 +38,9 @@ export function TwilightCard({
 }
 
 /**
- * Row card (list item): `p-3.5 rounded-2xl bg-[#161a22] border-[#232934]
- * hover:border-[#343e4f]`, icon tile `w-10 h-10 rounded-xl bg-[#202632]
- * border-[#2c3444] text-[#d2c0a5]`.
+ * Row card (list item): `p-3.5 rounded-2xl bg-card border-border
+ * hover:border-border`, icon tile `w-10 h-10 rounded-xl bg-secondary
+ * border-border text-primary`.
  */
 export function RowCard({
   icon,
@@ -62,21 +62,21 @@ export function RowCard({
       onClick={onClick}
       whileTap={onClick ? { scale: 0.98 } : undefined}
       className={cn(
-        "group flex cursor-pointer items-center justify-between rounded-2xl border border-[#232934] bg-[#161a22] p-3.5 transition-colors hover:border-[#343e4f]",
+        "group flex cursor-pointer items-center justify-between rounded-2xl border border-border bg-card p-3.5 transition-colors hover:border-border",
         className
       )}
     >
       <div className="flex min-w-0 items-center gap-3.5">
         {icon ? (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#2c3444] bg-[#202632] text-[#d2c0a5] transition-colors group-hover:border-[#d2c0a5]/50">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-primary transition-colors group-hover:border-primary/50">
             {icon}
           </div>
         ) : null}
         <div className="min-w-0">
-          <h3 className="truncate font-sans text-sm font-medium text-white transition-colors group-hover:text-[#d2c0a5]">
+          <h3 className="truncate font-sans text-sm font-medium text-foreground transition-colors group-hover:text-primary">
             {title}
           </h3>
-          {subtitle ? <p className="mt-0.5 truncate text-[11px] text-[#8e98a8]">{subtitle}</p> : null}
+          {subtitle ? <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{subtitle}</p> : null}
         </div>
       </div>
       {trailing ? <div className="shrink-0">{trailing}</div> : null}
@@ -96,8 +96,8 @@ type CtaProps = Omit<
 };
 
 /**
- * CTA: cream `bg-[#d2c0a5] text-[#121417] hover:bg-[#ded1bc] rounded-xl`;
- * orange (promo) `bg-[#ff5a1f] hover:bg-[#ff6e38] text-white` (reference
+ * CTA: cream `bg-primary text-primary-foreground hover:bg-primary rounded-xl`;
+ * orange (promo) `bg-cta hover:bg-cta text-logo-ink-inverse` (reference
  * RemixModal/ShowcaseHeader); ghost/outline for secondary actions.
  */
 export function CtaButton({ variant = "cream", className, children, ...rest }: CtaProps) {
@@ -106,12 +106,12 @@ export function CtaButton({ variant = "cream", className, children, ...rest }: C
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.96 }}
       className={cn(
-        "flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-bold tracking-wide shadow-lg shadow-black/40 transition-colors",
-        variant === "cream" && "bg-[#d2c0a5] text-[#121417] hover:bg-[#ded1bc]",
-        variant === "orange" && "bg-[#ff5a1f] text-white shadow-[#ff5a1f]/20 hover:bg-[#ff6e38]",
-        variant === "ghost" && "bg-[#1c222e] text-white shadow-none hover:bg-[#283244]",
+        "flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-bold tracking-wide shadow-lg shadow-scrim/40 transition-colors",
+        variant === "cream" && "bg-primary text-primary-foreground hover:bg-primary",
+        variant === "orange" && "bg-cta text-logo-ink-inverse shadow-cta/20 hover:bg-cta",
+        variant === "ghost" && "bg-card text-foreground shadow-none hover:bg-secondary",
         variant === "outline" &&
-          "border border-[#d2c0a5]/50 bg-[#1c222e] text-[#d2c0a5] shadow-none hover:bg-[#252d3d]",
+          "border border-primary/50 bg-card text-primary shadow-none hover:bg-secondary",
         className
       )}
       {...rest}
@@ -121,7 +121,7 @@ export function CtaButton({ variant = "cream", className, children, ...rest }: C
   );
 }
 
-/** Circular icon action button (play etc.): `w-9 h-9 rounded-full bg-[#202632] border-white/10` */
+/** Circular icon action button (play etc.): `w-9 h-9 rounded-full bg-secondary border-border` */
 export function CircleIconButton({
   children,
   className,
@@ -140,7 +140,7 @@ export function CircleIconButton({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-[#202632] text-white shadow-sm",
+        "flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-secondary text-foreground shadow-sm",
         className
       )}
     >
@@ -153,7 +153,7 @@ export function CircleIconButton({
 /* Search + filter chips                                               */
 /* ------------------------------------------------------------------ */
 
-/** Search field: `h-11 rounded-full bg-[#161a22] border-[#232934] focus:border-[#d2c0a5]/50` */
+/** Search field: `h-11 rounded-full bg-card border-border focus:border-primary/50` */
 export function SearchInput({
   value,
   onChange,
@@ -167,18 +167,18 @@ export function SearchInput({
 }) {
   return (
     <div className={cn("relative", className)}>
-      <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a94a3]" />
+      <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-11 w-full rounded-full border border-[#232934] bg-[#161a22] py-0 pl-4 pr-11 text-right text-xs text-white shadow-xs transition-all placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:bg-[#1a202a] focus:outline-none"
+        className="h-11 w-full rounded-full border border-border bg-card py-0 pl-4 pr-11 text-right text-xs text-foreground shadow-xs transition-all placeholder:text-muted-foreground focus:border-primary/50 focus:bg-secondary focus:outline-none"
       />
       {value && (
         <button
           onClick={() => onChange("")}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-[#8a94a3] hover:text-white"
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
           aria-label="پاک کردن جستجو"
         >
           <X className="h-3.5 w-3.5" />
@@ -190,8 +190,8 @@ export function SearchInput({
 
 /**
  * Filter chips with the reference gliding sand pill (`layoutId`).
- * Active: `bg-[#d2c0a5] text-[#121417]`; inactive: `bg-[#181d24]
- * border-[#262c37] text-[#9ca3af]`.
+ * Active: `bg-primary text-primary-foreground`; inactive: `bg-card
+ * border-border text-muted-foreground`.
  */
 export function FilterChips<T extends string>({
   options,
@@ -217,13 +217,13 @@ export function FilterChips<T extends string>({
             whileTap={{ scale: 0.94 }}
             className={cn(
               "relative cursor-pointer whitespace-nowrap rounded-full px-4 py-2 font-sans text-xs font-medium transition-colors",
-              isActive ? "font-semibold text-[#121417]" : "border border-[#262c37] bg-[#181d24] text-[#9ca3af] hover:text-white"
+              isActive ? "font-semibold text-primary-foreground" : "border border-border bg-card text-muted-foreground hover:text-foreground"
             )}
           >
             {isActive && (
               <motion.span
                 layoutId={pillId}
-                className="absolute inset-0 rounded-full bg-[#d2c0a5] shadow-sm"
+                className="absolute inset-0 rounded-full bg-primary shadow-sm"
                 transition={{ type: "spring", stiffness: 450, damping: 30 }}
               />
             )}
@@ -239,7 +239,7 @@ export function FilterChips<T extends string>({
 /* Stat card (journey pattern)                                         */
 /* ------------------------------------------------------------------ */
 
-/** `p-4 rounded-2xl bg-[#161a22] border-[#232934]` with tracked micro label + tabular value */
+/** `p-4 rounded-2xl bg-card border-border` with tracked micro label + tabular value */
 export function StatCard({
   label,
   value,
@@ -255,12 +255,12 @@ export function StatCard({
     <motion.div
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className={cn("flex flex-col justify-between rounded-2xl border border-[#232934] bg-[#161a22] p-4 shadow-xs", className)}
+      className={cn("flex flex-col justify-between rounded-2xl border border-border bg-card p-4 shadow-xs", className)}
     >
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8e98a8]">{label}</span>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
       <div className="mt-3 flex items-baseline gap-1">
-        <span className="font-sans text-2xl font-normal tabular-nums tracking-tight text-white">{value}</span>
-        {suffix ? <span className="text-xs text-[#8e98a8]">{suffix}</span> : null}
+        <span className="font-sans text-2xl font-normal tabular-nums tracking-tight text-foreground">{value}</span>
+        {suffix ? <span className="text-xs text-muted-foreground">{suffix}</span> : null}
       </div>
     </motion.div>
   );
@@ -270,7 +270,7 @@ export function StatCard({
 /* Toggle (reference profile pattern)                                  */
 /* ------------------------------------------------------------------ */
 
-/** `w-10 h-5 rounded-full`, on: `bg-[#d2c0a5]`, knob `bg-[#121417]` */
+/** `w-10 h-5 rounded-full`, on: `bg-primary`, knob `bg-primary-foreground` */
 export function Toggle({
   checked,
   onChange,
@@ -288,13 +288,13 @@ export function Toggle({
       onClick={() => onChange(!checked)}
       className={cn(
         "relative h-5 w-10 cursor-pointer rounded-full p-0.5 transition-colors",
-        checked ? "bg-[#d2c0a5]" : "bg-[#2b3342]"
+        checked ? "bg-primary" : "bg-border"
       )}
     >
       <motion.span
         layout
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-        className={cn("block h-4 w-4 rounded-full bg-[#121417]", checked ? "-translate-x-5" : "translate-x-0")}
+        className={cn("block h-4 w-4 rounded-full bg-primary-foreground", checked ? "-translate-x-5" : "translate-x-0")}
       />
     </button>
   );
@@ -305,8 +305,8 @@ export function Toggle({
 /* ------------------------------------------------------------------ */
 
 /**
- * Modal shell: backdrop `fixed inset-0 z-50 bg-black/85 backdrop-blur-xl`,
- * panel `max-w-sm rounded-[32px] bg-[#10141a] border-white/10 p-6`.
+ * Modal shell: backdrop `fixed inset-0 z-50 bg-scrim/85 backdrop-blur-xl`,
+ * panel `max-w-sm rounded-[32px] bg-popover border-border p-6`.
  */
 export function TwilightModal({
   open,
@@ -322,7 +322,7 @@ export function TwilightModal({
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex select-none items-center justify-center bg-black/85 p-3 backdrop-blur-xl">
+        <div className="fixed inset-0 z-50 flex select-none items-center justify-center bg-scrim/85 p-3 backdrop-blur-xl">
           <motion.div
             initial={{ opacity: 0, scale: 0.94, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -331,14 +331,14 @@ export function TwilightModal({
             role="dialog"
             aria-modal="true"
             className={cn(
-              "relative flex max-h-[92vh] w-full max-w-sm flex-col gap-5 overflow-hidden overflow-y-auto rounded-[32px] border border-white/10 bg-[#10141a] p-6 text-white shadow-2xl",
+              "relative flex max-h-[92vh] w-full max-w-sm flex-col gap-5 overflow-hidden overflow-y-auto rounded-[32px] border border-border bg-popover p-6 text-foreground shadow-2xl",
               className
             )}
           >
             <button
               onClick={onClose}
               aria-label="بستن"
-              className="absolute left-4 top-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-[#1b222c] text-[#8e98a8] transition-colors hover:text-white"
+              className="absolute left-4 top-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-border bg-secondary text-muted-foreground transition-colors hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -366,14 +366,14 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-[#232934] bg-[#161a22] px-6 py-10 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card px-6 py-10 text-center">
       {icon ? (
-        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#d2c0a5]/40 bg-[#202734] text-[#d2c0a5]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-secondary text-primary">
           {icon}
         </div>
       ) : null}
-      <h3 className="font-serif text-base font-normal text-white">{title}</h3>
-      {description ? <p className="max-w-[260px] text-xs leading-relaxed text-[#8e98a8]">{description}</p> : null}
+      <h3 className="font-serif text-base font-normal text-foreground">{title}</h3>
+      {description ? <p className="max-w-[260px] text-xs leading-relaxed text-muted-foreground">{description}</p> : null}
       {action ? <div className="mt-1 w-full max-w-[240px]">{action}</div> : null}
     </div>
   );
@@ -391,9 +391,9 @@ export function Toast({ message }: { message: string | null }) {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          className="fixed top-5 z-50 flex items-center gap-2 rounded-full border border-[#d2c0a5]/40 bg-[#1b222d] px-4 py-2 text-xs text-white shadow-2xl"
+          className="fixed top-5 z-50 flex items-center gap-2 rounded-full border border-primary/40 bg-secondary px-4 py-2 text-xs text-foreground shadow-2xl"
         >
-          <span className="h-2 w-2 rounded-full bg-[#d2c0a5]" />
+          <span className="h-2 w-2 rounded-full bg-primary" />
           <span>{message}</span>
         </motion.div>
       )}

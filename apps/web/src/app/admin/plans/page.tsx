@@ -260,22 +260,22 @@ export default function PlansPage() {
           {plans.map((plan) => (
             <TwilightCard key={plan.id} className={cn(!plan.isActive && "opacity-60")}>
               <div className="flex items-center justify-between">
-                <h3 className="font-serif text-lg font-normal text-white">{plan.name}</h3>
+                <h3 className="font-serif text-lg font-normal text-foreground">{plan.name}</h3>
                 <Badge variant={plan.isActive ? "success" : "secondary"}>
                   {plan.isActive ? "فعال" : "غیرفعال"}
                 </Badge>
               </div>
               <div className="mt-4">
-                <p className="font-sans text-3xl font-normal tabular-nums text-white">{formatCurrency(plan.price)}</p>
-                <p className="mt-1 text-xs text-[#8e98a8]">{durationLabel(plan.durationDays)}</p>
+                <p className="font-sans text-3xl font-normal tabular-nums text-foreground">{formatCurrency(plan.price)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{durationLabel(plan.durationDays)}</p>
               </div>
-              <p className="mt-3 text-sm text-[#8e98a8]">
-                <span className="font-medium tabular-nums text-white">{formatPersianNumber(plan.sessionsCount)}</span> جلسه
+              <p className="mt-3 text-sm text-muted-foreground">
+                <span className="font-medium tabular-nums text-foreground">{formatPersianNumber(plan.sessionsCount)}</span> جلسه
               </p>
-              <ul className="mt-3 space-y-2 border-t border-[#1e2430] pt-3">
+              <ul className="mt-3 space-y-2 border-t border-border pt-3">
                 {(plan.features ?? []).map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-white">
-                    <Check className="h-4 w-4 shrink-0 text-[#d2c0a5]" strokeWidth={1.75} />
+                  <li key={feature} className="flex items-center gap-2 text-sm text-foreground">
+                    <Check className="h-4 w-4 shrink-0 text-primary" strokeWidth={1.75} />
                     <span>{feature}</span>
                   </li>
                 ))}

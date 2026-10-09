@@ -21,7 +21,7 @@ const forgotSchema = z.object({
 type ForgotFormData = z.infer<typeof forgotSchema>;
 
 const inputClassName =
-  "h-11 w-full rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
+  "h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -91,34 +91,34 @@ export default function ForgotPasswordPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="rounded-[32px] border border-white/10 bg-[#10141a] p-8 text-white shadow-2xl shadow-black/50"
+        className="rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-black/50"
       >
         <div className="mb-8 text-center">
-          <h1 className="font-serif text-2xl font-medium tracking-tight text-white">بازیابی رمز عبور</h1>
-          <p className="mt-2 text-sm text-[#8e98a8]">
+          <h1 className="font-serif text-2xl font-medium tracking-tight text-foreground">بازیابی رمز عبور</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             ایمیل خود را وارد کنید تا لینک بازیابی ارسال شود
           </p>
         </div>
 
         {isSent ? (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4 py-4 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-[#4ade80]/30 bg-[#4ade80]/10">
-              <CheckCircle2 className="h-7 w-7 text-[#4ade80]" strokeWidth={1.75} />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-success/30 bg-success/10">
+              <CheckCircle2 className="h-7 w-7 text-success" strokeWidth={1.75} />
             </div>
-            <p className="text-sm leading-7 text-[#8e98a8]" aria-live="polite">
-              اگر <span dir="ltr" className="font-medium text-white">{sentEmail}</span> در سامانه ثبت شده
+            <p className="text-sm leading-7 text-muted-foreground" aria-live="polite">
+              اگر <span dir="ltr" className="font-medium text-foreground">{sentEmail}</span> در سامانه ثبت شده
               باشد، لینک بازیابی یک‌بارمصرف برایش ساخته شده است. برای حفظ حریم خصوصی، این پیام برای
               ایمیل ثبت‌شده و ثبت‌نشده یکسان است.
             </p>
             {devToken && process.env.NODE_ENV !== "production" && (
-              <div className="rounded-2xl border border-dashed border-[#d2c0a5]/40 bg-[#d2c0a5]/5 p-4 text-right">
-                <p className="text-xs leading-6 text-[#8e98a8]">
+              <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-4 text-right">
+                <p className="text-xs leading-6 text-muted-foreground">
                   محیط توسعه — سرویس ایمیل راه‌اندازی نشده، پس توکن همین‌جا نمایش داده می‌شود تا مسیر
                   بازیابی را تا انتها طی کنی.
                 </p>
                 <Link
                   href={`/auth/reset-password?token=${encodeURIComponent(devToken)}`}
-                  className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#d2c0a5]/50 px-4 py-2 text-sm font-medium text-[#d2c0a5] transition-colors hover:bg-[#d2c0a5]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/40"
+                  className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-primary/50 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
                   <KeyRound className="h-4 w-4" strokeWidth={1.75} />
                   رفتن به فرم رمز جدید
@@ -138,7 +138,7 @@ export default function ForgotPasswordPage() {
                     ? "در حال ارسال…"
                     : "ارسال دوباره"}
               </CtaButton>
-              <p className="text-[11px] text-[#6b7280]" aria-live="polite">
+              <p className="text-[11px] text-muted-foreground" aria-live="polite">
                 {cooldown > 0 ? `برای ارسال دوباره ${formatPersianNumber(cooldown)} ثانیه صبر کن.` : ""}
               </p>
               <button
@@ -147,14 +147,14 @@ export default function ForgotPasswordPage() {
                   setIsSent(false);
                   setSubmitError(null);
                 }}
-                className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm text-[#8e98a8] transition-colors hover:text-[#d2c0a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/40"
+                className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 ارسال با ایمیل دیگر
               </button>
             </div>
             <Link
               href="/auth/login"
-              className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-[#d2c0a5] transition-colors hover:text-[#ded1bc]"
+              className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary"
             >
               بازگشت به ورود
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -163,7 +163,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-              <label htmlFor="email" className="mb-2 block text-xs text-[#8e98a8]">
+              <label htmlFor="email" className="mb-2 block text-xs text-muted-foreground">
                 ایمیل
               </label>
               <input
@@ -176,11 +176,11 @@ export default function ForgotPasswordPage() {
                 className={inputClassName}
                 {...register("email")}
               />
-              {errors.email?.message && <p className="mt-1 text-xs text-[#f87171]">{errors.email.message}</p>}
+              {errors.email?.message && <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>}
             </motion.div>
 
             {submitError && (
-              <p role="alert" className="rounded-xl border border-[#f87171]/20 bg-[#f87171]/10 px-4 py-3 text-center text-sm text-[#f87171]">
+              <p role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-center text-sm text-destructive">
                 {submitError}
               </p>
             )}
@@ -192,7 +192,7 @@ export default function ForgotPasswordPage() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-center">
-              <Link href="/auth/login" className="inline-flex items-center gap-1 text-sm text-[#8e98a8] transition-colors hover:text-[#d2c0a5]">
+              <Link href="/auth/login" className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary">
                 <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} />
                 بازگشت به صفحه ورود
               </Link>

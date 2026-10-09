@@ -66,32 +66,32 @@ export default function ProgramsPage() {
         labels={statusLabels}
       />
 
-      <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-[#232934]">
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">نام برنامه</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">ورزشکار</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">تاریخ شروع</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">تاریخ پایان</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">وضعیت</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">تمرینات</TableHead>
-              <TableHead className="text-left text-[11px] font-semibold text-[#8e98a8]">عملیات</TableHead>
+            <TableRow className="border-b border-border">
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">نام برنامه</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">ورزشکار</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">تاریخ شروع</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">تاریخ پایان</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">وضعیت</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">تمرینات</TableHead>
+              <TableHead className="text-left text-[11px] font-semibold text-muted-foreground">عملیات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.map((program) => (
-              <TableRow key={program.id} className={cn("border-t border-[#1e2430] hover:bg-[#1a202a]")}>
-                <TableCell className="font-medium text-white">{program.name}</TableCell>
-                <TableCell className="text-white">{program.athlete ? `${program.athlete.firstName} ${program.athlete.lastName}` : "–"}</TableCell>
-                <TableCell className="text-white">{formatDate(program.startDate)}</TableCell>
-                <TableCell className="text-white">{formatDate(program.endDate)}</TableCell>
+              <TableRow key={program.id} className={cn("border-t border-border hover:bg-secondary")}>
+                <TableCell className="font-medium text-foreground">{program.name}</TableCell>
+                <TableCell className="text-foreground">{program.athlete ? `${program.athlete.firstName} ${program.athlete.lastName}` : "–"}</TableCell>
+                <TableCell className="text-foreground">{formatDate(program.startDate)}</TableCell>
+                <TableCell className="text-foreground">{formatDate(program.endDate)}</TableCell>
                 <TableCell>
                   <Badge variant={statusConfig[program.status]?.variant || "outline"}>
                     {statusConfig[program.status]?.label || program.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="tabular-nums text-white">{formatPersianNumber(program.exercises.length)} تمرین</TableCell>
+                <TableCell className="tabular-nums text-foreground">{formatPersianNumber(program.exercises.length)} تمرین</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Button variant="ghost" size="sm" asChild>
@@ -113,7 +113,7 @@ export default function ProgramsPage() {
           </TableBody>
         </Table>
         {filtered.length === 0 && (
-          <div className="border-t border-[#1e2430] p-6">
+          <div className="border-t border-border p-6">
             <EmptyState
               title="هیچ برنامه‌ای یافت نشد"
               description="برنامه‌ای با فیلتر انتخاب شده وجود ندارد"

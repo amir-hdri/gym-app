@@ -33,7 +33,7 @@ const categories = [
   { value: "strength", label: "قدرت" }, { value: "endurance", label: "استقامت" },
 ];
 
-const inputClassName = "h-11 rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
+const inputClassName = "h-11 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none";
 
 export default function NewGoalPage() {
   const router = useRouter();
@@ -101,7 +101,7 @@ export default function NewGoalPage() {
             <Input label="مقدار هدف" type="number" error={errors.target?.message} {...register("target")} className={inputClassName} />
             <Input label="واحد" placeholder="کیلوگرم" error={errors.unit?.message} {...register("unit")} className={inputClassName} />
           </div>
-          <Textarea label="یادداشت" rows={3} placeholder="یادداشت دلخواه..." {...register("notes")} className="rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none" />
+          <Textarea label="یادداشت" rows={3} placeholder="یادداشت دلخواه..." {...register("notes")} className="rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none" />
           <div className="flex justify-end gap-3 pt-4">
             <Button variant="outline" type="button" onClick={() => router.push("/athlete/goals")}>انصراف</Button>
             <Button type="submit" loading={isSubmitting}><Save className="ml-2 h-4 w-4" strokeWidth={1.75} />ثبت هدف</Button>

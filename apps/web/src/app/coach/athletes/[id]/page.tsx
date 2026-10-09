@@ -206,7 +206,7 @@ export default function AthleteDetailPage() {
       />
 
       <div className="flex flex-col items-center pt-2">
-        <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[#d2c0a5] bg-gradient-to-br from-[#2a3444] to-[#141a22] shadow-xl">
+        <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-gradient-to-br from-secondary to-card shadow-xl">
           <Avatar className="h-full w-full">
             <AvatarFallback className={`text-2xl ${generateAvatarColor(name)}`}>
               {getInitials(name)}
@@ -218,7 +218,7 @@ export default function AthleteDetailPage() {
             {athlete.status === "active" ? "فعال" : "غیرفعال"}
           </Badge>
         </div>
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8e98a8]">
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5" dir="ltr">
             <Phone className="h-3.5 w-3.5" strokeWidth={1.75} />
             {athlete.phone}
@@ -239,10 +239,10 @@ export default function AthleteDetailPage() {
       </div>
 
       <Tabs defaultValue="program" dir="rtl">
-        <TabsList className="w-full justify-start overflow-x-auto rounded-xl border border-[#232934] bg-[#161a22] p-1">
-          <TabsTrigger value="program" className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">برنامه تمرینی</TabsTrigger>
-          <TabsTrigger value="progress" className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">پیشرفت</TabsTrigger>
-          <TabsTrigger value="history" className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">تاریخچه</TabsTrigger>
+        <TabsList className="w-full justify-start overflow-x-auto rounded-xl border border-border bg-card p-1">
+          <TabsTrigger value="program" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">برنامه تمرینی</TabsTrigger>
+          <TabsTrigger value="progress" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">پیشرفت</TabsTrigger>
+          <TabsTrigger value="history" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">تاریخچه</TabsTrigger>
         </TabsList>
 
         <TabsContent value="program" className="mt-4 space-y-4">
@@ -254,16 +254,16 @@ export default function AthleteDetailPage() {
             groupedPrograms.map((day) => (
               <div key={day.day}>
                 <SectionTitle className="mb-3">{day.day}</SectionTitle>
-                <TwilightCard className="divide-y divide-[#1e2430] p-0">
+                <TwilightCard className="divide-y divide-border p-0">
                   {day.exercises.map((ex, i) => (
                     <div key={i} className="flex items-center justify-between gap-3 px-4 py-3.5 first:pt-3.5 last:pb-3.5">
                       <div className="flex min-w-0 flex-1 items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#2c3444] bg-[#202632] text-[#d2c0a5]">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-primary">
                           <Dumbbell className="h-5 w-5" strokeWidth={1.75} />
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-white">{ex.name}</p>
-                          <p className="mt-0.5 text-[11px] text-[#8e98a8]">
+                          <p className="truncate text-sm font-medium text-foreground">{ex.name}</p>
+                          <p className="mt-0.5 text-[11px] text-muted-foreground">
                             {formatPersianNumber(ex.sets)} ست × {formatPersianNumber(ex.reps)} تکرار
                             {ex.weight > 0 && ` | ${formatPersianNumber(ex.weight)} کیلوگرم`}
                           </p>
@@ -306,9 +306,9 @@ export default function AthleteDetailPage() {
             athleteGoals.map((goal) => (
               <TwilightCard key={goal.id}>
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-white">{goal.title}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{goal.title}</span>
                   <span className="flex shrink-0 items-center gap-2">
-                    <span className="text-xs tabular-nums text-[#8e98a8]">
+                    <span className="text-xs tabular-nums text-muted-foreground">
                       {formatPersianNumber(goal.currentValue)} / {formatPersianNumber(goal.targetValue)} {goal.unit}
                     </span>
                     <button
@@ -322,8 +322,8 @@ export default function AthleteDetailPage() {
                     </button>
                   </span>
                 </div>
-                <Progress value={calculateProgress(goal.currentValue, goal.targetValue)} indicatorClassName="bg-none bg-[#d2c0a5]" className="bg-white/10" />
-                <p className="mt-1.5 text-[11px] text-[#8e98a8]">
+                <Progress value={calculateProgress(goal.currentValue, goal.targetValue)} indicatorClassName="bg-none bg-primary" className="bg-border" />
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
                   {formatPersianNumber(Math.round(calculateProgress(goal.currentValue, goal.targetValue)))}٪ تکمیل شده
                 </p>
               </TwilightCard>
@@ -341,7 +341,7 @@ export default function AthleteDetailPage() {
               <div>
                 <SectionTitle className="mb-3">ریتم تمرین</SectionTitle>
                 <TwilightCard>
-                  <p className="mb-3 text-[11px] text-[#8e98a8]">مدت جلسات تکمیل‌شده شاگرد</p>
+                  <p className="mb-3 text-[11px] text-muted-foreground">مدت جلسات تکمیل‌شده شاگرد</p>
                   <SessionDurationChart checkIns={athleteHistory} />
                 </TwilightCard>
               </div>
@@ -351,11 +351,11 @@ export default function AthleteDetailPage() {
                   return (
                     <TwilightCard key={checkin.id} className="flex items-center justify-between !p-4">
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-white">تمرین</p>
-                        <p className="text-[11px] text-[#8e98a8]">{formatDate(checkin.checkInTime)}</p>
+                        <p className="text-sm font-medium text-foreground">تمرین</p>
+                        <p className="text-[11px] text-muted-foreground">{formatDate(checkin.checkInTime)}</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-xs tabular-nums text-[#8e98a8]">{duration}</span>
+                        <span className="text-xs tabular-nums text-muted-foreground">{duration}</span>
                         <Badge variant={checkin.sessionDeducted ? "success" : "secondary"}>
                           {checkin.sessionDeducted ? "انجام شده" : "ثبت شده"}
                         </Badge>

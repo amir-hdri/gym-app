@@ -37,7 +37,7 @@ const categories = [
   { value: "strength", label: "قدرت" }, { value: "endurance", label: "استقامت" },
 ];
 
-const inputClassName = "h-11 rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
+const inputClassName = "h-11 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none";
 
 export default function GoalDetailPage() {
   const params = useParams<{ id: string }>();
@@ -95,17 +95,17 @@ export default function GoalDetailPage() {
 
       <TwilightCard>
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-[#2c3444] bg-[#202632] text-[#d2c0a5]">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-border bg-secondary text-primary">
             <Target className="h-8 w-8" strokeWidth={1.75} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-3">
-              <h1 className="font-serif text-2xl font-normal tracking-tight text-white">{goal.title}</h1>
+              <h1 className="font-serif text-2xl font-normal tracking-tight text-foreground">{goal.title}</h1>
               <Badge variant={goal.status === "achieved" ? "success" : "warning"}>
                 {goal.status === "achieved" ? "تکمیل شده" : "در حال انجام"}
               </Badge>
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-[#8e98a8]">
+            <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1"><Calendar className="h-4 w-4" strokeWidth={1.75} />مهلت: {goal.targetDate}</span>
               <span>{formatPersianNumber(calculateDaysRemaining(goal.targetDate))} روز باقی‌مانده</span>
             </div>
@@ -117,14 +117,14 @@ export default function GoalDetailPage() {
         <SectionTitle>پیشرفت</SectionTitle>
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm text-[#8e98a8]">مقدار فعلی</span>
-            <span className="font-sans text-2xl font-bold tabular-nums text-white">{formatPersianNumber(goal.currentValue)}</span>
+            <span className="text-sm text-muted-foreground">مقدار فعلی</span>
+            <span className="font-sans text-2xl font-bold tabular-nums text-foreground">{formatPersianNumber(goal.currentValue)}</span>
           </div>
-          <Progress value={progress} className="bg-[#1e2430]" indicatorClassName="bg-none bg-[#d2c0a5]" />
+          <Progress value={progress} className="bg-border" indicatorClassName="bg-none bg-primary" />
           <div className="mt-2 flex items-center justify-between">
-            <span className="text-sm text-[#8e98a8]">۰</span>
-            <span className="text-sm font-medium text-white">{formatPersianNumber(Math.round(progress))}%</span>
-            <span className="text-sm text-[#8e98a8]">{formatPersianNumber(goal.targetValue)} {goal.unit}</span>
+            <span className="text-sm text-muted-foreground">۰</span>
+            <span className="text-sm font-medium text-foreground">{formatPersianNumber(Math.round(progress))}%</span>
+            <span className="text-sm text-muted-foreground">{formatPersianNumber(goal.targetValue)} {goal.unit}</span>
           </div>
         </div>
       </TwilightCard>
@@ -147,7 +147,7 @@ export default function GoalDetailPage() {
             </div>
             <Input label="مهلت" type="date" error={errors.deadline?.message} {...register("deadline")} className={inputClassName} />
           </div>
-          <Textarea label="یادداشت" rows={3} {...register("notes")} className="rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none" />
+          <Textarea label="یادداشت" rows={3} {...register("notes")} className="rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none" />
           <div className="flex justify-between">
             <Button variant="destructive" type="button"><Trash2 className="ml-2 h-4 w-4" strokeWidth={1.75} />حذف هدف</Button>
             <Button type="submit" loading={isSubmitting}><Save className="ml-2 h-4 w-4" strokeWidth={1.75} />ذخیره تغییرات</Button>

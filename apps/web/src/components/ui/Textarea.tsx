@@ -17,7 +17,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="w-full space-y-1.5">
         {label && (
-          <label htmlFor={textareaId} className="block text-xs font-medium text-[#8e98a8]">
+          <label htmlFor={textareaId} className="block text-xs font-medium text-muted-foreground">
             {label}
           </label>
         )}
@@ -25,7 +25,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={textareaId}
           rows={rows}
           className={cn(
-            "flex min-h-[80px] w-full resize-y rounded-xl border border-[#232934] bg-[#161a22] px-4 py-2.5 text-sm text-white placeholder:text-[#6b7280] focus-visible:outline-none focus-visible:ring-0 focus-visible:border-[#d2c0a5]/50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
+            "flex min-h-[80px] w-full resize-y rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
             error && "border-destructive focus-visible:border-destructive/60",
             className
           )}

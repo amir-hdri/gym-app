@@ -46,18 +46,18 @@ const statusMap: Record<string, { label: string; variant: "success" | "secondary
 
 function InfoRow({ icon, label, value, ltr }: { icon: ReactNode; label: string; value: ReactNode; ltr?: boolean }) {
   return (
-    <div className="flex items-center justify-between px-4 py-3.5 hover:bg-[#1a202a]">
+    <div className="flex items-center justify-between px-4 py-3.5 hover:bg-secondary">
       <span className="flex items-center gap-3">
-        <span className="text-[#8e98a8]">{icon}</span>
-        <span className="text-xs text-[#8e98a8]">{label}</span>
+        <span className="text-muted-foreground">{icon}</span>
+        <span className="text-xs text-muted-foreground">{label}</span>
       </span>
-      <span dir={ltr ? "ltr" : undefined} className="text-sm text-white">{value}</span>
+      <span dir={ltr ? "ltr" : undefined} className="text-sm text-foreground">{value}</span>
     </div>
   );
 }
 
-const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-[#8e98a8]";
-const tdClass = "px-4 py-3 text-[#c8cdd6]";
+const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground";
+const tdClass = "px-4 py-3 text-muted-foreground";
 
 const programStatusConfig: Record<TrainingProgram["status"], { label: string; variant: "success" | "secondary" | "info" | "outline" }> = {
   draft: { label: "پیش‌نویس", variant: "outline" },
@@ -323,15 +323,15 @@ export default function CoachProfilePage() {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-5 rounded-2xl border border-[#232934] bg-[#161a22] p-5 sm:flex-row sm:items-center">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 border-[#d2c0a5] bg-gradient-to-br from-[#2a3444] to-[#141a22]">
-          <span className="font-serif text-2xl text-[#d2c0a5]">
+      <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-5 sm:flex-row sm:items-center">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-gradient-to-br from-secondary to-card">
+          <span className="font-serif text-2xl text-primary">
             {getInitials(`${coach.firstName} ${coach.lastName}`)}
           </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-serif text-2xl font-normal text-white">{coach.firstName} {coach.lastName}</h1>
+            <h1 className="font-serif text-2xl font-normal text-foreground">{coach.firstName} {coach.lastName}</h1>
             <Badge variant={statusMap[coach.status].variant}>{statusMap[coach.status].label}</Badge>
           </div>
         </div>
@@ -341,7 +341,7 @@ export default function CoachProfilePage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22] divide-y divide-[#1e2430]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
         <InfoRow icon={<Phone className="h-4 w-4" strokeWidth={1.75} />} label="تلفن" value={coach.phone} ltr />
         <InfoRow icon={<Mail className="h-4 w-4" strokeWidth={1.75} />} label="ایمیل" value={coach.email} ltr />
         <InfoRow icon={<Award className="h-4 w-4" strokeWidth={1.75} />} label="تخصص" value={coach.specialty} />
@@ -364,7 +364,7 @@ export default function CoachProfilePage() {
 
       <div>
         <SectionTitle className="mb-3">لیست شاگردان</SectionTitle>
-        <div className="overflow-x-auto rounded-2xl border border-[#232934] bg-[#161a22]">
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="w-full min-w-[480px] text-sm">
             <thead>
               <tr>
@@ -375,13 +375,13 @@ export default function CoachProfilePage() {
             </thead>
             <tbody>
               {(coach.studentsList || []).map((s: any) => (
-                <tr key={s.id} className="border-t border-[#1e2430] hover:bg-[#1a202a]">
-                  <td className={`${tdClass} font-medium text-white`}>{s.name}</td>
+                <tr key={s.id} className="border-t border-border hover:bg-secondary">
+                  <td className={`${tdClass} font-medium text-foreground`}>{s.name}</td>
                   <td className={tdClass}>{s.plan}</td>
                   <td className={tdClass}>
                     <div className="flex items-center gap-2">
-                      <div className="h-2 flex-1 rounded-full bg-[#202632]">
-                        <div className="h-full rounded-full bg-[#d2c0a5]" style={{ width: `${s.progress}%` }} />
+                      <div className="h-2 flex-1 rounded-full bg-secondary">
+                        <div className="h-full rounded-full bg-primary" style={{ width: `${s.progress}%` }} />
                       </div>
                       <span className="text-sm">{formatPersianNumber(s.progress)}%</span>
                     </div>

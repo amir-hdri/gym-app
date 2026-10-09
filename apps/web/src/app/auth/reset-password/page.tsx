@@ -33,7 +33,7 @@ const resetSchema = z
 type ResetFormData = z.infer<typeof resetSchema>;
 
 const inputClassName =
-  "h-11 w-full rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
+  "h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none";
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -74,21 +74,21 @@ function ResetPasswordContent() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="rounded-[32px] border border-white/10 bg-[#10141a] p-8 text-white shadow-2xl shadow-black/50"
+        className="rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-black/50"
       >
         <div className="mb-8 text-center">
-          <h1 className="font-serif text-2xl font-medium tracking-tight text-white">رمز عبور جدید</h1>
-          <p className="mt-2 text-sm text-[#8e98a8]">
+          <h1 className="font-serif text-2xl font-medium tracking-tight text-foreground">رمز عبور جدید</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             رمز عبور جدید خود را وارد کنید
           </p>
         </div>
 
         {isDone ? (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-4 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-[#4ade80]/30 bg-[#4ade80]/10">
-              <CheckCircle2 className="h-7 w-7 text-[#4ade80]" strokeWidth={1.75} />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-success/30 bg-success/10">
+              <CheckCircle2 className="h-7 w-7 text-success" strokeWidth={1.75} />
             </div>
-            <p className="text-sm text-[#8e98a8]">رمز عبور با موفقیت تغییر کرد.</p>
+            <p className="text-sm text-muted-foreground">رمز عبور با موفقیت تغییر کرد.</p>
             <CtaButton onClick={() => router.push("/auth/login")} className="mt-4 text-sm">
               ورود به Lumi Wellness
             </CtaButton>
@@ -96,7 +96,7 @@ function ResetPasswordContent() {
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {tokenError && (
-              <p role="alert" className="rounded-xl border border-[#f87171]/30 bg-[#f87171]/10 px-4 py-3 text-xs leading-6 text-[#f87171]">
+              <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-xs leading-6 text-destructive">
                 {tokenError}{" "}
                 <Link href="/auth/forgot-password" className="font-semibold underline underline-offset-4">
                   دریافت لینک تازه
@@ -104,7 +104,7 @@ function ResetPasswordContent() {
               </p>
             )}
             <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-              <label htmlFor="password" className="mb-2 block text-xs text-[#8e98a8]">
+              <label htmlFor="password" className="mb-2 block text-xs text-muted-foreground">
                 رمز عبور جدید
               </label>
               <input
@@ -115,11 +115,11 @@ function ResetPasswordContent() {
                 className={inputClassName}
                 {...register("password")}
               />
-              {errors.password?.message && <p className="mt-1 text-xs text-[#f87171]">{errors.password.message}</p>}
+              {errors.password?.message && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-              <label htmlFor="confirmPassword" className="mb-2 block text-xs text-[#8e98a8]">
+              <label htmlFor="confirmPassword" className="mb-2 block text-xs text-muted-foreground">
                 تکرار رمز عبور
               </label>
               <input
@@ -130,7 +130,7 @@ function ResetPasswordContent() {
                 className={inputClassName}
                 {...register("confirmPassword")}
               />
-              {errors.confirmPassword?.message && <p className="mt-1 text-xs text-[#f87171]">{errors.confirmPassword.message}</p>}
+              {errors.confirmPassword?.message && <p className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p>}
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -150,7 +150,7 @@ export default function ResetPasswordPage() {
     <Suspense fallback={
       <AuthLayout>
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#d2c0a5] border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       </AuthLayout>
     }>

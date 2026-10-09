@@ -71,24 +71,24 @@ export default function AthletesPage() {
         />
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-[#232934]">
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">نام</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">تلفن</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">برنامه فعلی</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">آخرین چک‌این</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">پیشرفت</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">وضعیت</TableHead>
-              <TableHead className="text-left text-[11px] font-semibold text-[#8e98a8]">عملیات</TableHead>
+            <TableRow className="border-b border-border">
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">نام</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">تلفن</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">برنامه فعلی</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">آخرین چک‌این</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">پیشرفت</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">وضعیت</TableHead>
+              <TableHead className="text-left text-[11px] font-semibold text-muted-foreground">عملیات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.map((athlete) => {
               const name = `${athlete.firstName} ${athlete.lastName}`;
               return (
-                <TableRow key={athlete.id} className={cn("border-t border-[#1e2430] hover:bg-[#1a202a]")}>
+                <TableRow key={athlete.id} className={cn("border-t border-border hover:bg-secondary")}>
                   <TableCell>
                     <Link href={`/coach/athletes/${athlete.id}`} className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
@@ -96,13 +96,13 @@ export default function AthletesPage() {
                           {getInitials(name)}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-medium text-white">{name}</span>
+                      <span className="font-medium text-foreground">{name}</span>
                     </Link>
                   </TableCell>
-                  <TableCell dir="ltr" className="text-left text-white">{athlete.phone}</TableCell>
-                  <TableCell className="text-white">–</TableCell>
-                  <TableCell className="text-white">{athlete.lastLoginAt ? formatDate(athlete.lastLoginAt) : "–"}</TableCell>
-                  <TableCell className="text-white">–</TableCell>
+                  <TableCell dir="ltr" className="text-left text-foreground">{athlete.phone}</TableCell>
+                  <TableCell className="text-foreground">–</TableCell>
+                  <TableCell className="text-foreground">{athlete.lastLoginAt ? formatDate(athlete.lastLoginAt) : "–"}</TableCell>
+                  <TableCell className="text-foreground">–</TableCell>
                   <TableCell>
                     <Badge variant={getStatusBadge(athlete.status).variant}>
                       {getStatusBadge(athlete.status).label}
@@ -128,7 +128,7 @@ export default function AthletesPage() {
           </TableBody>
         </Table>
         {filtered.length === 0 && (
-          <div className="border-t border-[#1e2430] p-6">
+          <div className="border-t border-border p-6">
             <EmptyState
               title="هیچ شاگردی یافت نشد"
               description="شما هنوز هیچ شاگردی ندارید"

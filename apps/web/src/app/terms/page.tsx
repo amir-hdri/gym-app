@@ -24,26 +24,26 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-[#0c0e12] text-white">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-4 py-10 sm:py-16">
         <Link
           href="/auth/register"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-[#8e98a8] transition-colors hover:text-[#d2c0a5]"
+          className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
         >
           <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
           بازگشت به ثبت‌نام
         </Link>
         <FadeIn>
-          <div className="rounded-[32px] border border-white/10 bg-[#10141a] p-6 shadow-2xl shadow-black/50 sm:p-10">
+          <div className="rounded-[32px] border border-border bg-popover p-6 shadow-2xl shadow-black/50 sm:p-10">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#d2c0a5]/40 bg-[#202734] text-[#d2c0a5]">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/40 bg-secondary text-primary">
                 <ShieldCheck className="h-6 w-6" strokeWidth={1.75} />
               </div>
               <div>
-                <h1 className="font-serif text-2xl font-medium text-white sm:text-3xl">
+                <h1 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
                   قوانین و مقررات Lumi Wellness
                 </h1>
-                <p className="mt-1 text-xs text-[#8e98a8]">آخرین به‌روزرسانی: تیر 1405</p>
+                <p className="mt-1 text-xs text-muted-foreground">آخرین به‌روزرسانی: تیر 1405</p>
               </div>
             </div>
 
@@ -51,7 +51,7 @@ export default function TermsPage() {
               {sections.map((s) => (
                 <section key={s.title}>
                   <SectionTitle>{s.title}</SectionTitle>
-                  <p className="mt-2 text-sm leading-8 text-[#8e98a8]">{s.body}</p>
+                  <p className="mt-2 text-sm leading-8 text-muted-foreground">{s.body}</p>
                 </section>
               ))}
             </div>

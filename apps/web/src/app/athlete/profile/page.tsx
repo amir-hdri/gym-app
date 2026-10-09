@@ -48,43 +48,43 @@ export default function ProfilePage() {
       {/* Profile header — reference avatar pattern */}
       <div className="flex flex-col items-center pt-2">
         <div className="relative">
-          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[#d2c0a5] bg-gradient-to-br from-[#2a3444] to-[#141a22] shadow-xl">
-            <span className="font-serif text-2xl font-bold text-[#d2c0a5]">{getInitials(fullName)}</span>
+          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-gradient-to-br from-secondary to-card shadow-xl">
+            <span className="font-serif text-2xl font-bold text-primary">{getInitials(fullName)}</span>
           </div>
-          <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#d2c0a5] text-[#121417] shadow-md">
+          <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md">
             <Sparkles className="h-3.5 w-3.5 fill-current" />
           </div>
         </div>
-        <h1 className="mt-3.5 font-serif text-2xl font-normal tracking-tight text-white">{fullName}</h1>
+        <h1 className="mt-3.5 font-serif text-2xl font-normal tracking-tight text-foreground">{fullName}</h1>
         <Badge className="mt-2" variant="secondary">{user.role === "athlete" ? "ورزشکار" : user.role}</Badge>
-        <p className="mt-2 text-xs text-[#8e98a8]">
+        <p className="mt-2 text-xs text-muted-foreground">
           <span dir="ltr">{user.email}</span> · {user.phone || "بدون تلفن"}
         </p>
-        {user.branchId && <p className="mt-1 text-xs text-[#8e98a8]">شعبه: {user.branchId}</p>}
+        {user.branchId && <p className="mt-1 text-xs text-muted-foreground">شعبه: {user.branchId}</p>}
       </div>
 
       {/* Stats row with dividers */}
-      <div className="flex items-center justify-around border-y border-[#1e2430] px-2 py-3">
+      <div className="flex items-center justify-around border-y border-border px-2 py-3">
         {statsRow.map((s, i) => (
           <div key={s.label} className="flex items-center">
-            {i > 0 && <div className="h-7 w-[1px] bg-[#262e3d] mx-4" />}
+            {i > 0 && <div className="h-7 w-[1px] bg-border mx-4" />}
             <div className="flex flex-col items-center">
-              <span className="font-sans text-xl font-medium tabular-nums text-white">{s.value}</span>
-              <span className="mt-0.5 text-[10px] font-semibold text-[#8e98a8]">{s.label}</span>
+              <span className="font-sans text-xl font-medium tabular-nums text-foreground">{s.value}</span>
+              <span className="mt-0.5 text-[10px] font-semibold text-muted-foreground">{s.label}</span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Membership card */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-[#232934] bg-[#161a22] p-4 shadow-lg shadow-black/20">
+      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/20">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#323d4d] bg-[#242b36] text-[#d2c0a5]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-secondary text-primary">
             <Sparkles className="h-5 w-5" strokeWidth={1.75} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">{membership?.plan?.name || "بدون اشتراک فعال"}</h3>
-            <p className="mt-0.5 text-xs text-[#8e98a8]">
+            <h3 className="text-sm font-semibold text-foreground">{membership?.plan?.name || "بدون اشتراک فعال"}</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
               {membership
                 ? `اعتبار تا ${formatDate(membership.endDate)} · ${formatPersianNumber(membership.sessionsRemaining ?? 0)} جلسه باقی‌مانده`
                 : "اشتراک فعالی ثبت نشده است."}
@@ -99,14 +99,14 @@ export default function ProfilePage() {
       {/* Personal info — settings list pattern */}
       <div className="flex flex-col gap-3">
         <SectionTitle>اطلاعات شخصی</SectionTitle>
-        <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22] divide-y divide-[#1e2430]">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
           <ProfileRow icon={<User className="h-4 w-4" strokeWidth={1.75} />} label="نام" value={user.firstName} />
           <ProfileRow icon={<User className="h-4 w-4" strokeWidth={1.75} />} label="نام خانوادگی" value={user.lastName} />
           <ProfileRow icon={<Mail className="h-4 w-4" strokeWidth={1.75} />} label="ایمیل">
-            <span className="break-all text-left text-sm text-white" dir="ltr">{user.email}</span>
+            <span className="break-all text-left text-sm text-foreground" dir="ltr">{user.email}</span>
           </ProfileRow>
           <ProfileRow icon={<Phone className="h-4 w-4" strokeWidth={1.75} />} label="تلفن">
-            <span className="text-sm text-white" dir="ltr">{user.phone || "—"}</span>
+            <span className="text-sm text-foreground" dir="ltr">{user.phone || "—"}</span>
           </ProfileRow>
           <ProfileRow icon={<CheckCircle2 className="h-4 w-4" strokeWidth={1.75} />} label="وضعیت">
             <Badge variant={user.status === "active" ? "success" : "secondary"}>{user.status}</Badge>
@@ -117,9 +117,9 @@ export default function ProfilePage() {
       {/* Membership details — settings list pattern */}
       <div className="flex flex-col gap-3">
         <SectionTitle>اشتراک</SectionTitle>
-        <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22] divide-y divide-[#1e2430]">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
           {!membership ? (
-            <p className="px-4 py-3.5 text-sm text-[#8e98a8]">اشتراک فعالی ثبت نشده است.</p>
+            <p className="px-4 py-3.5 text-sm text-muted-foreground">اشتراک فعالی ثبت نشده است.</p>
           ) : (
             <>
               <ProfileRow icon={<Sparkles className="h-4 w-4" strokeWidth={1.75} />} label="طرح" value={membership.plan?.name || "—"} />
@@ -146,12 +146,12 @@ function ProfileRow({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="group flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-[#1a202a]">
+    <div className="group flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-secondary">
       <div className="flex items-center gap-3">
-        <span className="text-[#8e98a8] transition-colors group-hover:text-[#d2c0a5]">{icon}</span>
-        <span className="text-xs font-medium text-white">{label}</span>
+        <span className="text-muted-foreground transition-colors group-hover:text-primary">{icon}</span>
+        <span className="text-xs font-medium text-foreground">{label}</span>
       </div>
-      {children ?? <span className="text-sm text-white">{value}</span>}
+      {children ?? <span className="text-sm text-foreground">{value}</span>}
     </div>
   );
 }

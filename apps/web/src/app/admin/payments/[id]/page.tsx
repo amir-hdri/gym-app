@@ -15,8 +15,8 @@ const statusConfig: Record<string, { label: string; variant: "success" | "warnin
 };
 
 const infoRow = "flex items-center justify-between gap-3 px-4 py-3.5";
-const infoLabel = "text-[11px] font-semibold text-[#8e98a8]";
-const infoValue = "text-sm font-medium text-white";
+const infoLabel = "text-[11px] font-semibold text-muted-foreground";
+const infoValue = "text-sm font-medium text-foreground";
 
 export default function TransactionDetailPage() {
   const params = useParams<{ id: string }>();
@@ -32,7 +32,7 @@ export default function TransactionDetailPage() {
       <div>
         <Link
           href="/admin/payments"
-          className="mb-2 inline-flex items-center gap-1 text-xs text-[#8e98a8] transition-colors hover:text-white"
+          className="mb-2 inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
           <ChevronRight strokeWidth={1.75} className="h-4 w-4" />
           بازگشت به پرداخت‌ها
@@ -51,13 +51,13 @@ export default function TransactionDetailPage() {
       <TwilightCard className="p-6">
         <div className="flex flex-col items-center gap-2 text-center">
           <MicroLabelFa>مبلغ</MicroLabelFa>
-          <p className="font-serif text-4xl font-normal tabular-nums text-[#f5f3ef]">
+          <p className="font-serif text-4xl font-normal tabular-nums text-foreground">
             {formatCurrency(payment.amount)}
           </p>
         </div>
       </TwilightCard>
 
-      <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22] divide-y divide-[#1e2430]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
         <div className={infoRow}>
           <span className={infoLabel}>پرداخت‌کننده</span>
           <span className={infoValue}>{payment.user ? `${payment.user.firstName} ${payment.user.lastName}` : payment.userId}</span>
@@ -76,7 +76,7 @@ export default function TransactionDetailPage() {
         </div>
         <div className={infoRow}>
           <span className={infoLabel}>توضیحات</span>
-          <span className="max-w-[60%] text-sm text-[#c3cad6]">{payment.description}</span>
+          <span className="max-w-[60%] text-sm text-muted-foreground">{payment.description}</span>
         </div>
       </div>
 

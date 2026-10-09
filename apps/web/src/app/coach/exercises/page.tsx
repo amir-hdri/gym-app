@@ -59,7 +59,7 @@ export default function ExerciseLibraryPage() {
       <div className="flex flex-col gap-3">
         <SearchInput value={search} onChange={setSearch} placeholder="جستجوی حرکت..." />
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <span className="w-16 shrink-0 text-[11px] font-semibold text-[#8e98a8]">عضله هدف</span>
+          <span className="w-16 shrink-0 text-[11px] font-semibold text-muted-foreground">عضله هدف</span>
           <FilterChips
             pillId="coach-exercises-muscle"
             options={muscles}
@@ -69,7 +69,7 @@ export default function ExerciseLibraryPage() {
           />
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <span className="w-16 shrink-0 text-[11px] font-semibold text-[#8e98a8]">سطح</span>
+          <span className="w-16 shrink-0 text-[11px] font-semibold text-muted-foreground">سطح</span>
           <FilterChips
             pillId="coach-exercises-difficulty"
             options={difficulties}
@@ -80,27 +80,27 @@ export default function ExerciseLibraryPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-[#232934]">
-              <TableHead className="w-12 text-[11px] font-semibold text-[#8e98a8]">ردیف</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">نام حرکت</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">عضله هدف</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">وسیله</TableHead>
-              <TableHead className="text-[11px] font-semibold text-[#8e98a8]">سطح</TableHead>
-              <TableHead className="w-28 text-[11px] font-semibold text-[#8e98a8]">عملیات</TableHead>
+            <TableRow className="border-b border-border">
+              <TableHead className="w-12 text-[11px] font-semibold text-muted-foreground">ردیف</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">نام حرکت</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">عضله هدف</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">وسیله</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground">سطح</TableHead>
+              <TableHead className="w-28 text-[11px] font-semibold text-muted-foreground">عملیات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.map((ex, idx) => (
-              <TableRow key={ex.id} className={cn("border-t border-[#1e2430] hover:bg-[#1a202a]")}>
-                <TableCell className="tabular-nums text-white">{formatPersianNumber(idx + 1)}</TableCell>
-                <TableCell className="font-medium text-white">{ex.name}</TableCell>
+              <TableRow key={ex.id} className={cn("border-t border-border hover:bg-secondary")}>
+                <TableCell className="tabular-nums text-foreground">{formatPersianNumber(idx + 1)}</TableCell>
+                <TableCell className="font-medium text-foreground">{ex.name}</TableCell>
                 <TableCell><Badge variant="outline">{ex.muscleGroup}</Badge></TableCell>
                 <TableCell>
-                  <span className="flex items-center gap-1 text-white">
-                    <Dumbbell className="h-3.5 w-3.5 text-[#8e98a8]" strokeWidth={1.75} />
+                  <span className="flex items-center gap-1 text-foreground">
+                    <Dumbbell className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.75} />
                     {ex.equipment || "–"}
                   </span>
                 </TableCell>
@@ -126,7 +126,7 @@ export default function ExerciseLibraryPage() {
           </TableBody>
         </Table>
         {filtered.length === 0 && (
-          <div className="border-t border-[#1e2430] p-6">
+          <div className="border-t border-border p-6">
             <EmptyState
               title="هیچ حرکتی یافت نشد"
               description="حرکتی با فیلترهای انتخاب شده وجود ندارد"

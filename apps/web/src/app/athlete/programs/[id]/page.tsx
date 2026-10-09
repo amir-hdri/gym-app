@@ -91,7 +91,7 @@ export default function ProgramDetailPage() {
         title={program.name}
         subtitle={`${program.coach?.firstName || ""} ${program.coach?.lastName || ""} | ${formatDate(program.startDate)} - ${formatDate(program.endDate)} | ${formatPersianNumber(program.frequencyPerWeek)} روز در هفته`}
         action={
-          <span className="rounded-full border border-[#2b313d] bg-[#181c22] px-3 py-1.5 text-[11px] text-[#e5d9c5]">
+          <span className="rounded-full border border-border bg-card px-3 py-1.5 text-[11px] text-primary">
             {formatPersianNumber(Math.round(overallProgress))}٪ تکمیل
           </span>
         }
@@ -100,14 +100,14 @@ export default function ProgramDetailPage() {
       <TwilightCard>
         <div className="mb-3 flex items-center justify-between">
           <MicroLabelFa>پیشرفت کلی برنامه</MicroLabelFa>
-          <span className="font-sans text-sm font-medium tabular-nums text-white">
+          <span className="font-sans text-sm font-medium tabular-nums text-foreground">
             {formatPersianNumber(Math.round(overallProgress))}٪
           </span>
         </div>
         <Progress
           value={overallProgress}
-          className="bg-white/10"
-          indicatorClassName="bg-[#d2c0a5] shadow-none"
+          className="bg-border"
+          indicatorClassName="bg-primary shadow-none"
         />
       </TwilightCard>
 
@@ -124,7 +124,7 @@ export default function ProgramDetailPage() {
           <div className="flex items-center justify-between px-4 pt-4">
             <div>
               <SectionTitle>تمرینات {activeDayData.day}</SectionTitle>
-              <span className="text-[11px] text-[#8e98a8]">
+              <span className="text-[11px] text-muted-foreground">
                 {formatPersianNumber(activeDayCompleted)}/{formatPersianNumber(activeDayData.exercises.length)} حرکت تکمیل شده
               </span>
             </div>
@@ -134,14 +134,14 @@ export default function ProgramDetailPage() {
                 onClick={() => setIsPlayerOpen(true)}
                 className="w-auto px-4 py-2 text-xs"
               >
-                <Play className="w-3.5 h-3.5 fill-current text-[#121417]" />
+                <Play className="w-3.5 h-3.5 fill-current text-primary-foreground" />
                 <span>شروع تمرین این روز</span>
               </CtaButton>
             )}
           </div>
           <div className="flex flex-col gap-2.5 p-4">
             {activeDayData.exercises.length === 0 ? (
-              <p className="py-6 text-center text-sm text-[#8e98a8]">روز استراحت و ریکاوری عضلات</p>
+              <p className="py-6 text-center text-sm text-muted-foreground">روز استراحت و ریکاوری عضلات</p>
             ) : (
               activeDayData.exercises.map((exercise, idx) => {
                 const isCompleted = (completedExercises[activeDayData.day] || []).includes(idx);
@@ -149,7 +149,7 @@ export default function ProgramDetailPage() {
                   <div
                     key={exercise.id || idx}
                     className={cn(
-                      "flex items-center gap-4 rounded-xl border border-[#232934] bg-[#161a22] p-4 transition-colors",
+                      "flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-colors",
                       isCompleted && "opacity-50"
                     )}
                   >
@@ -157,9 +157,9 @@ export default function ProgramDetailPage() {
                       checked={isCompleted}
                       onCheckedChange={() => toggleExercise(activeDayData.day, idx)}
                     />
-                    <div className={cn("flex-1", isCompleted && "line-through text-[#8e98a8]")}>
-                      <p className="text-sm font-medium text-white">{exercise.exercise?.name || exercise.exerciseId}</p>
-                      <p className="mt-0.5 text-[11px] text-[#8e98a8]">
+                    <div className={cn("flex-1", isCompleted && "line-through text-muted-foreground")}>
+                      <p className="text-sm font-medium text-foreground">{exercise.exercise?.name || exercise.exerciseId}</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
                         {formatPersianNumber(exercise.sets)} × {exercise.reps}
                         {exercise.weight ? ` - ${formatPersianNumber(exercise.weight)} کیلوگرم` : ""}
                         {" - "}

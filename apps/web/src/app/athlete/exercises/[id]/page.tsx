@@ -60,27 +60,27 @@ export default function ExerciseDetailPage() {
 
       <TwilightCard className="p-5">
         <div className="flex items-start gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-[#2c3444] bg-[#202632] text-[#d2c0a5]">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-border bg-secondary text-primary">
             <Dumbbell className="h-8 w-8" strokeWidth={1.75} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="font-serif text-2xl font-normal text-white">{ex.name}</h1>
+              <h1 className="font-serif text-2xl font-normal text-foreground">{ex.name}</h1>
               <Badge variant={diffColors[ex.difficulty] || "default"} className="bg-primary">
                 {diffLabels[ex.difficulty] || ex.difficulty}
               </Badge>
             </div>
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#8e98a8]">
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <BarChart3 className="h-3.5 w-3.5 text-[#d2c0a5]" strokeWidth={1.75} />
+                <BarChart3 className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
                 عضله: {ex.muscleGroup}
               </span>
               <span className="flex items-center gap-1.5">
-                <Dumbbell className="h-3.5 w-3.5 text-[#d2c0a5]" strokeWidth={1.75} />
+                <Dumbbell className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
                 وسیله: {ex.equipment || "بدون وسیله"}
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-[#d2c0a5]" strokeWidth={1.75} />
+                <Clock className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
                 استراحت: {formatPersianNumber(defaultRest)} ثانیه
               </span>
             </div>
@@ -91,7 +91,7 @@ export default function ExerciseDetailPage() {
       <section className="flex flex-col gap-3">
         <SectionTitle>نحوه اجرا</SectionTitle>
         <TwilightCard>
-          <p className="text-sm leading-relaxed text-[#c3ccd8]">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             {ex.description || ex.instructions || "توضیحاتی ثبت نشده است"}
           </p>
         </TwilightCard>
@@ -100,7 +100,7 @@ export default function ExerciseDetailPage() {
       <section className="flex flex-col gap-3">
         <SectionTitle>نکات مهم</SectionTitle>
         <TwilightCard>
-          <p className="text-sm leading-relaxed text-[#c3ccd8]">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             {ex.tips || "نکته خاصی ثبت نشده است"}
           </p>
         </TwilightCard>
@@ -112,7 +112,7 @@ export default function ExerciseDetailPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <Label>تعداد ست</Label>
-              <p className="pt-2 font-sans text-lg font-semibold tabular-nums text-white">
+              <p className="pt-2 font-sans text-lg font-semibold tabular-nums text-foreground">
                 {formatPersianNumber(defaultSets)}
               </p>
             </div>

@@ -43,42 +43,42 @@ export default function InvoiceDetailPage() {
 
       <TwilightCard className="p-6">
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full border border-[#d2c0a5]/40 bg-[#202734] text-[#d2c0a5] shadow-lg">
+          <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-secondary text-primary shadow-lg">
             <Receipt className="h-6 w-6" strokeWidth={1.75} />
           </div>
-          <p className="font-sans text-3xl font-normal tabular-nums text-white">
+          <p className="font-sans text-3xl font-normal tabular-nums text-foreground">
             {formatCurrency(p.amount)}
           </p>
           <MicroLabelFa>مبلغ پرداخت</MicroLabelFa>
         </div>
 
-        <div className="mt-6 grid gap-4 border-t border-[#1e2430] pt-6 md:grid-cols-2">
+        <div className="mt-6 grid gap-4 border-t border-border pt-6 md:grid-cols-2">
           <div className="space-y-1">
             <MicroLabelFa>تاریخ</MicroLabelFa>
-            <p className="text-sm font-medium text-white">{formatDate(p.paidAt || p.createdAt)}</p>
+            <p className="text-sm font-medium text-foreground">{formatDate(p.paidAt || p.createdAt)}</p>
           </div>
           <div className="space-y-1">
             <MicroLabelFa>روش پرداخت</MicroLabelFa>
-            <p className="text-sm font-medium text-white">{p.method}</p>
+            <p className="text-sm font-medium text-foreground">{p.method}</p>
           </div>
           <div className="space-y-1">
             <MicroLabelFa>وضعیت</MicroLabelFa>
-            <p className="text-sm font-medium text-white">{isCompleted ? "موفق" : p.status}</p>
+            <p className="text-sm font-medium text-foreground">{isCompleted ? "موفق" : p.status}</p>
           </div>
           <div className="space-y-1">
             <MicroLabelFa>توضیحات</MicroLabelFa>
-            <p className="text-sm text-[#c3ccd8]">{p.description || "---"}</p>
+            <p className="text-sm text-muted-foreground">{p.description || "---"}</p>
           </div>
         </div>
 
         {isCompleted && (
-          <div className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-[#d2c0a5]/40 bg-[#161c26] p-4">
-            <CheckCircle className="h-5 w-5 text-[#d2c0a5]" strokeWidth={1.75} />
-            <span className="text-sm text-[#e5e7eb]">این پرداخت با موفقیت انجام شده است</span>
+          <div className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-primary/40 bg-card p-4">
+            <CheckCircle className="h-5 w-5 text-primary" strokeWidth={1.75} />
+            <span className="text-sm text-foreground">این پرداخت با موفقیت انجام شده است</span>
           </div>
         )}
 
-        <div className="mt-6 flex justify-end gap-3 border-t border-[#1e2430] pt-6">
+        <div className="mt-6 flex justify-end gap-3 border-t border-border pt-6">
           <Button variant="outline">
             <Printer className="h-4 w-4" strokeWidth={1.75} /> چاپ
           </Button>
@@ -91,15 +91,15 @@ export default function InvoiceDetailPage() {
       <section className="flex flex-col gap-3">
         <SectionTitle>خلاصه</SectionTitle>
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-[#232934] bg-[#161a22] p-4">
+          <div className="rounded-2xl border border-border bg-card p-4">
             <MicroLabelFa>شماره پیگیری</MicroLabelFa>
-            <p className="mt-2 break-all font-sans text-sm text-white" dir="ltr">
+            <p className="mt-2 break-all font-sans text-sm text-foreground" dir="ltr">
               {p.referenceId || p.id}
             </p>
           </div>
-          <div className="rounded-2xl border border-[#232934] bg-[#161a22] p-4">
+          <div className="rounded-2xl border border-border bg-card p-4">
             <MicroLabelFa>مبلغ به عدد</MicroLabelFa>
-            <p className="mt-2 font-sans text-sm tabular-nums text-white">
+            <p className="mt-2 font-sans text-sm tabular-nums text-foreground">
               {formatPersianNumber(p.amount)}
             </p>
           </div>

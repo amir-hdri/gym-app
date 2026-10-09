@@ -32,7 +32,7 @@ const statusLabels: Record<string, { label: string; variant: "success" | "warnin
   refunded: { label: "بازگشت داده شده", variant: "secondary" },
 };
 
-const tableHeadCell = "whitespace-nowrap px-4 py-3 text-right align-middle text-[10px] font-semibold text-[#8e98a8]";
+const tableHeadCell = "whitespace-nowrap px-4 py-3 text-right align-middle text-[10px] font-semibold text-muted-foreground";
 const tableCell = "px-4 py-3 align-middle";
 
 export default function PaymentsPage() {
@@ -52,11 +52,11 @@ export default function PaymentsPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard
           label="کل درآمد (موفق)"
-          value={<span className="text-[#d2c0a5]">{formatCurrency(totalRevenue)}</span>}
+          value={<span className="text-primary">{formatCurrency(totalRevenue)}</span>}
         />
         <StatCard
           label="درآمد در انتظار"
-          value={<span className="text-[#d2c0a5]">{formatCurrency(totalPending)}</span>}
+          value={<span className="text-primary">{formatCurrency(totalPending)}</span>}
         />
         <StatCard
           label="تعداد تراکنش‌ها"
@@ -67,7 +67,7 @@ export default function PaymentsPage() {
       <section className="flex flex-col gap-3">
         <SectionTitle>روند درآمد موفق</SectionTitle>
         <TwilightCard>
-          <p className="mb-4 text-xs text-[#8e98a8]">بر اساس تاریخ پرداخت‌های تکمیل‌شده</p>
+          <p className="mb-4 text-xs text-muted-foreground">بر اساس تاریخ پرداخت‌های تکمیل‌شده</p>
           <RevenueChart payments={payments} />
         </TwilightCard>
       </section>
@@ -81,7 +81,7 @@ export default function PaymentsPage() {
             description="هنوز هیچ پرداختی ثبت نشده است"
           />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-sm leading-6">
                 <thead>
@@ -97,10 +97,10 @@ export default function PaymentsPage() {
                 </thead>
                 <tbody>
                   {payments.map((payment, idx) => (
-                    <tr key={payment.id} className="border-t border-[#1e2430] transition-colors hover:bg-[#1a202a]">
+                    <tr key={payment.id} className="border-t border-border transition-colors hover:bg-secondary">
                       <td className={tableCell}>{formatPersianNumber(idx + 1)}</td>
-                      <td className={`${tableCell} font-medium text-white`}>{payment.user ? `${payment.user.firstName} ${payment.user.lastName}` : payment.userId}</td>
-                      <td className={`${tableCell} font-medium tabular-nums text-white`}>{formatCurrency(payment.amount)}</td>
+                      <td className={`${tableCell} font-medium text-foreground`}>{payment.user ? `${payment.user.firstName} ${payment.user.lastName}` : payment.userId}</td>
+                      <td className={`${tableCell} font-medium tabular-nums text-foreground`}>{formatCurrency(payment.amount)}</td>
                       <td className={tableCell}>
                         <Badge variant={methodVariants[payment.method]}>
                           {methodLabels[payment.method]}
@@ -111,7 +111,7 @@ export default function PaymentsPage() {
                           {statusLabels[payment.status].label}
                         </Badge>
                       </td>
-                      <td className={`${tableCell} whitespace-nowrap text-[#c3cad6]`}>{formatDateTime(payment.paidAt || payment.createdAt)}</td>
+                      <td className={`${tableCell} whitespace-nowrap text-muted-foreground`}>{formatDateTime(payment.paidAt || payment.createdAt)}</td>
                       <td className={tableCell}>
                         <div className="flex items-center gap-1">
                           <Link href={`/admin/payments/${payment.id}`} className="min-h-11 inline-flex items-center px-2 text-sm font-medium text-primary hover:underline">جزئیات</Link>

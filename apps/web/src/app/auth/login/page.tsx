@@ -15,7 +15,7 @@ import { homeForRole, panelLabelForRole } from "@/components/auth/auth-helpers";
 import { USE_MOCK } from "@/hooks/api-source";
 
 const inputClassName =
-  "h-12 w-full rounded-xl border border-[#232934] bg-[#161a22] pe-11 ps-4 text-sm text-white placeholder:text-[#5b6472] transition-all duration-200 focus:border-[#d2c0a5]/60 focus:outline-none focus:ring-2 focus:ring-[#d2c0a5]/15 disabled:opacity-60";
+  "h-12 w-full rounded-xl border border-border bg-card pe-11 ps-4 text-sm text-foreground placeholder:text-muted transition-all duration-200 focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-60";
 
 interface DemoAccount {
   email: string;
@@ -86,7 +86,7 @@ function SignInContent() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
       <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-        <label htmlFor="email" className="mb-2 block text-xs font-medium text-[#8e98a8]">
+        <label htmlFor="email" className="mb-2 block text-xs font-medium text-muted-foreground">
           ایمیل
         </label>
         <div className="relative">
@@ -109,15 +109,15 @@ function SignInContent() {
               },
             })}
           />
-          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5b6472]">
+          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted">
             <Mail className="h-4 w-4" strokeWidth={1.75} />
           </span>
         </div>
-        {errors.email?.message && <p className="mt-1.5 text-xs text-[#f87171]">{errors.email.message}</p>}
+        {errors.email?.message && <p className="mt-1.5 text-xs text-destructive">{errors.email.message}</p>}
       </motion.div>
 
       <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
-        <label htmlFor="password" className="mb-2 block text-xs font-medium text-[#8e98a8]">
+        <label htmlFor="password" className="mb-2 block text-xs font-medium text-muted-foreground">
           رمز عبور
         </label>
         <div className="relative">
@@ -133,12 +133,12 @@ function SignInContent() {
               minLength: { value: 6, message: "رمز باید حداقل ۶ کاراکتر باشد" },
             })}
           />
-          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5b6472]">
+          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted">
             <Lock className="h-4 w-4" strokeWidth={1.75} />
           </span>
           <button
             type="button"
-            className="absolute left-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#8e98a8] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/40"
+            className="absolute left-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? "پنهان کردن رمز عبور" : "نمایش رمز عبور"}
             aria-pressed={showPassword}
@@ -147,7 +147,7 @@ function SignInContent() {
             {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={1.75} /> : <Eye className="h-4 w-4" strokeWidth={1.75} />}
           </button>
         </div>
-        {errors.password?.message && <p className="mt-1.5 text-xs text-[#f87171]">{errors.password.message}</p>}
+        {errors.password?.message && <p className="mt-1.5 text-xs text-destructive">{errors.password.message}</p>}
       </motion.div>
 
       {submitError && (
@@ -155,7 +155,7 @@ function SignInContent() {
           role="alert"
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-[#f87171]/20 bg-[#f87171]/10 px-4 py-3 text-center text-sm text-[#f87171]"
+          className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-center text-sm text-destructive"
         >
           {submitError}
         </motion.p>
@@ -170,14 +170,14 @@ function SignInContent() {
         <label className="group flex cursor-pointer items-center gap-2">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-[#232934] bg-[#161a22] text-[#d2c0a5] accent-[#d2c0a5]"
+            className="h-4 w-4 rounded border-border bg-card text-primary accent-primary"
             {...register("rememberMe")}
           />
-          <span className="text-sm text-[#8e98a8] transition-colors group-hover:text-white">
+          <span className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">
             مرا به خاطر بسپار
           </span>
         </label>
-        <Link href="/auth/forgot-password" className="rounded-md text-sm font-medium text-[#d2c0a5] transition-colors hover:text-[#ded1bc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/40">
+        <Link href="/auth/forgot-password" className="rounded-md text-sm font-medium text-primary transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
           فراموشی رمز؟
         </Link>
       </motion.div>
@@ -199,9 +199,9 @@ function SignInContent() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.35 }}
-        className="flex items-center justify-center gap-1.5 text-[11px] text-[#6b7280]"
+        className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground"
       >
-        <ShieldCheck className="h-3.5 w-3.5 text-[#d2c0a5]/70" strokeWidth={1.75} />
+        <ShieldCheck className="h-3.5 w-3.5 text-primary/70" strokeWidth={1.75} />
         اطلاعات شما با رمزنگاری محافظت می‌شود
       </motion.div>
 
@@ -209,19 +209,19 @@ function SignInContent() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="text-center text-sm text-[#8e98a8]"
+        className="text-center text-sm text-muted-foreground"
       >
         عضو نیستی؟{" "}
-        <Link href="/auth/register" className="inline-flex items-center gap-1 font-semibold text-[#d2c0a5] transition-colors hover:text-[#ded1bc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/40 rounded-md">
+        <Link href="/auth/register" className="inline-flex items-center gap-1 font-semibold text-primary transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md">
           ثبت‌نام کن
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
         </Link>
       </motion.p>
 
       {SHOW_DEMO_ACCOUNTS && (
-        <div className="rounded-2xl border border-dashed border-[#232934] bg-[#161a22]/60 p-4">
-          <p className="text-xs font-semibold text-white">حساب‌های نمایشی (فقط محیط توسعه)</p>
-          <p className="mt-1 text-[11px] leading-5 text-[#8e98a8]">
+        <div className="rounded-2xl border border-dashed border-border bg-card/60 p-4">
+          <p className="text-xs font-semibold text-foreground">حساب‌های نمایشی (فقط محیط توسعه)</p>
+          <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
             یکی را انتخاب کن تا فرم پر شود؛ بعد «ورود به حساب» را بزن.
           </p>
           <div className="mt-3 flex flex-wrap gap-2" aria-live="polite">
@@ -230,7 +230,7 @@ function SignInContent() {
                 key={account.email}
                 type="button"
                 onClick={() => fillDemoAccount(account)}
-                className="inline-flex min-h-11 items-center rounded-xl border border-[#232934] bg-[#10141a] px-3 text-xs font-medium text-white transition-colors hover:border-[#d2c0a5]/60 hover:text-[#d2c0a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2c0a5]/40"
+                className="inline-flex min-h-11 items-center rounded-xl border border-border bg-popover px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 {account.label}
               </button>
@@ -244,7 +244,7 @@ function SignInContent() {
 
 export default function LoginPage() {
   return (
-    <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-[#07090c] px-4 py-8 text-white">
+    <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-8 text-foreground">
       {/* Subtle atmospheric scenic background */}
       <div className="pointer-events-none absolute inset-0 opacity-25">
         <GymBackdrop />
@@ -267,27 +267,27 @@ export default function LoginPage() {
         {/* Centered Brand Header */}
         <div className="mb-6 flex flex-col items-center text-center">
           <LumiWordmark />
-          <h1 className="mt-4 font-serif text-3xl font-normal text-white sm:text-4xl">
+          <h1 className="mt-4 font-serif text-3xl font-normal text-foreground sm:text-4xl">
             خوش برگشتی
           </h1>
-          <p className="mt-1.5 text-xs text-[#8e98a8]">
+          <p className="mt-1.5 text-xs text-muted-foreground">
             وارد حساب کاربری‌ات شو و تمرینت رو ادامه بده
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[#10141a]/95 p-6 shadow-2xl shadow-black/70 backdrop-blur-xl sm:p-8">
+        <div className="relative w-full overflow-hidden rounded-[28px] border border-border bg-popover/95 p-6 shadow-2xl shadow-black/70 backdrop-blur-xl sm:p-8">
           {/* Top subtle highlight */}
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-[#d2c0a5]/50 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-primary/50 to-transparent" />
           <SignInContent />
         </div>
 
         {/* Footer Terms Note */}
-        <p className="mt-6 text-center text-[11px] leading-5 text-[#6b7280]">
+        <p className="mt-6 text-center text-[11px] leading-5 text-muted-foreground">
           با ورود،{" "}
           <Link
             href="/terms"
-            className="text-[#8e98a8] underline underline-offset-4 transition-colors hover:text-white"
+            className="text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
           >
             شرایط استفاده
           </Link>{" "}

@@ -30,8 +30,8 @@ const statusFilterLabels: Record<StatusFilter, string> = {
   suspended: "تعلیق شده",
 };
 
-const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-[#8e98a8]";
-const tdClass = "px-4 py-3 text-[#c8cdd6]";
+const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground";
+const tdClass = "px-4 py-3 text-muted-foreground";
 
 export default function MembersPage() {
   const router = useRouter();
@@ -82,18 +82,18 @@ export default function MembersPage() {
         <>
           <div className="grid gap-3 sm:hidden">
             {filtered.map((member) => (
-              <article key={member.id} className="rounded-2xl border border-[#232934] bg-[#161a22] p-4">
+              <article key={member.id} className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="truncate font-sans text-sm font-medium text-white">{member.firstName} {member.lastName}</h2>
-                    <p dir="ltr" className="mt-1 truncate text-left text-xs text-[#8e98a8]">{member.email}</p>
+                    <h2 className="truncate font-sans text-sm font-medium text-foreground">{member.firstName} {member.lastName}</h2>
+                    <p dir="ltr" className="mt-1 truncate text-left text-xs text-muted-foreground">{member.email}</p>
                   </div>
                   <Badge variant={statusMap[member.status].variant}>{statusMap[member.status].label}</Badge>
                 </div>
-                <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-[#1e2430] py-3 text-xs">
-                  <div><dt className="text-[#8e98a8]">شماره تماس</dt><dd dir="ltr" className="mt-1 text-right font-medium text-white">{member.phone}</dd></div>
-                  <div><dt className="text-[#8e98a8]">طرح اشتراک</dt><dd className="mt-1 font-medium text-white">{member.plan || "بدون طرح"}</dd></div>
-                  <div className="col-span-2"><dt className="text-[#8e98a8]">تاریخ ثبت‌نام</dt><dd className="mt-1 font-medium text-white">{formatDate(member.createdAt)}</dd></div>
+                <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-border py-3 text-xs">
+                  <div><dt className="text-muted-foreground">شماره تماس</dt><dd dir="ltr" className="mt-1 text-right font-medium text-foreground">{member.phone}</dd></div>
+                  <div><dt className="text-muted-foreground">طرح اشتراک</dt><dd className="mt-1 font-medium text-foreground">{member.plan || "بدون طرح"}</dd></div>
+                  <div className="col-span-2"><dt className="text-muted-foreground">تاریخ ثبت‌نام</dt><dd className="mt-1 font-medium text-foreground">{formatDate(member.createdAt)}</dd></div>
                 </dl>
                 <CtaButton variant="outline" onClick={() => router.push(`/admin/members/${member.id}`)} className="mt-3 w-full">
                   مشاهده و ویرایش
@@ -101,7 +101,7 @@ export default function MembersPage() {
               </article>
             ))}
           </div>
-          <div className="hidden overflow-x-auto rounded-2xl border border-[#232934] bg-[#161a22] sm:block">
+          <div className="hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
             <table className="w-full min-w-[760px] text-sm">
               <thead>
                 <tr>
@@ -117,9 +117,9 @@ export default function MembersPage() {
               </thead>
               <tbody>
                 {filtered.map((member, idx) => (
-                  <tr key={member.id} className="border-t border-[#1e2430] hover:bg-[#1a202a]">
+                  <tr key={member.id} className="border-t border-border hover:bg-secondary">
                     <td className={tdClass}>{formatPersianNumber(idx + 1)}</td>
-                    <td className={`${tdClass} font-medium text-white`}>{member.firstName} {member.lastName}</td>
+                    <td className={`${tdClass} font-medium text-foreground`}>{member.firstName} {member.lastName}</td>
                     <td dir="ltr" className={`${tdClass} text-left`}>{member.email}</td>
                     <td dir="ltr" className={`${tdClass} text-left`}>{member.phone}</td>
                     <td className={tdClass}>

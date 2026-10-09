@@ -13,7 +13,7 @@ import { useDashboardStats, useUsers } from "@/hooks/use-api";
 
 /** Twilight input override (ui/Input base carries old theme tokens + a dark: variant). */
 const inputClassName =
-  "h-11 rounded-xl border-[#232934] bg-[#161a22] text-white placeholder:text-[#6b7280] focus-visible:ring-0 focus-visible:border-[#d2c0a5]/50";
+  "h-11 rounded-xl border-border bg-card text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-primary/50";
 
 function StaffStats() {
   const stats = useDashboardStats();
@@ -90,28 +90,28 @@ export default function AdminProfilePage() {
       <PageHeader title="پروفایل مدیر" subtitle="مدیریت حساب کاربری شما" />
 
       <TwilightCard className="flex flex-col items-center gap-4 py-8">
-        <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#d2c0a5] bg-gradient-to-br from-[#2a3444] to-[#141a22]">
-          <span className="font-serif text-2xl text-[#d2c0a5]">{getInitials(fullName)}</span>
+        <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary bg-gradient-to-br from-secondary to-card">
+          <span className="font-serif text-2xl text-primary">{getInitials(fullName)}</span>
         </div>
         <div className="text-center">
-          <h2 className="font-serif text-2xl font-normal text-white">{fullName}</h2>
-          <p className="mt-1 text-xs text-[#8e98a8]">مدیر باشگاه</p>
+          <h2 className="font-serif text-2xl font-normal text-foreground">{fullName}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">مدیر باشگاه</p>
         </div>
       </TwilightCard>
 
       <StaffStats />
 
       <Tabs defaultValue="info" dir="rtl">
-        <TabsList className="rounded-xl border border-[#232934] bg-[#161a22] p-1">
+        <TabsList className="rounded-xl border border-border bg-card p-1">
           <TabsTrigger
             value="info"
-            className="rounded-lg text-[#8e98a8] data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417]"
+            className="rounded-lg text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             اطلاعات شخصی
           </TabsTrigger>
           <TabsTrigger
             value="security"
-            className="rounded-lg text-[#8e98a8] data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417]"
+            className="rounded-lg text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             امنیت
           </TabsTrigger>
@@ -119,7 +119,7 @@ export default function AdminProfilePage() {
 
         <TabsContent value="info">
           <TwilightCard>
-            <h3 className="font-serif text-lg font-normal text-white">اطلاعات شخصی</h3>
+            <h3 className="font-serif text-lg font-normal text-foreground">اطلاعات شخصی</h3>
             <div className="mt-4 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Input label="نام" value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} className={inputClassName} />
@@ -141,7 +141,7 @@ export default function AdminProfilePage() {
 
         <TabsContent value="security">
           <TwilightCard>
-            <h3 className="font-serif text-lg font-normal text-white">تغییر رمز عبور</h3>
+            <h3 className="font-serif text-lg font-normal text-foreground">تغییر رمز عبور</h3>
             <div className="mt-4 space-y-4">
               <Input
                 label="رمز عبور فعلی"

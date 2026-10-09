@@ -9,13 +9,13 @@ function Badge({ className, variant = "default", ...props }: BadgeProps) {
   // Reference pill language (GymCheckinScreen «ACTIVE» pill):
   // cream-tinted for positive states, muted for neutral, tinted for warn/error.
   const variants = {
-    default: "border-transparent bg-[#d2c0a5] text-[#121417]",
-    secondary: "border-[#2b3342] bg-[#1e2430] text-[#9ca3af]",
-    destructive: "border-[#f87171]/40 bg-[#f87171]/10 text-[#f87171]",
-    outline: "border-[#2b3342] text-[#8e98a8]",
-    success: "border-[#d2c0a5]/40 bg-[#d2c0a5]/10 text-[#d2c0a5]",
-    warning: "border-[#fbbf24]/40 bg-[#fbbf24]/10 text-[#fbbf24]",
-    info: "border-white/10 bg-[#202632] text-[#9ca3af]",
+    default: "border-transparent bg-primary text-primary-foreground",
+    secondary: "border-border bg-border text-muted-foreground",
+    destructive: "border-destructive/40 bg-destructive/10 text-destructive",
+    outline: "border-border text-muted-foreground",
+    success: "border-primary/40 bg-primary/10 text-primary",
+    warning: "border-warning/40 bg-warning/10 text-warning",
+    info: "border-border bg-secondary text-muted-foreground",
   };
 
   return (

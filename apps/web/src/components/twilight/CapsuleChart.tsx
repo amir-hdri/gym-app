@@ -65,22 +65,22 @@ export function WeeklyCapsuleChart({ checkIns }: { checkIns: CapsuleCheckIn[] })
   const maxMinutes = Math.max(...days.map((d) => d.minutes), 1);
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-[#232934] bg-[#161a22] p-4">
+    <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4">
       {/* Section Header with Legend */}
       <div className="flex items-center justify-between">
-        <h2 className="font-serif text-base font-normal text-white">حجم فعالیت هفتگی</h2>
-        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#8e98a8]">
-          <span className="h-2 w-2 rounded-full bg-[#d2c0a5]" />
+        <h2 className="font-serif text-base font-normal text-foreground">حجم فعالیت هفتگی</h2>
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="h-2 w-2 rounded-full bg-primary" />
           <span>دقیقه</span>
         </div>
       </div>
 
       {/* Selected Day Info Banner */}
-      <div className="flex items-center justify-between rounded-lg border border-white/5 bg-[#1a202a] px-2.5 py-1.5 text-xs">
-        <span className="font-medium text-neutral-300">
+      <div className="flex items-center justify-between rounded-lg border border-border bg-secondary px-2.5 py-1.5 text-xs">
+        <span className="font-medium text-muted-foreground">
           {active.label} · {active.sessions > 0 ? `${active.sessions} جلسه` : "بدون جلسه"}
         </span>
-        <span className="font-semibold tabular-nums text-[#d2c0a5]">
+        <span className="font-semibold tabular-nums text-primary">
           {active.minutes} دقیقه
         </span>
       </div>
@@ -101,8 +101,8 @@ export function WeeklyCapsuleChart({ checkIns }: { checkIns: CapsuleCheckIn[] })
             >
               {/* Vertical Pill Capsule Track */}
               <div
-                className={`relative flex h-36 w-8 flex-col items-center justify-end overflow-hidden rounded-full bg-[#1b2029] p-1 transition-colors sm:w-9 ${
-                  isSelected ? "bg-[#222834] ring-1 ring-[#d2c0a5]/70" : "hover:bg-[#202632]"
+                className={`relative flex h-36 w-8 flex-col items-center justify-end overflow-hidden rounded-full bg-secondary p-1 transition-colors sm:w-9 ${
+                  isSelected ? "bg-secondary ring-1 ring-primary/70" : "hover:bg-secondary"
                 }`}
               >
                 {/* Filled Inner Cream Capsule with organic spring growth */}
@@ -111,17 +111,17 @@ export function WeeklyCapsuleChart({ checkIns }: { checkIns: CapsuleCheckIn[] })
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: idx * 0.05 + 0.15, type: "spring", stiffness: 350, damping: 25 }}
-                    className="aspect-square w-full rounded-full bg-[#d2c0a5] shadow-xs"
+                    className="aspect-square w-full rounded-full bg-primary shadow-xs"
                   />
                 ) : (
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${pct}%` }}
                     transition={{ delay: idx * 0.05 + 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative w-full rounded-full bg-[#d2c0a5] shadow-xs"
+                    className="relative w-full rounded-full bg-primary shadow-xs"
                   >
                     {isSelected && (
-                      <div className="absolute left-1/2 top-1 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#8a7a65]/40" />
+                      <div className="absolute left-1/2 top-1 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-primary/40" />
                     )}
                   </motion.div>
                 )}
@@ -130,7 +130,7 @@ export function WeeklyCapsuleChart({ checkIns }: { checkIns: CapsuleCheckIn[] })
               {/* Day Label */}
               <span
                 className={`text-[10px] font-medium transition-colors ${
-                  isSelected ? "font-bold text-[#d2c0a5]" : "text-[#8e98a8] group-hover:text-white"
+                  isSelected ? "font-bold text-primary" : "text-muted-foreground group-hover:text-foreground"
                 }`}
               >
                 {item.short}

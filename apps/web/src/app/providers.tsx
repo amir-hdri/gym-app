@@ -40,7 +40,7 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
             toastOptions={{
               classNames: {
                 toast:
-                  "rounded-2xl border border-white/10 bg-[#10141a]/95 text-white shadow-2xl shadow-black/50 backdrop-blur-md",
+                  "rounded-2xl border border-border bg-popover/95 text-foreground shadow-2xl shadow-black/50 backdrop-blur-md",
                 description: "text-muted-foreground",
                 actionButton: "bg-primary-solid text-primary-foreground",
                 cancelButton: "bg-muted text-foreground",

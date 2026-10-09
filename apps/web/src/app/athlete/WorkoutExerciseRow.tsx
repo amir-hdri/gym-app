@@ -22,8 +22,8 @@ export function WorkoutExerciseRow({ exercise, checked, onCheckedChange }: Worko
       className={cn(
         "group flex cursor-pointer items-center gap-3 rounded-2xl border p-3.5 transition-colors",
         checked
-          ? "border-[#d2c0a5]/30 bg-[#1a202a]"
-          : "border-[#232934] bg-[#161a22] hover:border-[#343e4f]"
+          ? "border-primary/30 bg-secondary"
+          : "border-border bg-card hover:border-border"
       )}
       whileTap={{ scale: 0.995 }}
     >
@@ -41,10 +41,10 @@ export function WorkoutExerciseRow({ exercise, checked, onCheckedChange }: Worko
         {checked && <Check className="h-4 w-4" strokeWidth={1.75} />}
       </span>
       <div className="min-w-0 flex-1">
-        <p className={cn("text-sm font-medium text-white transition-all", checked && "text-[#8e98a8] line-through")}>
+        <p className={cn("text-sm font-medium text-foreground transition-all", checked && "text-muted-foreground line-through")}>
           {exerciseName}
         </p>
-        <p className={cn("text-xs leading-5 text-[#8e98a8]", checked && "line-through")}>
+        <p className={cn("text-xs leading-5 text-muted-foreground", checked && "line-through")}>
           {formatPersianNumber(exercise.sets)} × {exercise.reps}
           {exercise.weight ? ` - ${formatPersianNumber(exercise.weight)} کیلوگرم` : ""}
           {" - "}

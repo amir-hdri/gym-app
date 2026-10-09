@@ -85,7 +85,7 @@ export default function ProgramsPage() {
         title="برنامه‌های تمرینی"
         subtitle="برنامه‌های تمرینی شما"
         action={
-          <span className="rounded-full border border-[#2b313d] bg-[#181c22] px-3 py-1.5 text-[11px] text-[#e5d9c5]">
+          <span className="rounded-full border border-border bg-card px-3 py-1.5 text-[11px] text-primary">
             {formatPersianNumber(programs.length)} برنامه
           </span>
         }
@@ -114,18 +114,18 @@ export default function ProgramsPage() {
           </Badge>
         </div>
         <Link href={`/athlete/programs/${featured.id}`} className="group block">
-          <div className="relative h-48 cursor-pointer overflow-hidden rounded-[26px] border border-white/10 shadow-xl">
+          <div className="relative h-48 cursor-pointer overflow-hidden rounded-[26px] border border-logo-ink-inverse/10 shadow-xl">
             <GymBackdrop />
             <div className="absolute inset-0 z-10 flex flex-col justify-end p-6">
               <MicroLabel className="mb-1">Featured Program</MicroLabel>
-              <h3 className="font-serif text-[26px] font-medium text-white transition-colors group-hover:text-[#f8f5f0]">
+              <h3 className="font-serif text-[26px] font-medium text-logo-ink-inverse transition-colors group-hover:text-foreground">
                 {featured.name}
               </h3>
-              <p className="mt-1 text-[11px] text-[#8e98a8]">
+              <p className="mt-1 text-[11px] text-muted-foreground">
                 {formatPersianNumber(featuredTotal)} حرکت · {formatPersianNumber(Math.round(featuredProgress))}٪ تکمیل · {formatDate(featured.startDate)} - {formatDate(featured.endDate)}
               </p>
             </div>
-            <div className="absolute left-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-colors group-hover:bg-[#d2c0a5] group-hover:text-black">
+            <div className="absolute left-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-logo-ink-inverse/20 bg-scrim/40 text-logo-ink-inverse backdrop-blur-md transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
               <Play className="h-3.5 w-3.5 fill-current" strokeWidth={1.75} />
             </div>
           </div>
@@ -157,10 +157,10 @@ export default function ProgramsPage() {
                     trailing={
                       <span className="flex items-center gap-2">
                         <Badge variant={status.variant}>{status.label}</Badge>
-                        <ChevronLeft className="h-4 w-4 text-[#606a78]" strokeWidth={1.75} />
+                        <ChevronLeft className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
                       </span>
                     }
-                    className={program.status === "active" ? "ring-2 ring-[#d2c0a5]/40" : undefined}
+                    className={program.status === "active" ? "ring-2 ring-primary/40" : undefined}
                   />
                 </Link>
               );

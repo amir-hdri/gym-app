@@ -28,7 +28,7 @@ import type { Branch } from "@/lib/types";
 
 /** Twilight input override (ui/Input base carries old theme tokens + a dark: variant). */
 const inputClassName =
-  "h-10 rounded-xl border-[#232934] bg-[#12151b] text-sm text-white placeholder:text-[#6b7280] focus-visible:ring-0 focus-visible:border-[#d2c0a5]/50";
+  "h-10 rounded-xl border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-primary/50";
 
 function SettingsRow({
   id,
@@ -46,10 +46,10 @@ function SettingsRow({
   type?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-[#1a202a]">
+    <div className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-secondary">
       <div className="flex shrink-0 items-center gap-3">
-        <span className="text-[#8e98a8]">{icon}</span>
-        <Label htmlFor={id} className="text-xs font-medium text-white">
+        <span className="text-muted-foreground">{icon}</span>
+        <Label htmlFor={id} className="text-xs font-medium text-foreground">
           {label}
         </Label>
       </div>
@@ -271,7 +271,7 @@ export default function SettingsPage() {
 
       <section>
         <SectionTitle>بخش باشگاه</SectionTitle>
-        <div className="mt-3 divide-y divide-[#1e2430] overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+        <div className="mt-3 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           <SettingsRow
             id="branchName"
             icon={<Building2 className="h-4 w-4" strokeWidth={1.75} />}
@@ -306,7 +306,7 @@ export default function SettingsPage() {
 
       <section>
         <SectionTitle>بخش قیمت‌گذاری</SectionTitle>
-        <div className="mt-3 divide-y divide-[#1e2430] overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+        <div className="mt-3 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           <SettingsRow
             id="sessionPrice"
             icon={<Tag className="h-4 w-4" strokeWidth={1.75} />}

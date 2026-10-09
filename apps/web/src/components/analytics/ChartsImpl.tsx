@@ -16,7 +16,7 @@ function EmptyChart({ message, className }: { message: string; className?: strin
   return (
     <div
       className={cn(
-        "flex h-64 items-center justify-center rounded-xl border border-dashed border-[#232934] bg-[#161a22] px-6 text-center text-sm text-[#8e98a8]",
+        "flex h-64 items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 text-center text-sm text-muted-foreground",
         className
       )}
     >

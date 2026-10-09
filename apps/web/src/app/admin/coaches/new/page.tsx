@@ -31,7 +31,7 @@ const specialties = ["بدنسازی و فیتنس", "قدرتی و حرفه‌�
 const experienceOptions = ["۱-۳ سال", "۳-۵ سال", "۵-۱۰ سال", "بیش از ۱۰ سال"];
 
 const inputClass =
-  "h-11 w-full rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
+  "h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none";
 
 function Field({ label, error, htmlFor, children }: { label: string; error?: string; htmlFor?: string; children: ReactNode }) {
   return (
@@ -143,7 +143,7 @@ export default function NewCoachPage() {
             <div className="space-y-2">
               <Label>تخصص</Label>
               <Select value={selectedSpecialty} onValueChange={(v) => setValue("specialty", v)}>
-                <SelectTrigger className="h-11 rounded-xl border-[#232934] bg-[#161a22] text-sm text-white">
+                <SelectTrigger className="h-11 rounded-xl border-border bg-card text-sm text-foreground">
                   <SelectValue placeholder="انتخاب کنید" />
                 </SelectTrigger>
                 <SelectContent>{specialties.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}</SelectContent>
@@ -153,7 +153,7 @@ export default function NewCoachPage() {
             <div className="space-y-2">
               <Label>سابقه</Label>
               <Select value={selectedExperience} onValueChange={(v) => setValue("experience", v)}>
-                <SelectTrigger className="h-11 rounded-xl border-[#232934] bg-[#161a22] text-sm text-white">
+                <SelectTrigger className="h-11 rounded-xl border-border bg-card text-sm text-foreground">
                   <SelectValue placeholder="انتخاب کنید" />
                 </SelectTrigger>
                 <SelectContent>{experienceOptions.map((e) => (<SelectItem key={e} value={e}>{e}</SelectItem>))}</SelectContent>

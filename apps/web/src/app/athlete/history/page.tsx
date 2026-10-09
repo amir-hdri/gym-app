@@ -125,11 +125,11 @@ function HistoryStatCard({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col justify-between rounded-2xl border border-[#232934] bg-[#161a22] p-4", className)}>
+    <div className={cn("flex flex-col justify-between rounded-2xl border border-border bg-card p-4", className)}>
       <MicroLabelFa>{label}</MicroLabelFa>
       <div className="mt-3 flex items-baseline gap-1">
-        <span className="font-sans text-2xl font-normal tabular-nums tracking-tight text-white">{value}</span>
-        {suffix ? <span className="text-xs text-[#8e98a8]">{suffix}</span> : null}
+        <span className="font-sans text-2xl font-normal tabular-nums tracking-tight text-foreground">{value}</span>
+        {suffix ? <span className="text-xs text-muted-foreground">{suffix}</span> : null}
       </div>
     </div>
   );
@@ -192,9 +192,9 @@ export default function HistoryPage() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <SectionTitle>وضعیت آمادگی جسمانی امروز</SectionTitle>
-            <p className="text-xs text-[#8e98a8] mt-0.5">وضعیت بدن خود را مشخص کنید تا شدت تمرین تطبیق یابد</p>
+            <p className="text-xs text-muted-foreground mt-0.5">وضعیت بدن خود را مشخص کنید تا شدت تمرین تطبیق یابد</p>
           </div>
-          <Sparkles className="w-4 h-4 text-[#d2c0a5]" />
+          <Sparkles className="w-4 h-4 text-primary" />
         </div>
 
         <div className="no-scrollbar flex items-center justify-between gap-2 overflow-x-auto py-1">
@@ -208,8 +208,8 @@ export default function HistoryPage() {
                 className={cn(
                   "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all cursor-pointer min-w-[70px] flex-1",
                   isSelected
-                    ? "bg-[#202734] border-[#d2c0a5] text-[#d2c0a5] shadow-[0_0_12px_rgba(210,192,165,0.2)]"
-                    : "bg-[#141820] border-[#232934] text-[#8e98a8] hover:border-white/20 hover:text-white"
+                    ? "bg-secondary border-primary text-primary shadow-[0_0_12px_rgba(210,192,165,0.2)]"
+                    : "bg-card border-border text-muted-foreground hover:border-border hover:text-foreground"
                 )}
               >
                 <Icon className="w-4 h-4" strokeWidth={1.75} />
@@ -220,8 +220,8 @@ export default function HistoryPage() {
         </div>
 
         {readinessMessage && (
-          <div className="mt-3 p-3 rounded-xl bg-[#141820] border border-[#232934] text-xs text-[#d2c0a5] leading-relaxed flex items-start gap-2">
-            <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-[#d2c0a5]" />
+          <div className="mt-3 p-3 rounded-xl bg-card border border-border text-xs text-primary leading-relaxed flex items-start gap-2">
+            <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
             <span>{readinessMessage}</span>
           </div>
         )}
@@ -240,7 +240,7 @@ export default function HistoryPage() {
         <>
         <TwilightCard>
           <SectionTitle>حجم فعالیت و جلسات هفتگی</SectionTitle>
-          <p className="mt-1 text-xs text-[#8e98a8]">مدت جلسات تکمیل‌شده در ۷ روز اخیر</p>
+          <p className="mt-1 text-xs text-muted-foreground">مدت جلسات تکمیل‌شده در ۷ روز اخیر</p>
           <div className="mt-4">
             {checkinsLoadingOrError ? (
               checkinsLoading ? <Loading /> : <ErrorDisplay message={checkinsErr?.message} />
@@ -249,11 +249,11 @@ export default function HistoryPage() {
             ) : (
               <div className="space-y-6">
                 <WeeklyCapsuleChart checkIns={checkinHistory} />
-                <div className="overflow-hidden rounded-xl border border-[#1e2430]">
+                <div className="overflow-hidden rounded-xl border border-border">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="text-[10px] uppercase tracking-wider text-[#8e98a8]">
+                        <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
                           <th className="whitespace-nowrap py-3 pr-4 text-right font-medium">تاریخ</th>
                           <th className="whitespace-nowrap py-3 text-right font-medium">ورود</th>
                           <th className="whitespace-nowrap py-3 text-right font-medium">خروج</th>
@@ -262,11 +262,11 @@ export default function HistoryPage() {
                       </thead>
                       <tbody>
                         {checkinHistory.map((item) => (
-                          <tr key={item.id} className="border-t border-[#1e2430] transition-colors hover:bg-[#1a202a]">
-                            <td className="whitespace-nowrap py-2.5 pr-4 text-white">{formatDate(item.checkInTime)}</td>
-                            <td className="whitespace-nowrap py-2.5 tabular-nums text-[#c9cfd9]">{new Date(item.checkInTime).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" })}</td>
-                            <td className="whitespace-nowrap py-2.5 tabular-nums text-[#c9cfd9]">{item.checkOutTime ? new Date(item.checkOutTime).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" }) : "---"}</td>
-                            <td className="whitespace-nowrap py-2.5 pl-4 tabular-nums text-[#c9cfd9]">{item.durationMinutes ? `${Math.floor(item.durationMinutes / 60)}:${String(item.durationMinutes % 60).padStart(2, "0")}` : "---"}</td>
+                          <tr key={item.id} className="border-t border-border transition-colors hover:bg-secondary">
+                            <td className="whitespace-nowrap py-2.5 pr-4 text-foreground">{formatDate(item.checkInTime)}</td>
+                            <td className="whitespace-nowrap py-2.5 tabular-nums text-muted-foreground">{new Date(item.checkInTime).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" })}</td>
+                            <td className="whitespace-nowrap py-2.5 tabular-nums text-muted-foreground">{item.checkOutTime ? new Date(item.checkOutTime).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" }) : "---"}</td>
+                            <td className="whitespace-nowrap py-2.5 pl-4 tabular-nums text-muted-foreground">{item.durationMinutes ? `${Math.floor(item.durationMinutes / 60)}:${String(item.durationMinutes % 60).padStart(2, "0")}` : "---"}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -346,7 +346,7 @@ export default function HistoryPage() {
                   title={item.name}
                   subtitle={`${item.exercises?.length || 0} تمرین · ${formatPersianNumber(item.frequencyPerWeek)} روز/هفته`}
                   trailing={
-                    <span className="text-[11px] text-[#8e98a8]">{formatDate(item.startDate)}</span>
+                    <span className="text-[11px] text-muted-foreground">{formatDate(item.startDate)}</span>
                   }
                 />
               ))}
@@ -391,24 +391,24 @@ export default function HistoryPage() {
           {MILESTONES.map((m) => (
             <div
               key={m.id}
-              className="p-3.5 rounded-2xl bg-[#161a22] border border-[#232934] flex items-center justify-between"
+              className="p-3.5 rounded-2xl bg-card border border-border flex items-center justify-between"
             >
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-full bg-[#202632] border border-[#2c3444] flex items-center justify-center text-[#d2c0a5] shrink-0">
+                <div className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center text-primary shrink-0">
                   <Award className="w-5 h-5 stroke-[1.75]" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-white leading-tight">{m.title}</h3>
-                  <p className="text-xs text-[#8e98a8] mt-0.5">{m.description}</p>
+                  <h3 className="text-sm font-medium text-foreground leading-tight">{m.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">{m.description}</p>
                 </div>
               </div>
               {m.achieved ? (
-                <div className="flex items-center gap-1 text-[11px] font-medium text-[#d2c0a5] bg-[#222a36] px-2.5 py-1 rounded-full border border-[#d2c0a5]/30">
+                <div className="flex items-center gap-1 text-[11px] font-medium text-primary bg-border px-2.5 py-1 rounded-full border border-primary/30">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>{m.achievedDate}</span>
                 </div>
               ) : (
-                <span className="text-[11px] text-[#8e98a8]">در حال پیشرفت</span>
+                <span className="text-[11px] text-muted-foreground">در حال پیشرفت</span>
               )}
             </div>
           ))}

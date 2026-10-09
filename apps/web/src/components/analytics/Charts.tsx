@@ -13,7 +13,7 @@ function ChartSkeleton({ compact }: Compact) {
     <div
       aria-hidden
       className={cn(
-        "animate-pulse rounded-xl border border-[#232934] bg-[#161a22]",
+        "animate-pulse rounded-xl border border-border bg-card",
         compact ? "h-44" : "h-72"
       )}
     />

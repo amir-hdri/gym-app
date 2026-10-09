@@ -29,7 +29,7 @@ const memberSchema = z.object({
 type MemberFormData = z.infer<typeof memberSchema>;
 
 const inputClass =
-  "h-11 w-full rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
+  "h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none";
 
 function Field({ label, error, htmlFor, children }: { label: string; error?: string; htmlFor?: string; children: ReactNode }) {
   return (
@@ -145,7 +145,7 @@ export default function NewMemberPage() {
             <div className="space-y-2">
               <Label>طرح اشتراک</Label>
               <Select value={selectedPlan} onValueChange={(v) => setValue("plan", v)}>
-                <SelectTrigger className="h-11 rounded-xl border-[#232934] bg-[#161a22] text-sm text-white">
+                <SelectTrigger className="h-11 rounded-xl border-border bg-card text-sm text-foreground">
                   <SelectValue placeholder="انتخاب کنید" />
                 </SelectTrigger>
                 <SelectContent>{plans.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}</SelectContent>
@@ -155,7 +155,7 @@ export default function NewMemberPage() {
             <div className="space-y-2">
               <Label>مربی</Label>
               <Select value={selectedCoach} onValueChange={(v) => setValue("coach", v)}>
-                <SelectTrigger className="h-11 rounded-xl border-[#232934] bg-[#161a22] text-sm text-white">
+                <SelectTrigger className="h-11 rounded-xl border-border bg-card text-sm text-foreground">
                   <SelectValue placeholder="انتخاب کنید" />
                 </SelectTrigger>
                 <SelectContent>{coaches.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}</SelectContent>

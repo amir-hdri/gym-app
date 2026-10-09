@@ -157,16 +157,16 @@ export default function MembershipPage() {
       {/* Current subscription — SubscriptionModal header pattern */}
       <TwilightCard className="p-6">
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full border border-[#d2c0a5]/40 bg-[#202734] text-[#d2c0a5] shadow-lg">
+          <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-secondary text-primary shadow-lg">
             <Crown className="h-6 w-6" strokeWidth={1.75} />
           </div>
-          <h2 className="font-serif text-2xl font-medium text-white">
+          <h2 className="font-serif text-2xl font-medium text-foreground">
             {membership.plan?.name || "اشتراک"}
           </h2>
           <Badge variant={isActive ? "success" : "secondary"}>
             {isActive ? "فعال" : membership.status}
           </Badge>
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-[#8e98a8]">
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" strokeWidth={1.75} />
               شروع: {formatDate(membership.startDate)}
@@ -182,54 +182,54 @@ export default function MembershipPage() {
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between rounded-xl border border-[#2b313d] bg-[#181c22] px-4 py-3">
-          <span className="text-xs text-[#8e98a8]">جلسات استفاده شده</span>
-          <span className="font-sans text-sm font-medium tabular-nums text-white">
+        <div className="mt-5 flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3">
+          <span className="text-xs text-muted-foreground">جلسات استفاده شده</span>
+          <span className="font-sans text-sm font-medium tabular-nums text-foreground">
             {formatPersianNumber(membership.sessionsUsed)} / {formatPersianNumber(membership.sessionsTotal)}
           </span>
         </div>
         <Progress
           value={progress}
-          className="mt-3 bg-white/10"
-          indicatorClassName="bg-[#d2c0a5] shadow-none"
+          className="mt-3 bg-border"
+          indicatorClassName="bg-primary shadow-none"
         />
-        <p className="mt-3 text-center font-sans text-2xl font-normal tabular-nums text-[#d2c0a5]">
+        <p className="mt-3 text-center font-sans text-2xl font-normal tabular-nums text-primary">
           {formatPersianNumber(remaining)}
-          <span className="mr-2 text-xs font-normal text-[#8e98a8]">جلسه باقی‌مانده</span>
+          <span className="mr-2 text-xs font-normal text-muted-foreground">جلسه باقی‌مانده</span>
         </p>
       </TwilightCard>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-[#232934] bg-[#161a22] p-4">
+        <div className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <MicroLabelFa>جلسات باقی‌مانده</MicroLabelFa>
-            <Award className="h-4 w-4 text-[#d2c0a5]" strokeWidth={1.75} />
+            <Award className="h-4 w-4 text-primary" strokeWidth={1.75} />
           </div>
-          <p className="mt-3 font-sans text-2xl font-normal tabular-nums text-white">
+          <p className="mt-3 font-sans text-2xl font-normal tabular-nums text-foreground">
             {formatPersianNumber(remaining)}
           </p>
-          <p className="mt-0.5 text-[11px] text-[#8e98a8]">از {formatPersianNumber(membership.sessionsTotal)} جلسه</p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">از {formatPersianNumber(membership.sessionsTotal)} جلسه</p>
         </div>
-        <div className="rounded-2xl border border-[#232934] bg-[#161a22] p-4">
+        <div className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <MicroLabelFa>وضعیت اشتراک</MicroLabelFa>
-            <CheckCircle className="h-4 w-4 text-[#d2c0a5]" strokeWidth={1.75} />
+            <CheckCircle className="h-4 w-4 text-primary" strokeWidth={1.75} />
           </div>
-          <p className="mt-3 font-sans text-2xl font-normal text-[#d2c0a5]">
+          <p className="mt-3 font-sans text-2xl font-normal text-primary">
             {isActive ? "فعال" : membership.status}
           </p>
-          <p className="mt-0.5 text-[11px] text-[#8e98a8]">تا {formatDate(membership.endDate)}</p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">تا {formatDate(membership.endDate)}</p>
         </div>
-        <div className="col-span-2 rounded-2xl border border-[#232934] bg-[#161a22] p-4">
+        <div className="col-span-2 rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <MicroLabelFa>پرداخت بعدی</MicroLabelFa>
             <AlertTriangle className="h-4 w-4 text-warning" strokeWidth={1.75} />
           </div>
-          <p className="mt-3 font-sans text-lg font-normal text-white">
+          <p className="mt-3 font-sans text-lg font-normal text-foreground">
             {formatDate(membership.endDate)}
           </p>
-          <p className="mt-0.5 text-[11px] text-[#8e98a8]">تاریخ سررسید</p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">تاریخ سررسید</p>
         </div>
       </div>
 
@@ -247,26 +247,26 @@ export default function MembershipPage() {
                   onClick={() => setSelectedPlanId(plan.id)}
                   className={`flex cursor-pointer items-center justify-between rounded-2xl border p-3.5 text-right transition-all ${
                     isSelected
-                      ? "border-[#d2c0a5] bg-[#19212d] shadow-md"
-                      : "border-[#222a36] bg-[#141820] opacity-70 hover:opacity-100"
+                      ? "border-primary bg-secondary shadow-md"
+                      : "border-border bg-card opacity-70 hover:opacity-100"
                   }`}
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-white">{plan.name}</span>
+                      <span className="text-sm font-semibold text-foreground">{plan.name}</span>
                       {plan.discountPercent > 0 && (
-                        <span className="rounded-full bg-[#d2c0a5]/20 px-2 py-0.5 text-[10px] font-bold text-[#d2c0a5]">
+                        <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">
                           {formatPersianNumber(plan.discountPercent)}٪ تخفیف
                         </span>
                       )}
                     </div>
-                    <p className="mt-0.5 text-[11px] text-[#8e98a8]">
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
                       {formatPersianNumber(plan.durationDays)} روز · {formatPersianNumber(plan.sessionsCount)} جلسه
                       {plan.description ? ` · ${plan.description}` : ""}
                     </p>
                   </div>
                   <div className="shrink-0 text-left font-sans">
-                    <span className="block text-base font-bold tabular-nums text-white">
+                    <span className="block text-base font-bold tabular-nums text-foreground">
                       {formatCurrency(plan.price)}
                     </span>
                   </div>
@@ -276,10 +276,10 @@ export default function MembershipPage() {
           </div>
 
           {selectedPlan?.features && selectedPlan.features.length > 0 && (
-            <div className="flex flex-col gap-2 border-t border-[#1e2532] pt-3">
+            <div className="flex flex-col gap-2 border-t border-border pt-3">
               {selectedPlan.features.map((perk, i) => (
-                <div key={i} className="flex items-start gap-2.5 text-xs text-[#c3ccd8]">
-                  <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#d2c0a5]/50 bg-[#1e2734] text-[#d2c0a5]">
+                <div key={i} className="flex items-start gap-2.5 text-xs text-muted-foreground">
+                  <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-primary/50 bg-secondary text-primary">
                     <Check className="h-2.5 w-2.5" strokeWidth={3} />
                   </div>
                   <span className="leading-relaxed">{perk}</span>
@@ -348,8 +348,8 @@ export default function MembershipPage() {
             </DialogContent>
           </Dialog>
 
-          <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#6b7280]">
-            <ShieldCheck className="h-3.5 w-3.5 text-[#d2c0a5]" strokeWidth={1.75} />
+          <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
             <span>پرداخت امن · پشتیبانی باشگاه</span>
           </div>
         </section>
@@ -358,7 +358,7 @@ export default function MembershipPage() {
       {/* Payment — creates a pending payment receipt */}
       <TwilightCard className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#2c3444] bg-[#202632] text-[#d2c0a5]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-primary">
             <Receipt className="h-5 w-5" strokeWidth={1.75} />
           </div>
           <div>
@@ -432,30 +432,30 @@ export default function MembershipPage() {
         {payments.length === 0 ? (
           <EmptyState title="پرداختی ثبت نشده" description="هنوز پرداختی انجام نداده‌اید" />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-[#1e2430] hover:bg-transparent">
-                  <TableHead className="bg-transparent text-[11px] font-semibold text-[#8e98a8]">مبلغ</TableHead>
-                  <TableHead className="bg-transparent text-[11px] font-semibold text-[#8e98a8]">روش پرداخت</TableHead>
-                  <TableHead className="bg-transparent text-[11px] font-semibold text-[#8e98a8]">وضعیت</TableHead>
-                  <TableHead className="bg-transparent text-[11px] font-semibold text-[#8e98a8]">تاریخ</TableHead>
-                  <TableHead className="w-20 bg-transparent text-[11px] font-semibold text-[#8e98a8]">عملیات</TableHead>
+                <TableRow className="border-b border-border hover:bg-transparent">
+                  <TableHead className="bg-transparent text-[11px] font-semibold text-muted-foreground">مبلغ</TableHead>
+                  <TableHead className="bg-transparent text-[11px] font-semibold text-muted-foreground">روش پرداخت</TableHead>
+                  <TableHead className="bg-transparent text-[11px] font-semibold text-muted-foreground">وضعیت</TableHead>
+                  <TableHead className="bg-transparent text-[11px] font-semibold text-muted-foreground">تاریخ</TableHead>
+                  <TableHead className="w-20 bg-transparent text-[11px] font-semibold text-muted-foreground">عملیات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {payments.map((p) => (
-                  <TableRow key={p.id} className="border-t border-[#1e2430] hover:bg-[#1a202a]">
-                    <TableCell className="font-medium tabular-nums text-white">{formatCurrency(p.amount)}</TableCell>
-                    <TableCell className="text-[#c3ccd8]">{p.method}</TableCell>
+                  <TableRow key={p.id} className="border-t border-border hover:bg-secondary">
+                    <TableCell className="font-medium tabular-nums text-foreground">{formatCurrency(p.amount)}</TableCell>
+                    <TableCell className="text-muted-foreground">{p.method}</TableCell>
                     <TableCell>
                       <Badge variant={p.status === "completed" ? "success" : "secondary"}>
                         {p.status === "completed" ? "موفق" : p.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-[#c3ccd8]">{formatDate(p.paidAt || p.createdAt)}</TableCell>
+                    <TableCell className="text-muted-foreground">{formatDate(p.paidAt || p.createdAt)}</TableCell>
                     <TableCell>
-                      <Link href={`/athlete/membership/payments/${p.id}`} className="text-sm text-[#d2c0a5] hover:underline">
+                      <Link href={`/athlete/membership/payments/${p.id}`} className="text-sm text-primary hover:underline">
                         جزئیات
                       </Link>
                     </TableCell>

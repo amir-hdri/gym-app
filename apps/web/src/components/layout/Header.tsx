@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useNotifications } from "@/hooks/use-api";
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { LumiLogo } from "@/components/ui/LumiLogo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,9 +21,8 @@ interface HeaderProps {
 }
 
 /**
- * Twilight Meditation portal header — port of the reference App header:
- * cream dot + wordmark, hairline bottom border, bell with real unread badge,
- * avatar menu. Dark-only (no theme toggle).
+ * Twilight portal header: cream dot + wordmark, hairline bottom border, bell
+ * with real unread badge, theme toggle, avatar menu.
  */
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth();
@@ -43,12 +43,12 @@ export function Header({ onMenuToggle }: HeaderProps) {
     user?.role === "admin" ? "/admin/profile" : user?.role === "coach" ? "/coach/profile" : "/athlete/profile";
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/[0.04] bg-[#0c0e12]/90 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/90 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
       <div className="flex h-14 items-center justify-between px-4 md:px-7 lg:px-10">
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuToggle}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-[#1b222c] text-white transition-colors hover:bg-[#252d3d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
             aria-label="باز کردن منو"
             aria-controls="portal-sidebar"
           >
@@ -63,14 +63,15 @@ export function Header({ onMenuToggle }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-1.5">
+          <ThemeToggle className="h-11 w-11 rounded-xl" />
           <Link
             href={notificationHref}
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-[#1b222c] text-white transition-colors hover:bg-[#252d3d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={`اعلان‌ها${unreadCount > 0 ? `، ${unreadCount} خوانده‌نشده` : ""}`}
           >
             <Bell className="h-[20px] w-[20px]" strokeWidth={1.75} />
             {unreadCount > 0 && (
-              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d2c0a5] px-1 font-sans text-[10px] font-bold leading-none text-[#121417] shadow-[0_2px_8px_rgba(210,192,165,0.5)]">
+              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 font-sans text-[10px] font-bold leading-none text-primary-foreground shadow-[0_2px_8px_rgba(210,192,165,0.5)]">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}
@@ -78,36 +79,36 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#1b222c] p-1 pl-2 transition-colors hover:bg-[#252d3d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <Avatar className="h-8 w-8 ring-1 ring-white/10">
-                  <AvatarFallback className="bg-gradient-to-br from-[#2a3444] to-[#141a22] font-serif text-xs font-bold text-[#d2c0a5]">
+              <button className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-secondary p-1 pl-2 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <Avatar className="h-8 w-8 ring-1 ring-border">
+                  <AvatarFallback className="bg-gradient-to-br from-secondary to-card font-serif text-xs font-bold text-primary">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden max-w-[120px] truncate font-sans text-sm font-medium text-white md:block">
+                <span className="hidden max-w-[120px] truncate font-sans text-sm font-medium text-foreground md:block">
                   {fullName}
                 </span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 border-white/10 bg-[#10141a] text-white">
+            <DropdownMenuContent align="end" className="w-48 border-border bg-popover text-foreground">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col gap-1">
-                  <span className="font-semibold text-white">{fullName}</span>
-                  <span className="text-xs text-[#8e98a8]">{user?.email}</span>
+                  <span className="font-semibold text-foreground">{fullName}</span>
+                  <span className="text-xs text-muted-foreground">{user?.email}</span>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem asChild className="focus:bg-[#1a202a] focus:text-white">
+              <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuItem asChild className="focus:bg-secondary focus:text-foreground">
                 <Link href={profileHref}>پروفایل</Link>
               </DropdownMenuItem>
               {user?.role === "admin" && (
-                <DropdownMenuItem asChild className="focus:bg-[#1a202a] focus:text-white">
+                <DropdownMenuItem asChild className="focus:bg-secondary focus:text-foreground">
                   <Link href="/admin/settings">تنظیمات</Link>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem
-                className="text-[#f87171] focus:bg-[#f87171]/10 focus:text-[#f87171]"
+                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                 onClick={logout}
               >
                 خروج

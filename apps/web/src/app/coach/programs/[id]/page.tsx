@@ -112,9 +112,9 @@ export default function ProgramDetailPage() {
       </div>
 
       <Tabs value={String(activeDay)} onValueChange={(v) => setActiveDay(Number(v))} dir="rtl">
-        <TabsList className="w-full justify-start overflow-x-auto rounded-xl border border-[#232934] bg-[#161a22] p-1">
+        <TabsList className="w-full justify-start overflow-x-auto rounded-xl border border-border bg-card p-1">
           {days.map((day, i) => (
-            <TabsTrigger key={i} value={String(i)} className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">{day.day}</TabsTrigger>
+            <TabsTrigger key={i} value={String(i)} className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">{day.day}</TabsTrigger>
           ))}
         </TabsList>
 
@@ -122,24 +122,24 @@ export default function ProgramDetailPage() {
           <TabsContent key={i} value={String(i)} className="mt-4 space-y-4">
             <TwilightCard className="!p-0">
               <div className="flex items-center justify-between px-4 py-3.5">
-                <h3 className="font-serif text-lg font-normal text-white">{day.day}</h3>
+                <h3 className="font-serif text-lg font-normal text-foreground">{day.day}</h3>
                 <Button variant="ghost" size="sm" onClick={() => { setActiveDay(i); setShowAddForm(true); }}>
                   <Plus className="h-4 w-4" />
                   افزودن تمرین
                 </Button>
               </div>
-              <div className="divide-y divide-[#1e2430] border-t border-[#1e2430]">
+              <div className="divide-y divide-border border-t border-border">
                 {day.exercises.length === 0 ? (
-                  <p className="px-4 py-6 text-center text-sm text-[#8e98a8]">هیچ تمرینی برای این روز ثبت نشده است</p>
+                  <p className="px-4 py-6 text-center text-sm text-muted-foreground">هیچ تمرینی برای این روز ثبت نشده است</p>
                 ) : (
                   day.exercises.map((ex, j) => (
                     <div key={j} className="flex items-center gap-4 px-4 py-3.5">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#2c3444] bg-[#202632] text-[#d2c0a5]">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-primary">
                         <Dumbbell className="h-5 w-5" strokeWidth={1.75} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-white">{ex.name}</p>
-                        <p className="mt-0.5 text-[11px] text-[#8e98a8]">
+                        <p className="truncate text-sm font-medium text-foreground">{ex.name}</p>
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">
                           {formatPersianNumber(ex.sets)} ست × {formatPersianNumber(ex.reps)} تکرار
                           {ex.weight > 0 && ` | ${formatPersianNumber(ex.weight)} کیلوگرم`}
                         </p>
@@ -155,7 +155,7 @@ export default function ProgramDetailPage() {
 
             {showAddForm && activeDay === i && (
               <TwilightCard className="!p-5">
-                <h3 className="mb-4 font-serif text-lg font-normal text-white">افزودن تمرین جدید</h3>
+                <h3 className="mb-4 font-serif text-lg font-normal text-foreground">افزودن تمرین جدید</h3>
                 <div className="grid gap-4 md:grid-cols-5">
                   <div className="space-y-1.5">
                     <Label className="mb-1.5 block text-sm font-medium">نام تمرین</Label>

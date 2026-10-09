@@ -45,22 +45,22 @@ export default function CoachProfilePage() {
       <PageHeader title="پروفایل مربی" subtitle="مدیریت اطلاعات حساب شما" />
 
       <div className="flex flex-col items-center pt-2">
-        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-[#d2c0a5] bg-gradient-to-br from-[#2a3444] to-[#141a22] shadow-xl">
+        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-gradient-to-br from-secondary to-card shadow-xl">
           <Avatar className="h-full w-full">
             <AvatarFallback className={`text-3xl ${generateAvatarColor(fullName)}`}>{getInitials(fullName)}</AvatarFallback>
           </Avatar>
         </div>
-        <h2 className="mt-3.5 font-serif text-2xl font-normal tracking-tight text-white">{fullName}</h2>
+        <h2 className="mt-3.5 font-serif text-2xl font-normal tracking-tight text-foreground">{fullName}</h2>
         <div className="mt-2">
           <Badge variant="secondary">مربی</Badge>
         </div>
-        <p className="mt-1.5 text-xs text-[#8e98a8]">{profile.specialty}</p>
+        <p className="mt-1.5 text-xs text-muted-foreground">{profile.specialty}</p>
       </div>
 
       <Tabs defaultValue="info" dir="rtl">
-        <TabsList className="w-full justify-start overflow-x-auto rounded-xl border border-[#232934] bg-[#161a22] p-1">
-          <TabsTrigger value="info" className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">اطلاعات شخصی</TabsTrigger>
-          <TabsTrigger value="security" className="rounded-lg data-[state=active]:bg-[#d2c0a5] data-[state=active]:text-[#121417] data-[state=active]:shadow-none">امنیت</TabsTrigger>
+        <TabsList className="w-full justify-start overflow-x-auto rounded-xl border border-border bg-card p-1">
+          <TabsTrigger value="info" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">اطلاعات شخصی</TabsTrigger>
+          <TabsTrigger value="security" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none">امنیت</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info" className="mt-4">

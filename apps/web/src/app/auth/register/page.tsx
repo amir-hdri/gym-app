@@ -35,8 +35,8 @@ const registerSchema = z
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const inputClassName =
-  "h-11 rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
-const labelClassName = "mb-2 block text-xs text-[#8e98a8]";
+  "h-11 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none";
+const labelClassName = "mb-2 block text-xs text-muted-foreground";
 
 function Field({
   id,
@@ -55,7 +55,7 @@ function Field({
         {label}
       </label>
       {children}
-      {error && <p className="mt-1 text-xs text-[#f87171]">{error}</p>}
+      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
     </div>
   );
 }
@@ -114,11 +114,11 @@ export default function RegisterPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="rounded-[32px] border border-white/10 bg-[#10141a] p-5 text-white shadow-2xl shadow-black/50 sm:p-8"
+        className="rounded-[32px] border border-border bg-popover p-5 text-foreground shadow-2xl shadow-black/50 sm:p-8"
       >
         <div className="mb-8 text-center">
-          <h1 className="font-serif text-2xl font-medium tracking-tight text-white">ثبت‌نام</h1>
-          <p className="mt-2 text-sm text-[#8e98a8]">
+          <h1 className="font-serif text-2xl font-medium tracking-tight text-foreground">ثبت‌نام</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             حساب کاربری ورزشکار بساز — مربیان توسط مدیریت دعوت می‌شوند
           </p>
         </div>
@@ -163,7 +163,7 @@ export default function RegisterPage() {
                   </option>
                 ))}
               </select>
-              <p id="branchId-hint" className="mt-1 text-[11px] leading-5 text-[#8e98a8]" aria-live="polite">
+              <p id="branchId-hint" className="mt-1 text-[11px] leading-5 text-muted-foreground" aria-live="polite">
                 {branches.isLoading
                   ? "در حال بارگذاری شعبه‌ها…"
                   : branches.isError
@@ -187,12 +187,12 @@ export default function RegisterPage() {
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
             <label className="group flex cursor-pointer items-start gap-2">
-              <input type="checkbox" className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#232934] bg-[#161a22] accent-[#d2c0a5]" {...register("acceptTerms")} />
-              <span className="text-sm leading-relaxed text-[#8e98a8] transition-colors group-hover:text-white">
-                <Link href="/terms" className="text-[#d2c0a5] hover:underline">قوانین و مقررات</Link> را می‌پذیرم
+              <input type="checkbox" className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-card accent-primary" {...register("acceptTerms")} />
+              <span className="text-sm leading-relaxed text-muted-foreground transition-colors group-hover:text-foreground">
+                <Link href="/terms" className="text-primary hover:underline">قوانین و مقررات</Link> را می‌پذیرم
               </span>
             </label>
-            {errors.acceptTerms && <p className="mt-1 text-xs text-[#f87171]">{errors.acceptTerms.message}</p>}
+            {errors.acceptTerms && <p className="mt-1 text-xs text-destructive">{errors.acceptTerms.message}</p>}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
@@ -202,14 +202,14 @@ export default function RegisterPage() {
           </motion.div>
         </form>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }} className="mt-6 text-center text-sm text-[#8e98a8]">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }} className="mt-6 text-center text-sm text-muted-foreground">
           قبلاً ثبت‌نام کرده‌اید؟{" "}
-          <Link href="/auth/login" className="inline-flex items-center gap-1 font-semibold text-[#d2c0a5] transition-colors hover:text-[#ded1bc]">
+          <Link href="/auth/login" className="inline-flex items-center gap-1 font-semibold text-primary transition-colors hover:text-primary">
             وارد شوید
             <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} />
           </Link>
         </motion.p>
-        <p className="mt-3 text-center text-xs text-[#8e98a8]">
+        <p className="mt-3 text-center text-xs text-muted-foreground">
           مربی هستید؟ از مدیریت بخواهید حساب شما را بسازد.
         </p>
       </motion.div>

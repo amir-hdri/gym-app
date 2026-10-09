@@ -75,8 +75,8 @@ function matchesPath(pathname: string, href: string) {
 
 /**
  * Twilight Meditation floating bottom dock — port of the reference
- * GymBottomNavBar: fixed pill `bg-[#11141a]/94 backdrop-blur-2xl
- * border-white/[0.08] rounded-[36px]`, 330px × 65px, 30px icons, active icon
+ * GymBottomNavBar: fixed pill `bg-popover/94 backdrop-blur-2xl
+ * border-border rounded-[36px]`, 330px × 65px, 30px icons, active icon
  * cream #ded1bc with glow + spring scale, gliding active dot (layoutId).
  */
 export function DockNav({ items, dotId }: { items: DockItem[]; dotId: string }) {
@@ -96,7 +96,7 @@ export function DockNav({ items, dotId }: { items: DockItem[]; dotId: string }) 
     <div className="pointer-events-none fixed inset-x-0 bottom-5 z-40 select-none lg:hidden">
       <nav
         aria-label="ناوبری اصلی موبایل"
-        className="pointer-events-auto mx-auto flex h-[65px] w-[330px] max-w-[calc(100vw-2rem)] items-center justify-around rounded-[36px] border border-white/[0.08] bg-[#11141a]/94 px-3 shadow-[0_18px_44px_rgba(0,0,0,0.75)] backdrop-blur-2xl"
+        className="pointer-events-auto mx-auto flex h-[65px] w-[330px] max-w-[calc(100vw-2rem)] items-center justify-around rounded-[36px] border border-border bg-popover/94 px-3 shadow-[0_18px_44px_rgba(0,0,0,0.75)] backdrop-blur-2xl"
       >
         {items.map((item) => {
           const isActive = matchesPath(pathname, item.href);
@@ -117,8 +117,8 @@ export function DockNav({ items, dotId }: { items: DockItem[]; dotId: string }) 
                 className={cn(
                   "relative z-10 transition-colors duration-200",
                   isActive
-                    ? "text-[#ded1bc] drop-shadow-[0_0_8px_rgba(222,209,188,0.4)]"
-                    : "text-[#7d8694] group-hover:text-[#b0b8c4]"
+                    ? "text-primary drop-shadow-[0_0_8px_rgba(222,209,188,0.4)]"
+                    : "text-muted-foreground group-hover:text-muted-foreground"
                 )}
               >
                 {renderIcon(isActive)}
@@ -127,7 +127,7 @@ export function DockNav({ items, dotId }: { items: DockItem[]; dotId: string }) 
                 {isActive && (
                   <motion.span
                     layoutId={dotId}
-                    className="h-1.5 w-1.5 rounded-full bg-[#ded1bc] shadow-[0_0_8px_rgba(222,209,188,0.95)]"
+                    className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(222,209,188,0.95)]"
                     transition={{ type: "spring", stiffness: 500, damping: 32 }}
                   />
                 )}

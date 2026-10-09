@@ -20,18 +20,18 @@ const statusMap: Record<string, { label: string; variant: "success" | "secondary
 
 function InfoRow({ icon, label, value, ltr }: { icon: ReactNode; label: string; value: ReactNode; ltr?: boolean }) {
   return (
-    <div className="flex items-center justify-between px-4 py-3.5 hover:bg-[#1a202a]">
+    <div className="flex items-center justify-between px-4 py-3.5 hover:bg-secondary">
       <span className="flex items-center gap-3">
-        <span className="text-[#8e98a8]">{icon}</span>
-        <span className="text-xs text-[#8e98a8]">{label}</span>
+        <span className="text-muted-foreground">{icon}</span>
+        <span className="text-xs text-muted-foreground">{label}</span>
       </span>
-      <span dir={ltr ? "ltr" : undefined} className="text-sm text-white">{value}</span>
+      <span dir={ltr ? "ltr" : undefined} className="text-sm text-foreground">{value}</span>
     </div>
   );
 }
 
-const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-[#8e98a8]";
-const tdClass = "px-4 py-3 text-[#c8cdd6]";
+const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground";
+const tdClass = "px-4 py-3 text-muted-foreground";
 
 export default function MemberProfilePage() {
   const params = useParams<{ id: string }>();
@@ -52,15 +52,15 @@ export default function MemberProfilePage() {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-5 rounded-2xl border border-[#232934] bg-[#161a22] p-5 sm:flex-row sm:items-center">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 border-[#d2c0a5] bg-gradient-to-br from-[#2a3444] to-[#141a22]">
-          <span className="font-serif text-2xl text-[#d2c0a5]">
+      <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-5 sm:flex-row sm:items-center">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-gradient-to-br from-secondary to-card">
+          <span className="font-serif text-2xl text-primary">
             {getInitials(`${member.firstName} ${member.lastName}`)}
           </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-serif text-2xl font-normal text-white">{member.firstName} {member.lastName}</h1>
+            <h1 className="font-serif text-2xl font-normal text-foreground">{member.firstName} {member.lastName}</h1>
             <Badge variant={statusMap[member.status].variant}>{statusMap[member.status].label}</Badge>
           </div>
         </div>
@@ -70,7 +70,7 @@ export default function MemberProfilePage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[#232934] bg-[#161a22] divide-y divide-[#1e2430]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
         <InfoRow icon={<Phone className="h-4 w-4" strokeWidth={1.75} />} label="تلفن" value={member.phone} ltr />
         <InfoRow icon={<Mail className="h-4 w-4" strokeWidth={1.75} />} label="ایمیل" value={member.email} ltr />
         <InfoRow icon={<Award className="h-4 w-4" strokeWidth={1.75} />} label="طرح اشتراک" value={member.plan} />
@@ -81,15 +81,15 @@ export default function MemberProfilePage() {
         <StatCard label="اشتراک" value={member.plan} suffix={formatDate(member.createdAt)} />
         <StatCard label="مربی" value={member.coach} />
         <TwilightCard className="col-span-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8e98a8]">جلسات</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">جلسات</span>
           <div className="mt-3">
-            <span className="font-sans text-2xl font-normal tabular-nums tracking-tight text-white">
+            <span className="font-sans text-2xl font-normal tabular-nums tracking-tight text-foreground">
               {formatPersianNumber(member.sessionsUsed)} / {formatPersianNumber(member.sessionsTotal)}
             </span>
             <Progress
               value={((member.sessionsUsed || 0) / (member.sessionsTotal || 1)) * 100}
               className="mt-3"
-              indicatorClassName="bg-[#d2c0a5]"
+              indicatorClassName="bg-primary"
             />
           </div>
         </TwilightCard>
@@ -105,17 +105,17 @@ export default function MemberProfilePage() {
           {(member.goals || []).map((goal: any, i: number) => (
             <TwilightCard key={i}>
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium text-white">{goal.title}</span>
-                <span className="text-xs text-[#8e98a8]">{formatPersianNumber(goal.current)}/{formatPersianNumber(goal.target)} {goal.unit}</span>
+                <span className="text-sm font-medium text-foreground">{goal.title}</span>
+                <span className="text-xs text-muted-foreground">{formatPersianNumber(goal.current)}/{formatPersianNumber(goal.target)} {goal.unit}</span>
               </div>
-              <Progress value={(goal.current / goal.target) * 100} indicatorClassName="bg-[#d2c0a5]" />
+              <Progress value={(goal.current / goal.target) * 100} indicatorClassName="bg-primary" />
             </TwilightCard>
           ))}
         </TabsContent>
 
         <TabsContent value="payments">
           <SectionTitle className="mb-3">تاریخچه پرداخت‌ها</SectionTitle>
-          <div className="overflow-x-auto rounded-2xl border border-[#232934] bg-[#161a22]">
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr>
@@ -127,8 +127,8 @@ export default function MemberProfilePage() {
               </thead>
               <tbody>
                 {(member.payments || []).map((p: any) => (
-                  <tr key={p.id} className="border-t border-[#1e2430] hover:bg-[#1a202a]">
-                    <td className={`${tdClass} font-medium text-white`}>{formatCurrency(p.amount)}</td>
+                  <tr key={p.id} className="border-t border-border hover:bg-secondary">
+                    <td className={`${tdClass} font-medium text-foreground`}>{formatCurrency(p.amount)}</td>
                     <td className={tdClass}>{p.method}</td>
                     <td className={tdClass}><Badge variant={p.status === "completed" ? "success" : "warning"}>{p.status === "completed" ? "موفق" : "معلق"}</Badge></td>
                     <td className={tdClass}>{formatDateTime(p.date)}</td>

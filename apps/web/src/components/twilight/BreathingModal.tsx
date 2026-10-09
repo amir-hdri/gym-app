@@ -123,24 +123,24 @@ export function BreathingModal({ isOpen, onClose }: Props) {
     : 0.8;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200 select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-scrim/85 backdrop-blur-xl animate-in fade-in duration-200 select-none">
       <motion.div
         initial={{ opacity: 0, scale: 0.92, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.92, y: 16 }}
         transition={{ type: "spring", stiffness: 450, damping: 32 }}
-        className="relative w-full max-w-md rounded-[32px] overflow-hidden bg-[#10141a] border border-white/10 shadow-2xl flex flex-col text-white max-h-[92vh] p-6"
+        className="relative w-full max-w-md rounded-[32px] overflow-hidden bg-popover border border-border shadow-2xl flex flex-col text-foreground max-h-[92vh] p-6"
         dir="rtl"
       >
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-[#1c2330] border border-[#2b3648] flex items-center justify-center text-[#d2c0a5]">
+            <div className="w-9 h-9 rounded-xl bg-secondary border border-border flex items-center justify-center text-primary">
               <Wind className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-serif text-lg text-white font-normal">تنفس آگاهانه و ریکاوری</h2>
-              <p className="text-[11px] text-[#8e98a8]">کاهش کورتیزول و ضربان قلب پس از تمرین</p>
+              <h2 className="font-serif text-lg text-foreground font-normal">تنفس آگاهانه و ریکاوری</h2>
+              <p className="text-[11px] text-muted-foreground">کاهش کورتیزول و ضربان قلب پس از تمرین</p>
             </div>
           </div>
 
@@ -149,8 +149,8 @@ export function BreathingModal({ isOpen, onClose }: Props) {
               onClick={toggleSound}
               className={`w-8 h-8 rounded-full flex items-center justify-center border transition-colors cursor-pointer ${
                 soundEnabled
-                  ? "border-[#d2c0a5]/40 bg-[#1e2532] text-[#d2c0a5]"
-                  : "border-white/10 bg-[#141820] text-[#7d8694]"
+                  ? "border-primary/40 bg-border text-primary"
+                  : "border-border bg-card text-muted-foreground"
               }`}
               title={soundEnabled ? "قطع صدا" : "پخش صدای پس‌زمینه"}
             >
@@ -162,7 +162,7 @@ export function BreathingModal({ isOpen, onClose }: Props) {
                 soundEngine.stopAmbient();
                 onClose();
               }}
-              className="w-8 h-8 rounded-full bg-[#181d24] border border-white/10 flex items-center justify-center text-white/80 hover:text-white transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-foreground/80 hover:text-foreground transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -178,8 +178,8 @@ export function BreathingModal({ isOpen, onClose }: Props) {
             }}
             className={`py-2 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
               technique === "Box"
-                ? "bg-[#202734] border-[#d2c0a5]/50 text-[#d2c0a5]"
-                : "bg-[#141820] border-[#232934] text-[#8e98a8] hover:text-white"
+                ? "bg-secondary border-primary/50 text-primary"
+                : "bg-card border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             تنفس مربعی (۴-۴-۴-۴)
@@ -191,8 +191,8 @@ export function BreathingModal({ isOpen, onClose }: Props) {
             }}
             className={`py-2 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
               technique === "4-7-8"
-                ? "bg-[#202734] border-[#d2c0a5]/50 text-[#d2c0a5]"
-                : "bg-[#141820] border-[#232934] text-[#8e98a8] hover:text-white"
+                ? "bg-secondary border-primary/50 text-primary"
+                : "bg-card border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             آرامش عمیق (۴-۷-۸)
@@ -211,7 +211,7 @@ export function BreathingModal({ isOpen, onClose }: Props) {
               duration: isActive ? phaseDurations[phase] : 0.5,
               ease: "easeInOut",
             }}
-            className="absolute w-52 h-52 rounded-full bg-[#d2c0a5] blur-2xl pointer-events-none"
+            className="absolute w-52 h-52 rounded-full bg-primary blur-2xl pointer-events-none"
           />
 
           {/* Main animated orb */}
@@ -223,12 +223,12 @@ export function BreathingModal({ isOpen, onClose }: Props) {
               duration: isActive ? phaseDurations[phase] : 0.5,
               ease: "easeInOut",
             }}
-            className="relative w-40 h-40 rounded-full border-2 border-[#d2c0a5]/60 bg-gradient-to-br from-[#283244] via-[#1b2230] to-[#121620] shadow-[0_0_32px_rgba(210,192,165,0.25)] flex flex-col items-center justify-center p-4 text-center z-10"
+            className="relative w-40 h-40 rounded-full border-2 border-primary/60 bg-gradient-to-br from-secondary via-secondary to-card shadow-[0_0_32px_rgba(210,192,165,0.25)] flex flex-col items-center justify-center p-4 text-center z-10"
           >
-            <span className="text-3xl font-serif font-normal text-white tabular-nums">
+            <span className="text-3xl font-serif font-normal text-foreground tabular-nums">
               {formatPersianNumber(secondsInPhase)}
             </span>
-            <span className="text-[10px] uppercase tracking-widest text-[#d2c0a5] mt-1 font-semibold">
+            <span className="text-[10px] uppercase tracking-widest text-primary mt-1 font-semibold">
               {phase}
             </span>
           </motion.div>
@@ -236,10 +236,10 @@ export function BreathingModal({ isOpen, onClose }: Props) {
 
         {/* Phase subtitle */}
         <div className="text-center">
-          <h3 className="font-serif text-lg text-white font-medium">
+          <h3 className="font-serif text-lg text-foreground font-medium">
             {isActive ? getPhaseTitleFa() : "آماده شروع تمرین تنفس"}
           </h3>
-          <p className="text-xs text-[#8e98a8] mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             سیکل‌های تکمیل شده: {formatPersianNumber(totalCompletedCycles)} دور
           </p>
         </div>
@@ -250,16 +250,16 @@ export function BreathingModal({ isOpen, onClose }: Props) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
             onClick={toggleSession}
-            className="flex-1 py-3.5 rounded-xl bg-[#d2c0a5] text-[#121417] text-xs font-bold tracking-wide hover:bg-[#ded1bc] transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_16px_rgba(210,192,165,0.25)]"
+            className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold tracking-wide hover:bg-primary transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_16px_rgba(210,192,165,0.25)]"
           >
             {isActive ? (
               <>
-                <Pause className="w-4 h-4 fill-current text-[#121417]" />
+                <Pause className="w-4 h-4 fill-current text-primary-foreground" />
                 <span>توقف موقت</span>
               </>
             ) : (
               <>
-                <Play className="w-4 h-4 fill-current text-[#121417]" />
+                <Play className="w-4 h-4 fill-current text-primary-foreground" />
                 <span>شروع تمرین تنفس</span>
               </>
             )}
@@ -269,7 +269,7 @@ export function BreathingModal({ isOpen, onClose }: Props) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.92 }}
             onClick={handleReset}
-            className="w-12 h-12 rounded-xl bg-[#1a202c] border border-white/10 flex items-center justify-center text-[#8e98a8] hover:text-white transition-colors cursor-pointer"
+            className="w-12 h-12 rounded-xl bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             title="شروع مجدد"
           >
             <RotateCcw className="w-4 h-4" />

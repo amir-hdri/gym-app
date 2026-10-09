@@ -54,7 +54,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-scrim/60 backdrop-blur-sm lg:hidden"
             onClick={onClose}
           />
         )}
@@ -62,22 +62,22 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
       <aside
         id="portal-sidebar"
         className={cn(
-          "fixed inset-y-3 right-3 z-50 flex w-[264px] flex-col overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#0c0e12] shadow-[0_24px_80px_-28px_rgba(0,0,0,0.8)] transition-transform duration-300 ease-out lg:translate-x-0",
+          "fixed inset-y-3 right-3 z-50 flex w-[264px] flex-col overflow-hidden rounded-[2rem] border border-border bg-background shadow-[0_24px_80px_-28px_rgba(0,0,0,0.8)] transition-transform duration-300 ease-out lg:translate-x-0",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
         {/* Logo — reference wordmark */}
-        <div className="flex h-20 items-center justify-between border-b border-white/[0.04] px-5">
+        <div className="flex h-20 items-center justify-between border-b border-border px-5">
           <Link href="/" className="flex items-center gap-2" aria-label="Lumi Wellness">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#d2c0a5] shadow-[0_0_8px_rgba(210,192,165,0.8)]" />
-            <span className="font-serif text-lg font-semibold tracking-tight text-white">لومی</span>
-            <span dir="ltr" className="pt-0.5 text-[10px] font-normal tracking-widest text-[#8e98a8]">
+            <span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(210,192,165,0.8)]" />
+            <span className="font-serif text-lg font-semibold tracking-tight text-foreground">لومی</span>
+            <span dir="ltr" className="pt-0.5 text-[10px] font-normal tracking-widest text-muted-foreground">
               LUMI
             </span>
           </Link>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-[#8e98a8] transition-colors hover:bg-[#1a202a] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
             aria-label="بستن منو"
           >
             <X className="h-5 w-5" />
@@ -96,8 +96,8 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
               const rowClass = cn(
                 "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-sans text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 active
-                  ? "border border-[#d2c0a5]/25 bg-[#1a202a] text-white"
-                  : "border border-transparent text-[#8e98a8] hover:bg-[#1a202a] hover:text-white"
+                  ? "border border-primary/25 bg-secondary text-foreground"
+                  : "border border-transparent text-muted-foreground hover:bg-secondary hover:text-foreground"
               );
 
               return (
@@ -110,12 +110,12 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                         aria-controls={submenuId}
                         className={rowClass}
                       >
-                        <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center", active ? "text-[#d2c0a5]" : "")}>
+                        <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center", active ? "text-primary" : "")}>
                           {item.icon}
                         </span>
                         <span className="flex-1 text-right">{item.label}</span>
                         {item.badge !== undefined && (
-                          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#d2c0a5] px-1.5 font-sans text-xs font-bold text-[#121417]">
+                          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 font-sans text-xs font-bold text-primary-foreground">
                             {item.badge}
                           </span>
                         )}
@@ -131,7 +131,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.2, ease: "easeInOut" }}
-                            className="mr-4 mt-0.5 space-y-0.5 overflow-hidden border-r border-[#232934] pr-2"
+                            className="mr-4 mt-0.5 space-y-0.5 overflow-hidden border-r border-border pr-2"
                           >
                             {item.subItems!.map((sub) => {
                               const subActive = sub.href === pathname || pathname.startsWith(`${sub.href}/`) || sub.active;
@@ -143,8 +143,8 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                                     className={cn(
                                       "relative flex items-center gap-3 rounded-lg px-3 py-2 font-sans text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                                       subActive
-                                        ? "text-[#d2c0a5]"
-                                        : "text-[#8e98a8] hover:bg-[#1a202a] hover:text-white"
+                                        ? "text-primary"
+                                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                                     )}
                                   >
                                     <span className="text-right">{sub.label}</span>
@@ -158,12 +158,12 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                     </div>
                   ) : (
                     <Link href={item.href} onClick={onClose} className={rowClass}>
-                      <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center", active ? "text-[#d2c0a5]" : "")}>
+                      <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center", active ? "text-primary" : "")}>
                         {item.icon}
                       </span>
                       <span className="flex-1 text-right">{item.label}</span>
                       {item.badge !== undefined && (
-                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#d2c0a5] px-1.5 font-sans text-xs font-bold text-[#121417]">
+                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 font-sans text-xs font-bold text-primary-foreground">
                           {item.badge}
                         </span>
                       )}
@@ -176,8 +176,8 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-white/[0.04] p-4">
-          <p dir="ltr" className="text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-[#606a78]">
+        <div className="border-t border-border p-4">
+          <p dir="ltr" className="text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Lumi Wellness
           </p>
         </div>

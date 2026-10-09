@@ -18,8 +18,8 @@ const statusMap: Record<string, { label: string; variant: "success" | "secondary
   suspended: { label: "تعلیق شده", variant: "destructive" },
 };
 
-const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-[#8e98a8]";
-const tdClass = "px-4 py-3 text-[#c8cdd6]";
+const thClass = "px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground";
+const tdClass = "px-4 py-3 text-muted-foreground";
 
 export default function CoachesPage() {
   const router = useRouter();
@@ -56,7 +56,7 @@ export default function CoachesPage() {
           description={search ? "هیچ نتیجه‌ای با جستجوی فعلی مطابقت ندارد" : "هنوز مربی‌ای ثبت نشده است"}
         />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-[#232934] bg-[#161a22]">
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr>
@@ -71,9 +71,9 @@ export default function CoachesPage() {
             </thead>
             <tbody>
               {filtered.map((coach, idx) => (
-                <tr key={coach.id} className="border-t border-[#1e2430] hover:bg-[#1a202a]">
+                <tr key={coach.id} className="border-t border-border hover:bg-secondary">
                   <td className={tdClass}>{formatPersianNumber(idx + 1)}</td>
-                  <td className={`${tdClass} font-medium text-white`}>{coach.firstName} {coach.lastName}</td>
+                  <td className={`${tdClass} font-medium text-foreground`}>{coach.firstName} {coach.lastName}</td>
                   <td dir="ltr" className={`${tdClass} text-left`}>{coach.email}</td>
                   <td dir="ltr" className={`${tdClass} text-left`}>{coach.phone}</td>
                   <td className={tdClass}>{formatPersianNumber((coach as any).students)}</td>

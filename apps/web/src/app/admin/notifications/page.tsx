@@ -79,7 +79,7 @@ function audienceLabel(target: string, branchName?: string): string {
 }
 
 const inputClassName =
-  "h-11 w-full rounded-xl border border-[#232934] bg-[#161a22] px-4 text-sm text-white placeholder:text-[#6b7280] focus:border-[#d2c0a5]/50 focus:outline-none";
+  "h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none";
 
 const errorClassName = "text-xs text-destructive";
 

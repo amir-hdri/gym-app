@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/Badge";
@@ -62,11 +62,9 @@ export default function MembershipPage() {
   const plans = plansData?.data || [];
   const todayInput = new Date().toISOString().slice(0, 10);
 
-  useEffect(() => {
-    if (!amountTouched && membership && payAmount === "") {
-      setPayAmount(String(membership.finalPrice));
-    }
-  }, [membership, amountTouched, payAmount]);
+  // Prefill the amount from the membership until the member types: derived
+  // during render (no effect) so there is no cascading render.
+  const shownPayAmount = amountTouched || !membership ? payAmount : (payAmount !== "" ? payAmount : String(membership.finalPrice));
 
   const handleRenewConfirm = () => {
     if (!membership) return;
@@ -103,7 +101,7 @@ export default function MembershipPage() {
 
   const handleCreatePayment = () => {
     if (!athleteId || !membership) return;
-    const amount = Number(payAmount);
+    const amount = Number(shownPayAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
       toast.error("مبلغ معتبر وارد کنید");
       return;
@@ -373,7 +371,7 @@ export default function MembershipPage() {
             type="number"
             label="مبلغ (تومان)"
             required
-            value={payAmount}
+            value={shownPayAmount}
             min={1}
             inputMode="numeric"
             onChange={(e) => {

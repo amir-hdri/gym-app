@@ -64,7 +64,9 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
         id="portal-sidebar"
         className={cn(
           "fixed inset-y-3 right-3 z-50 flex w-[264px] flex-col overflow-hidden rounded-[2rem] border border-border bg-background shadow-[0_24px_80px_-28px_rgba(0,0,0,0.8)] transition-transform duration-300 ease-out lg:translate-x-0",
-          isOpen ? "translate-x-0" : "translate-x-full"
+          // Closed = fully off-canvas: translate-x-full alone leaves a 12px
+          // sliver (the right-3 gap) visible at the viewport edge.
+          isOpen ? "translate-x-0" : "translate-x-[calc(100%+0.75rem)]"
         )}
       >
         {/* Logo — the official SVG wordmark, shared with the header */}

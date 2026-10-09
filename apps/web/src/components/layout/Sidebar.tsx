@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LumiLogo } from "@/components/ui/LumiLogo";
 
 export interface NavItem {
   label: string;
@@ -66,14 +67,11 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        {/* Logo — reference wordmark */}
+        {/* Logo — the official SVG wordmark, shared with the header */}
         <div className="flex h-20 items-center justify-between border-b border-border px-5">
           <Link href="/" className="flex items-center gap-2" aria-label="Lumi Wellness">
-            <span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_color-mix(in_srgb,var(--color-primary)_80%,transparent)]" />
-            <span className="font-serif text-lg font-semibold tracking-tight text-foreground">لومی</span>
-            <span dir="ltr" className="pt-0.5 text-[10px] font-normal tracking-widest text-muted-foreground">
-              LUMI
-            </span>
+            <span aria-hidden className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_color-mix(in_srgb,var(--color-primary)_80%,transparent)]" />
+            <LumiLogo size="sm" variant="auto" showSubtitle={false} ariaLabel="Lumi Wellness" />
           </Link>
           <button
             onClick={onClose}

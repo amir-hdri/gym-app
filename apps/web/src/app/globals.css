@@ -15,7 +15,7 @@
    * leads the Persian UI; Bodoni Moda is the Latin display serif (brand
    * voice, cf. the LUMI wordmark); Vazirmatn is the glyph fallback.
    */
-  --font-serif: var(--font-bodoni), var(--font-estedad), var(--font-vazirmatn), Georgia, serif;
+  --font-serif: var(--font-estedad), var(--font-estedad-latin), var(--font-vazirmatn), Georgia, serif;
   --font-sans: var(--font-estedad), var(--font-estedad-latin), var(--font-vazirmatn), system-ui, -apple-system, sans-serif;
 
   --color-background: #f6f3ec;
@@ -128,7 +128,8 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Reference headings: Playfair serif, normal weight, tight tracking */
+  /* Headings render in Estedad like the body (one family everywhere);
+     Bodoni Moda lives only in the LUMI wordmark logo. */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
     font-weight: 400;

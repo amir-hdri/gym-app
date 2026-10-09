@@ -214,10 +214,7 @@ export function WorkoutPlayer({
                 حرکت {formatPersianNumber(index + 1)} از{" "}
                 {formatPersianNumber(exercises.length)}
               </p>
-              <h2
-                className="text-2xl font-medium leading-snug"
-                style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
-              >
+              <h2 className="font-sans text-2xl font-medium leading-snug">
                 {exercise.exercise?.name ?? "حرکت تمرینی"}
               </h2>
               <p className="mt-1.5 flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground">

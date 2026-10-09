@@ -6,18 +6,15 @@ import { MicroLabel } from "@/components/twilight/Page";
 import { LumiLogo } from "@/components/ui/LumiLogo";
 
 /**
- * Reference wordmark: cream dot + serif name + muted latin kicker
- * (matches components/layout/Header.tsx).
+ * Brand wordmark: cream dot + the official LUMI WELLNESS SVG logo.
+ * The only wordmark in the app — no Persian "لومی" text version exists.
  */
 export function LumiWordmark() {
   return (
-    <div className="flex items-center gap-2">
-      <span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_color-mix(in_srgb,var(--color-primary)_80%,transparent)]" />
-      <span className="font-serif text-lg font-semibold tracking-tight text-foreground">لومی</span>
-      <span dir="ltr" className="pt-0.5 text-[10px] font-normal tracking-widest text-muted-foreground">
-        LUMI WELLNESS
-      </span>
-    </div>
+    <span className="inline-flex items-center gap-2">
+      <span aria-hidden className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_color-mix(in_srgb,var(--color-primary)_80%,transparent)]" />
+      <LumiLogo size="sm" variant="auto" showSubtitle={false} ariaLabel="Lumi Wellness" />
+    </span>
   );
 }
 

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { formatPersianNumber } from "@/lib/utils";
 import { Plus, UserCircle } from "lucide-react";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
-import { useUsers } from "@/hooks/use-api";
+import { useUsers, useTrainingPrograms } from "@/hooks/use-api";
 import { PageShell, PageHeader } from "@/components/twilight/Page";
 import { CtaButton, SearchInput, EmptyState } from "@/components/twilight/controls";
 
@@ -24,11 +24,23 @@ const tdClass = "px-4 py-3 text-muted-foreground";
 export default function CoachesPage() {
   const router = useRouter();
   const { data, isLoading, isError, refetch } = useUsers("coach");
+  const { data: programsData } = useTrainingPrograms();
   const [search, setSearch] = useState("");
 
   if (isLoading) return <Loading />;
   if (isError) return <ErrorDisplay onRetry={refetch} />;
   const coaches = data?.data || [];
+
+  // Distinct coached athletes per coach, from the program roster.
+  const studentsByCoach = new Map<string, Set<string>>();
+  for (const program of programsData?.data ?? []) {
+    let set = studentsByCoach.get(program.coachId);
+    if (!set) {
+      set = new Set();
+      studentsByCoach.set(program.coachId, set);
+    }
+    set.add(program.athleteId);
+  }
 
   const filtered = coaches.filter((c) =>
     `${c.firstName} ${c.lastName}`.includes(search) || c.email.includes(search) || c.phone.includes(search)
@@ -76,7 +88,7 @@ export default function CoachesPage() {
                   <td className={`${tdClass} font-medium text-foreground`}>{coach.firstName} {coach.lastName}</td>
                   <td dir="ltr" className={`${tdClass} text-left`}>{coach.email}</td>
                   <td dir="ltr" className={`${tdClass} text-left`}>{coach.phone}</td>
-                  <td className={tdClass}>{formatPersianNumber((coach as any).students)}</td>
+                  <td className={tdClass}>{formatPersianNumber(studentsByCoach.get(coach.id)?.size ?? 0)}</td>
                   <td className={tdClass}>
                     <Badge variant={statusMap[coach.status].variant}>
                       {statusMap[coach.status].label}

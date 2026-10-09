@@ -216,3 +216,26 @@ The project currently scores 100 on Lighthouse a11y. Keep it.
 
 If you need a change in a file you do not own, say so in your final report
 instead of editing it.
+
+## 9. Addendum — October 2026 merge line
+
+The Twilight rewrite is now the shell (responsive `Sidebar` + `Header` +
+mobile `DockNav`, dark-canonical). These rules were added on top and hold
+everywhere:
+
+1. **Dual theme.** Tokens live in `@theme` (light: warm paper) with a `.dark`
+   override (pixel-identical to the Twilight reference). `next-themes`
+   class strategy, dark default, `ThemeToggle` in the portal header.
+   `@custom-variant dark` is required — without it `dark:` follows the OS.
+2. **Zero arbitrary color literals in JSX.** ~1,150 `text-[#…]`-style classes
+   were codemodded to tokens, plus ~320 `white`/`black` utilities mapped by
+   context: fixed-dark imagery keeps `logo-ink-inverse`/`scrim`, everything
+   else follows the theme. `rgba()` glows use `color-mix()` with tokens.
+3. **Type.** Self-hosted via `next/font/local`: Estedad (UI + Persian
+   display), Bodoni Moda + Montserrat (the LUMI WELLNESS wordmark, rendered
+   as inline SVG in `LumiLogo` so the faces resolve), Vazirmatn (fallback).
+   No `next/font/google` — builds work offline.
+4. **Charts are data surfaces.** Recharts paint reads `var(--color-*)`, so
+   grids, ticks, tooltips and series adapt to both themes.
+5. Anything still hardcoded (`GymNavIcons` knockouts, decorative `yellow-400`
+   star) is documented at its call site as deliberate.

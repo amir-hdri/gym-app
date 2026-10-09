@@ -20,8 +20,8 @@ Wellness**, which is the name in the UI, the manifest and the metadata.
 │                   forgot/reset password                │
 ├────────────────────────────────────────────────────────┤
 │  backend — FastAPI + SQLAlchemy + SQLite               │
-│  REST API under /api/v1 — 60 paths, 92 operations      │
-│  JWT auth · role enforcement · QR check-in             │
+│  REST API under /api/v1 — ~100 paths, 96 operations    │
+│  JWT auth · role enforcement · QR check-in · SMTP mail │
 ├────────────────────────────────────────────────────────┤
 │  packages/ — shared workspaces (reserved)              │
 │  turbo.json — Turborepo pipeline                       │
@@ -39,9 +39,13 @@ Wellness**, which is the name in the UI, the manifest and the metadata.
   dashboards
 - **Routers:** auth, users, branches, membership-plans, memberships, exercises,
   training-programs, goals, check-ins, payments, dashboard (incl. analytics),
-  notifications, messages
+  notifications, messages, readiness
+- Extra endpoints beyond plain CRUD: role update, check-in void, membership
+  renew, readiness history, QR check-in, broadcast, deduct-session
 - Schema is created with `Base.metadata.create_all` — there are **no
   migrations**. A model change means recreating the dev database.
+- Password reset mail is delivered over SMTP when `SMTP_HOST`/`SMTP_FROM` are
+  set; otherwise production answers 503 and non-prod returns `devToken`.
 - Interactive docs at `/docs` (Swagger UI)
 
 ### Frontend
@@ -145,10 +149,11 @@ build:
 
 | Metric | Baseline | Current |
 | --- | ---: | ---: |
-| Performance score | 85 | **92** |
+| Performance score | 85 | **91–92** |
 | Accessibility | 96 | **100** |
-| Speed Index | 6.0 s | **1.2 s** |
+| Speed Index | 6.0 s | **0.9–1.2 s** |
 | LCP element render delay | 3,921 ms | **126 ms** |
+| LCP (simulated Moto G4) | 3.46 s | **3.3 s** |
 | Color-contrast audit | fail | pass |
 | Desktop Performance | 100 | 100 |
 
@@ -157,12 +162,12 @@ Full methodology, fix log (P0/P1/P2) and the measured roadmap for reaching 95+:
 
 ## Known limitations
 
-- **Password reset cannot complete in production.**
-  `POST /api/v1/auth/forgot-password` mints a reset token but there is no mail
-  transport configured, so nothing is sent. Outside production the response
-  carries the token as `devToken`, which is the only way to reach
-  `/auth/reset-password`; in production that field is omitted and the flow is a
-  dead end. Wiring up SMTP is the single largest functional gap.
+- **Password reset needs SMTP env to work in production.**
+  `POST /api/v1/auth/forgot-password` sends a Persian reset mail when
+  `SMTP_HOST`/`SMTP_FROM` are configured (SSL or STARTTLS, optional login).
+  Outside production the response also carries the token as `devToken`;
+  in production without SMTP the endpoint answers 503. Tokens are
+  single-use, 30-minute, SHA-256 stored, rate-limited, and pruned.
 - **No database migrations.** Schema changes require recreating the database.
 - **`@playwright/test` is not in `package.json`.** The end-to-end specs under
   `apps/web/e2e/` are committed and the config is self-sufficient, but the
@@ -170,14 +175,10 @@ Full methodology, fix log (P0/P1/P2) and the measured roadmap for reaching 95+:
   registry access, and adding it without regenerating `package-lock.json` would
   break `npm ci`). The `e2e` CI job installs it ad hoc with `--no-save` and is
   `continue-on-error`. Add the dependency properly, then delete both.
-- **`npm run build` needs network for the font.** `app/layout.tsx` loads
-  Vazirmatn through `next/font/google`, which fetches from
-  `fonts.googleapis.com` at build time. CI is fine; an offline or
-  proxy-restricted machine fails the build with
-  `next/font: Failed to fetch Vazirmatn`, even though nothing else is wrong.
-  Self-hosting the family with `next/font/local` removes the dependency and
-  speeds up cold builds — it just needs someone with network to fetch the woff2
-  files once and commit them.
+- **Fonts are self-hosted.** `app/layout.tsx` loads Estedad (UI),
+  Bodoni Moda + Montserrat (LUMI WELLNESS wordmark) and Vazirmatn
+  (fallback) from `src/app/fonts/` via `next/font/local` — builds work
+  fully offline.
 
 Every intentional divergence between the implementation and the coordination
 spec is recorded under `## Deviations` in
@@ -190,6 +191,10 @@ spec is recorded under `## Deviations` in
 | `SECRET_KEY` | backend | — (required) |
 | `DATABASE_URL` | backend | `sqlite:///./gymapp.db` |
 | `ENVIRONMENT` | backend | `development` (`production` suppresses `devToken`) |
+| `SEED_DEMO_DATA` | backend | `false` (dev seeds by default; staging seeds only on opt-in) |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` / `SMTP_FROM` / `SMTP_STARTTLS` / `SMTP_SSL` | backend | unset (password-reset mail) |
+| `FRONTEND_URL` | backend | reset-link base URL |
+| `TRUST_PROXY` | backend | `false` (honor `X-Forwarded-For` for rate limiting) |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | backend | 30 |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | backend | 7 |
 | `LOGIN_RATE_LIMIT` | backend | per-IP login attempt ceiling |

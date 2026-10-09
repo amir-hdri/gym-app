@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Phone, Mail, Calendar, ChevronRight, Edit, Trash2, Award, Star, Plus, ClipboardList } from "lucide-react";
+import { Phone, Mail, Calendar, ChevronRight, Edit, Trash2, Award, Plus, ClipboardList } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -313,6 +313,8 @@ export default function CoachProfilePage() {
   const myPrograms = (programsQuery.data?.data ?? []).filter(
     (program) => program.coachId === params.id
   );
+  // The user row carries no student count — distinct coached athletes.
+  const studentCount = new Set(myPrograms.map((program) => program.athleteId)).size;
   const athleteById = new Map((usersQuery.data?.data ?? []).map((u) => [u.id, u] as const));
 
   return (
@@ -344,22 +346,16 @@ export default function CoachProfilePage() {
       <div className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
         <InfoRow icon={<Phone className="h-4 w-4" strokeWidth={1.75} />} label="تلفن" value={coach.phone} ltr />
         <InfoRow icon={<Mail className="h-4 w-4" strokeWidth={1.75} />} label="ایمیل" value={coach.email} ltr />
-        <InfoRow icon={<Award className="h-4 w-4" strokeWidth={1.75} />} label="تخصص" value={coach.specialty} />
-        <InfoRow icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />} label="سابقه" value={coach.experience} />
+        <InfoRow icon={<Award className="h-4 w-4" strokeWidth={1.75} />} label="شعبه" value={coach.branchName ?? "—"} />
+        <InfoRow icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />} label="عضویت از" value={formatDate(coach.createdAt)} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="تعداد شاگردان" value={formatPersianNumber(coach.students)} />
+        <StatCard label="تعداد شاگردان" value={formatPersianNumber(studentCount)} />
         <StatCard
-          label="امتیاز"
-          value={
-            <span className="flex items-center gap-1.5">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              {coach.rating}
-            </span>
-          }
+          label="برنامه‌های فعال"
+          value={formatPersianNumber(myPrograms.filter((p) => p.status === "active").length)}
         />
-        <StatCard label="تخصص" value={coach.specialty} className="col-span-2" />
       </div>
 
       <div>
@@ -374,20 +370,27 @@ export default function CoachProfilePage() {
               </tr>
             </thead>
             <tbody>
-              {(coach.studentsList || []).map((s: any) => (
-                <tr key={s.id} className="border-t border-border hover:bg-secondary">
-                  <td className={`${tdClass} font-medium text-foreground`}>{s.name}</td>
-                  <td className={tdClass}>{s.plan}</td>
-                  <td className={tdClass}>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 flex-1 rounded-full bg-secondary">
-                        <div className="h-full rounded-full bg-primary" style={{ width: `${s.progress}%` }} />
+              {myPrograms.map((program) => {
+                const athlete = athleteById.get(program.athleteId);
+                if (!athlete) return null;
+                const done = program.exercises.filter((e) => e.isCompleted).length;
+                const total = program.exercises.length || 1;
+                const progress = Math.round((done / total) * 100);
+                return (
+                  <tr key={program.id} className="border-t border-border hover:bg-secondary">
+                    <td className={`${tdClass} font-medium text-foreground`}>{athlete.firstName} {athlete.lastName}</td>
+                    <td className={tdClass}>{program.name}</td>
+                    <td className={tdClass}>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 flex-1 rounded-full bg-secondary">
+                          <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+                        </div>
+                        <span className="text-sm">{formatPersianNumber(progress)}%</span>
                       </div>
-                      <span className="text-sm">{formatPersianNumber(s.progress)}%</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

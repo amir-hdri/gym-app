@@ -66,7 +66,7 @@ export default function ExerciseDetailPage() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-serif text-2xl font-normal text-foreground">{ex.name}</h1>
-              <Badge variant={diffColors[ex.difficulty] || "default"} className="bg-primary">
+              <Badge variant={diffColors[ex.difficulty] || "default"} className="bg-primary text-primary-foreground dark:text-muted-foreground">
                 {diffLabels[ex.difficulty] || ex.difficulty}
               </Badge>
             </div>

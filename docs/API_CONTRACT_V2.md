@@ -115,7 +115,7 @@ Only the rows below are new. Existing routes keep their current behaviour.
 | POST | `/notifications` | admin, receptionist | `{ userId, title, message, type? }` → one notification |
 | POST | `/notifications/broadcast` | admin, receptionist | `{ title, message, type?, role?, branchId? }` → `{ "sent": int }` |
 | POST | `/memberships/{id}/deduct-session` | staff | already exists — verify and keep |
-| PUT | `/payments/{id}` | admin, receptionist | `{ status?, method?, notes? }` — status in `pending\|completed\|failed\|refunded` |
+| PUT | `/payments/{id}` | admin, receptionist | `{ status?, method?, notes? }` — status in `pending\|completed\|failed\|refunded\|cancelled` (unified with PATCH; leaving `completed` clears `paid_at`) |
 
 ---
 
@@ -185,6 +185,19 @@ to the athlete's `…/complete` call. `MembershipInput` is the same idea for
 `RevenueSeries` is the `{ labels, values }` pair `GET /dashboard/revenue`
 returns. The last four entries close the gaps recorded in deviation 14.
 
+Added October 2026, for routes that did not exist when v2 was written
+(client method + mock + `use<Method>` hook each):
+
+```
+updateUserRole, renewMembership, voidCheckIn, getReadinessHistory,
+useUpdateUserRole, useRenewMembership, useVoidCheckIn, useReadinessHistory,
+useBranch, useProfile
+```
+
+plus mock-only auth (`mockService.login/register/refreshToken/logout/getProfile`),
+which is what `AuthProvider` calls under `NEXT_PUBLIC_USE_MOCKS=true`, and a
+mock `qrCheckIn` so the desk flow works offline.
+
 `hooks/use-api.ts` gains a hook per method, named `use<Method>` with the
 existing conventions (`useQuery` for GET, `useMutation` + `invalidateQueries`
 for the rest). Query keys extend the existing `Q` map.
@@ -198,23 +211,50 @@ for the rest). Query keys extend the existing `Q` map.
 
 ---
 
+## 7. New endpoints (October 2026)
+
+Each has a client method, a mock, a hook, and a UI caller — `test_route_coverage`
+fails the suite otherwise.
+
+| Method | Path | Roles | Notes |
+|---|---|---|---|
+| PATCH | `/users/{id}/role` | admin | the single way roles change (PUT strips `role`, register hardcodes `athlete`); 400 on self or unknown role |
+| DELETE | `/check-ins/{id}` | admin, receptionist | voids an erroneous record; operational rows cascade on user delete, financial/shared rows are kept |
+| POST | `/memberships/{id}/renew` | admin, receptionist, athlete (own) | `{ endDate, sessionsTotal?, resetSessionsUsed? }` — new term, reactivation, counter reset; payment recorded separately via `POST /payments` |
+| GET | `/readiness/history?days=14&userId=` | athlete (own), coach (own athletes), admin | newest-first `{ day, state }` rows, max 60 days |
+| POST | `/auth/register` | public | now accepts optional `branchId` (honoured only if the branch exists); athletes with no branch may set their own once via `PUT /users/{id}` |
+
+Behaviour changes on existing routes (same table, new rules):
+- Coaches may `POST /memberships` for their own athletes and *read* (never
+  write) their athletes' payments — the coach athlete-detail page needs both.
+- Receptionists are read-only on goals (PUT/progress now 403 like DELETE).
+- Admins are observers on messaging: reads allowed, sends and read-marks 403.
+- `PUT /check-ins/{id}/checkout` rejects `checkOutTime <= check_in_time`.
+- Program/goal creation validates referenced users *and their roles*;
+  `MembershipCreate` enforces `final == price − discount` and sane dates;
+  re-completing an exercise re-stamps `completed_at`, un-completing nulls actuals.
+- `POST /users` 404s on unknown `branchId`; `PUT` 409s on duplicate email;
+  athlete `GET /users` echoes the requested `page`.
+
+---
+
 ## Deviations
 
 Where the shipped implementation differs from the spec above, and why. Written
 after the fact, from reading the code — not a wish list.
 
-### 1. `forgotPassword` has no mail transport
+### 1. `forgotPassword` mail transport (resolved October 2026)
 
 `POST /auth/forgot-password` mints a reset token and returns 200 whether or not
-the address is registered (deliberate: the response must not reveal which). It
-does not email it, because the project has no SMTP configuration and adding one
-was out of scope.
+the address is registered (deliberate: the response must not reveal which).
+SMTP delivery now exists (`app/mail.py`, Persian template): when `SMTP_HOST`
+and `SMTP_FROM` are configured the link is mailed; otherwise production
+answers 503 and non-production falls back to the `devToken` payload field.
 
-Outside production the response payload therefore carries the token as
-`devToken`, which is how `/auth/reset-password` is reachable at all in dev and
-in the end-to-end suite. **In production `devToken` is omitted and the reset
-flow is a dead end until a mail transport is wired up.** That is the single
-largest functional gap in the app.
+Hardening around it: every request burns rate-limit quota (the check could
+never fire before), `POST /reset-password` is rate-limited against guessing,
+consumed grants are deleted instead of accumulated, and per-user dead grants
+are pruned on issue. `devToken` still never appears in production.
 
 ### 2. Mock-service signatures take the caller id positionally
 
@@ -240,13 +280,12 @@ The request and response field names differ for the same value. Kept because
 `description` is the pre-existing column and renaming it would be a migration,
 which this project has no mechanism for (`Base.metadata.create_all`, no Alembic).
 
-### 5. `PATCH /payments/{id}/status` accepts one status the `PUT` rejects
+### 5. Payment status vocabulary (unified October 2026)
 
-`PUT /payments/{id}` validates against `PAYMENT_STATUSES`, which omits
-`cancelled`; the `PATCH` handler's own allow-list includes it. So `cancelled` is
-reachable only through the `PATCH`. The client exposes both — `updatePayment`
-for the full edit form, `updatePaymentStatus` for a one-click reconcile — and
-`useUpdatePaymentStatus` is the one the admin table should use.
+`PUT` and `PATCH` used to disagree on `cancelled` (422 on one, 200 on the
+other). `PAYMENT_STATUSES` now includes it on both, and any transition *away*
+from `completed` clears `paid_at` on both paths, so a reversed payment cannot
+keep claiming money changed hands.
 
 ### 6. `POST /users/{id}/password` needed its own request schema
 

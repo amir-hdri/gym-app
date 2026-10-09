@@ -148,14 +148,14 @@ export default function AthleteDashboard() {
             <h2 className="max-w-[290px] font-serif text-[26px] font-medium leading-snug tracking-tight text-logo-ink-inverse">
               {dashboardData?.currentProgram?.name ?? "قدرت و هایپرتروفی بالاتنه"}
             </h2>
-            <p className="mt-2.5 max-w-[290px] text-xs leading-relaxed text-foreground/90">
+            <p className="mt-2.5 max-w-[290px] text-xs leading-relaxed text-logo-ink-inverse/90">
               {todayExercises.length > 0
                 ? `${formatPersianNumber(todayExercises.length)} حرکت فعال در برنامه امروز`
                 : "برنامه اضافه بار تدریجی با تمرکز روی حرکات پایه و عضلات میان‌تنه."}
             </p>
           </div>
           <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-logo-ink-inverse">
               <Clock className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
               <span>
                 {formatPersianNumber(Math.round(completionPercent))}٪ تکمیل

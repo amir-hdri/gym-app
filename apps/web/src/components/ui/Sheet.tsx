@@ -69,7 +69,7 @@ export function Sheet({
         <DialogPrimitive.Content
           data-side={isResponsiveBottom ? "bottom" : side}
           className={cn(
-            "dark sheet-panel fixed z-50 flex flex-col overflow-hidden border-border bg-card text-card-foreground shadow-[var(--shadow-card-hover)]",
+            "sheet-panel fixed z-50 flex flex-col overflow-hidden border-border bg-card text-card-foreground shadow-[var(--shadow-card-hover)]",
             "outline-none",
             sideClasses[side],
             className

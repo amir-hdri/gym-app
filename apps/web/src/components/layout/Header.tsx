@@ -71,7 +71,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
           >
             <Bell className="h-[20px] w-[20px]" strokeWidth={1.75} />
             {unreadCount > 0 && (
-              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 font-sans text-[10px] font-bold leading-none text-primary-foreground shadow-[0_2px_8px_rgba(210,192,165,0.5)]">
+              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 font-sans text-[10px] font-bold leading-none text-primary-foreground shadow-[0_2px_8px_color-mix(in_srgb,var(--color-primary)_50%,transparent)]">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}

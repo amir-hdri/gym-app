@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/Progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { formatPersianNumber, formatCurrency, formatDate, formatDateTime, getInitials } from "@/lib/utils";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
-import { useUser } from "@/hooks/use-api";
+import { useUser, useMemberships, useMembershipPlans, useTrainingPrograms, useUsers, useGoals, usePayments } from "@/hooks/use-api";
 import { PageShell, SectionTitle } from "@/components/twilight/Page";
 import { StatCard, TwilightCard } from "@/components/twilight/controls";
 
@@ -36,10 +36,28 @@ const tdClass = "px-4 py-3 text-muted-foreground";
 export default function MemberProfilePage() {
   const params = useParams<{ id: string }>();
   const { data, isLoading, isError } = useUser(params.id);
+  const { data: membershipsData } = useMemberships();
+  const { data: plansData } = useMembershipPlans();
+  const { data: programsData } = useTrainingPrograms();
+  const { data: usersData } = useUsers();
+  const { data: goalsData } = useGoals(data?.data?.id);
+  const { data: paymentsData } = usePayments(data?.data?.id);
   if (isLoading) return <Loading />;
   if (isError) return <ErrorDisplay />;
-  const member = data?.data as any;
+  const member = data?.data;
   if (!member) return <ErrorDisplay message="کاربر یافت نشد" />;
+  const goals = goalsData?.data ?? [];
+  const payments = paymentsData?.data ?? [];
+
+  // The user row carries no membership/plan/coach fields — resolve them from
+  // their own sources instead of rendering literal "undefined".
+  const membership = (membershipsData?.data ?? [])
+    .filter((m) => m.userId === member.id)
+    .sort((a, b) => (b.endDate ?? "").localeCompare(a.endDate ?? ""))[0];
+  const planName = plansData?.data?.find((p) => p.id === membership?.planId)?.name;
+  const coachId = (programsData?.data ?? []).find((p) => p.athleteId === member.id)?.coachId;
+  const coach = (usersData?.data ?? []).find((u) => u.id === coachId);
+  const coachName = coach ? `${coach.firstName} ${coach.lastName}` : null;
 
   return (
     <PageShell>
@@ -73,21 +91,21 @@ export default function MemberProfilePage() {
       <div className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
         <InfoRow icon={<Phone className="h-4 w-4" strokeWidth={1.75} />} label="تلفن" value={member.phone} ltr />
         <InfoRow icon={<Mail className="h-4 w-4" strokeWidth={1.75} />} label="ایمیل" value={member.email} ltr />
-        <InfoRow icon={<Award className="h-4 w-4" strokeWidth={1.75} />} label="طرح اشتراک" value={member.plan} />
+        <InfoRow icon={<Award className="h-4 w-4" strokeWidth={1.75} />} label="طرح اشتراک" value={planName ?? "—"} />
         <InfoRow icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />} label="عضویت از" value={formatDate(member.createdAt)} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="اشتراک" value={member.plan} suffix={formatDate(member.createdAt)} />
-        <StatCard label="مربی" value={member.coach} />
+        <StatCard label="اشتراک" value={planName ?? "—"} suffix={formatDate(member.createdAt)} />
+        <StatCard label="مربی" value={coachName ?? "—"} />
         <TwilightCard className="col-span-2">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">جلسات</span>
           <div className="mt-3">
             <span className="font-sans text-2xl font-normal tabular-nums tracking-tight text-foreground">
-              {formatPersianNumber(member.sessionsUsed)} / {formatPersianNumber(member.sessionsTotal)}
+              {formatPersianNumber(membership?.sessionsUsed ?? 0)} / {formatPersianNumber(membership?.sessionsTotal ?? 0)}
             </span>
             <Progress
-              value={((member.sessionsUsed || 0) / (member.sessionsTotal || 1)) * 100}
+              value={((membership?.sessionsUsed || 0) / (membership?.sessionsTotal || 1)) * 100}
               className="mt-3"
               indicatorClassName="bg-primary"
             />
@@ -102,13 +120,13 @@ export default function MemberProfilePage() {
         </TabsList>
 
         <TabsContent value="goals" className="space-y-3">
-          {(member.goals || []).map((goal: any, i: number) => (
-            <TwilightCard key={i}>
+          {goals.map((goal) => (
+            <TwilightCard key={goal.id}>
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm font-medium text-foreground">{goal.title}</span>
-                <span className="text-xs text-muted-foreground">{formatPersianNumber(goal.current)}/{formatPersianNumber(goal.target)} {goal.unit}</span>
+                <span className="text-xs text-muted-foreground">{formatPersianNumber(goal.currentValue)}/{formatPersianNumber(goal.targetValue)} {goal.unit}</span>
               </div>
-              <Progress value={(goal.current / goal.target) * 100} indicatorClassName="bg-primary" />
+              <Progress value={goal.targetValue > 0 ? (goal.currentValue / goal.targetValue) * 100 : 0} indicatorClassName="bg-primary" />
             </TwilightCard>
           ))}
         </TabsContent>
@@ -126,12 +144,12 @@ export default function MemberProfilePage() {
                 </tr>
               </thead>
               <tbody>
-                {(member.payments || []).map((p: any) => (
+                {payments.map((p) => (
                   <tr key={p.id} className="border-t border-border hover:bg-secondary">
                     <td className={`${tdClass} font-medium text-foreground`}>{formatCurrency(p.amount)}</td>
                     <td className={tdClass}>{p.method}</td>
                     <td className={tdClass}><Badge variant={p.status === "completed" ? "success" : "warning"}>{p.status === "completed" ? "موفق" : "معلق"}</Badge></td>
-                    <td className={tdClass}>{formatDateTime(p.date)}</td>
+                    <td className={tdClass}>{formatDateTime(p.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

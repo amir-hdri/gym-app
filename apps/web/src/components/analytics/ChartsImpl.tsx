@@ -25,28 +25,30 @@ function EmptyChart({ message, className }: { message: string; className?: strin
   );
 }
 
-// Twilight — shared tooltip style
+// Twilight — shared tooltip style, resolved from the active theme tokens so
+// charts recolor with the rest of the UI (var() in presentation attributes
+// and inline styles follows the .dark class automatically).
 const twilightTooltip = {
-  cursor: { fill: "rgba(210,192,165,0.08)" },
+  cursor: { fill: "color-mix(in srgb, var(--color-primary) 8%, transparent)" },
   contentStyle: {
     direction: "rtl" as const,
     maxWidth: 220,
     borderRadius: "12px",
-    border: "1px solid #232934",
-    background: "#161a22",
-    color: "#f5f3ef",
+    border: "1px solid var(--color-border)",
+    background: "var(--color-popover)",
+    color: "var(--color-popover-foreground)",
     boxShadow: "0 12px 32px rgba(0,0,0,0.6)",
     whiteSpace: "normal" as const,
     lineHeight: 1.5,
-    fontFamily: "var(--font-vazirmatn), system-ui, sans-serif",
+    fontFamily: "var(--font-sans)",
     fontSize: "12px",
   },
-  labelStyle: { color: "#f5f3ef", fontWeight: 600 },
-  itemStyle: { color: "#8e98a8" },
+  labelStyle: { color: "var(--color-foreground)", fontWeight: 600 },
+  itemStyle: { color: "var(--color-muted-foreground)" },
 };
 
-const twilightGrid = "#1e2430";
-const twilightTick = { fill: "#8e98a8", fontSize: 11, fontFamily: "var(--font-vazirmatn), system-ui, sans-serif" };
+const twilightGrid = "var(--color-border)";
+const twilightTick = { fill: "var(--color-muted-foreground)", fontSize: 11, fontFamily: "var(--font-sans)" };
 
 export function RevenueChart({ payments, compact = false }: { payments: Payment[]; compact?: boolean }) {
   const reduceMotion = useReducedMotion();
@@ -83,7 +85,7 @@ export function RevenueChart({ payments, compact = false }: { payments: Payment[
             formatter={(value, _name, item) => [formatCurrency(value as number), `${formatPersianNumber(item.payload.transactions)} تراکنش موفق`] as any}
             labelFormatter={(label) => `درآمد ${label}`}
           />
-          <Bar dataKey="revenue" fill="#d2c0a5" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Bar dataKey="revenue" fill="var(--color-primary)" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -119,7 +121,7 @@ export function SessionDurationChart({ checkIns, compact = false }: { checkIns: 
             formatter={(value) => [`${formatPersianNumber(value as number)} دقیقه`, "مدت تمرین"] as any}
             labelFormatter={(label) => `جلسه ${label}`}
           />
-          <Bar dataKey="duration" fill="#8e98a8" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Bar dataKey="duration" fill="var(--color-muted-foreground)" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -151,7 +153,7 @@ export function AthleteProgressChart({ athletes }: { athletes: CoachAthlete[] })
             contentStyle={twilightTooltip.contentStyle as any}
             formatter={(value, _name, item) => [`${formatPersianNumber(value as number)}٪`, (item.payload as any).program ?? "بدون برنامه فعال"] as any}
           />
-          <Bar dataKey="progress" fill="#d2c0a5" radius={[0, 6, 6, 0]} maxBarSize={20} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
+          <Bar dataKey="progress" fill="var(--color-primary)" radius={[0, 6, 6, 0]} maxBarSize={20} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -186,7 +188,7 @@ export function AttendanceTrendChart({
               name === "checkIns" ? "ورود" : "عضو یکتا",
             ] as any}
           />
-          <Bar dataKey="checkIns" fill="#d2c0a5" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Bar dataKey="checkIns" fill="var(--color-primary)" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -216,7 +218,7 @@ export function RevenueTrendChart({
             contentStyle={twilightTooltip.contentStyle as any}
             formatter={(value) => [formatCurrency(value as number), "درآمد"] as any}
           />
-          <Bar dataKey="revenue" fill="#d2c0a5" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Bar dataKey="revenue" fill="var(--color-primary)" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -247,11 +249,11 @@ export function RevenueSeriesChart({
           <XAxis dataKey="label" tickLine={false} axisLine={false} tick={twilightTick} minTickGap={28} />
           <YAxis hide />
           <Tooltip
-            cursor={{ stroke: "rgba(210,192,165,0.3)" }}
+            cursor={{ stroke: "color-mix(in srgb, var(--color-primary) 30%, transparent)" }}
             contentStyle={twilightTooltip.contentStyle as any}
             formatter={(value) => [formatCurrency(value as number), "درآمد"] as any}
           />
-          <Line type="monotone" dataKey="revenue" stroke="#d2c0a5" strokeWidth={2} dot={false} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Line type="monotone" dataKey="revenue" stroke="var(--color-primary)" strokeWidth={2} dot={false} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -279,7 +281,7 @@ export function MembershipDistributionChart({
             contentStyle={twilightTooltip.contentStyle as any}
             formatter={(value, _name, item) => [`${formatPersianNumber(value as number)} عضو`, formatCurrency((item.payload as any).revenue)] as any}
           />
-          <Bar dataKey="count" fill="#4ade80" radius={[0, 6, 6, 0]} maxBarSize={20} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
+          <Bar dataKey="count" fill="var(--color-activity-exercise)" radius={[0, 6, 6, 0]} maxBarSize={20} isAnimationActive={!reduceMotion} animationDuration={1000} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -310,7 +312,7 @@ export function PeakHoursChart({
             contentStyle={twilightTooltip.contentStyle as any}
             formatter={(value) => [`${formatPersianNumber(value as number)} ورود`, "ساعت"] as any}
           />
-          <Bar dataKey="checkIns" fill="#7dd3fc" radius={[6, 6, 0, 0]} maxBarSize={compact ? 18 : 22} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Bar dataKey="checkIns" fill="var(--color-activity-stand)" radius={[6, 6, 0, 0]} maxBarSize={compact ? 18 : 22} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -345,7 +347,7 @@ export function AthleteActivityChart({
               name === "durationMinutes" ? "مدت حضور" : "حرکات تکمیل‌شده",
             ] as any}
           />
-          <Bar dataKey="durationMinutes" fill="#d2c0a5" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
+          <Bar dataKey="durationMinutes" fill="var(--color-primary)" radius={[6, 6, 0, 0]} maxBarSize={compact ? 22 : 28} isAnimationActive={!reduceMotion} animationDuration={900} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>

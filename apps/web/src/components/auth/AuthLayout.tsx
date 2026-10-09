@@ -12,7 +12,7 @@ import { LumiLogo } from "@/components/ui/LumiLogo";
 export function LumiWordmark() {
   return (
     <div className="flex items-center gap-2">
-      <span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(210,192,165,0.8)]" />
+      <span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_color-mix(in_srgb,var(--color-primary)_80%,transparent)]" />
       <span className="font-serif text-lg font-semibold tracking-tight text-foreground">لومی</span>
       <span dir="ltr" className="pt-0.5 text-[10px] font-normal tracking-widest text-muted-foreground">
         LUMI WELLNESS
@@ -57,7 +57,7 @@ export function AuthLayout({ children, showLogo = true }: AuthLayoutProps) {
       {/* Mobile scenic backdrop */}
       <div className="absolute inset-0 lg:hidden">
         <GymBackdrop className="absolute inset-0" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/55 via-background/15 to-background/90" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/85 via-background/30 to-background/95 dark:from-background/55 dark:via-background/15 dark:to-background/90" />
       </div>
 
       {/* Soft cream glow behind the card (monochrome, desktop) */}

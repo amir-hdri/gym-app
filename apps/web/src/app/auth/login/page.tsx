@@ -15,7 +15,7 @@ import { homeForRole, panelLabelForRole } from "@/components/auth/auth-helpers";
 import { USE_MOCK } from "@/hooks/api-source";
 
 const inputClassName =
-  "h-12 w-full rounded-xl border border-border bg-card pe-11 ps-4 text-sm text-foreground placeholder:text-muted transition-all duration-200 focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-60";
+  "h-12 w-full rounded-xl border border-border bg-card pe-11 ps-4 text-sm text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-60";
 
 interface DemoAccount {
   email: string;
@@ -109,7 +109,7 @@ function SignInContent() {
               },
             })}
           />
-          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted">
+          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground">
             <Mail className="h-4 w-4" strokeWidth={1.75} />
           </span>
         </div>
@@ -133,7 +133,7 @@ function SignInContent() {
               minLength: { value: 6, message: "رمز باید حداقل ۶ کاراکتر باشد" },
             })}
           />
-          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted">
+          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground">
             <Lock className="h-4 w-4" strokeWidth={1.75} />
           </span>
           <button
@@ -249,11 +249,21 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 opacity-25">
         <GymBackdrop />
       </div>
+      {/* Theme-aware vignette over the scenic backdrop: the legacy dark
+          scrim stays exact in dark mode; light gets a warm paper glow so the
+          foreground-ink header stays legible. */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 hidden dark:block"
         style={{
           background:
             "radial-gradient(circle at 50% 50%, rgba(210,192,165,0.08) 0%, rgba(7,9,12,0.85) 60%, #07090c 100%)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 dark:hidden"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-primary) 8%, transparent) 0%, color-mix(in srgb, var(--color-background) 80%, transparent) 60%, var(--color-background) 100%)",
         }}
       />
 

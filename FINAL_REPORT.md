@@ -1,6 +1,6 @@
 # FINAL ENGINEERING REPORT — GYM APP (UNIFIED)
 
-**Date:** 2026-08-15 · last updated 2026-10-02 (§9–§11)
+**Date:** 2026-08-15 · last updated 2026-10-09 (§12)
 **Repository:** https://github.com/amir-hdri/gym-app
 **Branch:** `main`
 **Build Status:** type-check clean, lint clean (0 errors, 0 warnings), 104 frontend unit tests, 94 backend tests, backend loads 60 paths / 92 operations. `npm run build` cannot complete in the development sandbox — see §11.4.
@@ -547,3 +547,84 @@ API instead, confirming it compiles and that every new `blush` utility
 generates. Self-hosting the font with `next/font/local` would remove the
 dependency and is the right long-term fix, but the font files cannot be
 downloaded here to do it.
+
+> Update 2026-10-09 (§12): superseded. Network access existed after all —
+> Estedad, Bodoni Moda, Montserrat and Vazirmatn are now self-hosted under
+> `src/app/fonts/` via `next/font/local`, and `npm run build` succeeds fully
+> offline.
+
+---
+
+## 12. CAPABILITY COMPLETION + MERGE (2026-10-09)
+
+Three audit agents inventoried the whole stack (backend: 18 issues, data
+layer: 12 gaps, UI: 20 partials), then five implementation agents closed them
+in parallel, then the remote Twilight line (5 commits ahead on `origin/main`)
+was merged in. `main` is now the only branch, local and remote.
+
+### 12.1 Backend
+
+- Auth: forgot-password records quota every request (the check could never
+  fire before), reset-password is rate-limited, consumed grants are deleted,
+  dead grants pruned; SMTP delivery via `app/mail.py` (Persian template),
+  503 in production when unconfigured, `devToken` non-prod only.
+- Validation: unified payment vocabulary (`cancelled` on PUT+PATCH, `paid_at`
+  cleared on reversal), checkout-after-checkin guard, program/goal reference
+  + role checks, membership pricing identity, fresh `completed_at` on
+  re-complete, null actuals on undo, athlete `GET /users` page echo.
+- Authz: receptionists read-only on goals, admins observer-only on messaging,
+  coaches can create memberships and read (never write) own athletes' payments.
+- New: `PATCH /users/{id}/role`, `DELETE /check-ins/{id}`,
+  `POST /memberships/{id}/renew`, `GET /readiness/history`,
+  `branchId` on register + one-time self-set on update.
+- Integrity: unknown-branch 404, duplicate-email 409, user delete cascades
+  operational rows (keeps financial/shared history), seed gating
+  (`SEED_DEMO_DATA`), isolated rate-limit test harness.
+- Suite: **171 passed, 4 xfailed** (was 105 + 26 pre-existing failures).
+
+### 12.2 Data layer & features
+
+- Mock auth (`login/register/refreshToken/logout/getProfile` + mock QR)
+  makes `NEXT_PUBLIC_USE_MOCKS=true` a genuinely offline demo — login was
+  broken before (Network Error against a backend that isn't there).
+- `rememberMe` persists to local vs session storage; refresh-token
+  stale-closure fixed; profile revalidated on restore; interceptor skips
+  refresh for forgot-password/logout and reads both stores.
+- New hooks: `useUpdateUserRole`, `useRenewMembership`, `useVoidCheckIn`,
+  `useReadinessHistory`, `useBranch`, `useProfile`; mock corrections
+  (streaks, payments pending, goal fields, zero-target guard, scoped
+  completion); `test_route_coverage` green.
+- Features: reception desk + today-check-ins with QR/camera entry, athlete
+  check-in/out + self renew/pay + dismiss, readiness widget + energy
+  history, coach goal create/delete + `?c=` thread links + member
+  visibility, admin hardening (plan/branch deletes, payment/broadcast
+  confirms, sent history, single-user send, program assign, staff stats),
+  CSV export, avatar URL, notif prefs, Persian 403, resend cooldown, branch
+  pickers, mode-aware demo logins, real reset-password flow.
+- Phantom-field fixes: admin member/coach pages read `sessionsUsed`,
+  `students`, `specialty`, `rating` off the raw user row (literal
+  "undefined" on screen) — all now derived from memberships/programs.
+- Suite: **138 unit green**, type-check clean, eslint clean (legacy
+  `.eslintrc.json` removed; `lint` pins flat config).
+
+### 12.3 Design
+
+- Self-hosted Estedad (UI) + Bodoni Moda/Montserrat (wordmark, inline SVG
+  `LumiLogo` wired into headers); Twilight shell kept (responsive
+  Sidebar/Header/DockNav).
+- Full light theme: dual `@theme` tokens, class-driven `dark:`, `ThemeToggle`
+  in the header; ~1,150 hex + ~320 white/black utilities codemodded to
+  tokens (dark pixel-identical, verified by screenshot); charts read
+  `var(--color-*)`; light QA sweep fixed ~10 illegibilities.
+- LCP: static above-fold hero + `content-visibility` below fold; prod
+  mobile Lighthouse **91–92 / 100 / 100 / 100** (LCP 3.3 s is the Persian
+  webfont swap on simulated 4G — kept deliberately over `display: optional`).
+
+### 12.4 What was deliberately not done
+
+- No light-theme change to fixed-dark brand imagery (hero/scenic art stays
+  dark in both themes — it is the product's signature).
+- No push-notification transport (terms mention it; needs VAPID + backend —
+  prefs are device-local toggles for now).
+- No DB migrations mechanism (unchanged), no e2e dependency addition
+  (unchanged), no message edit/delete (no backend model for it).

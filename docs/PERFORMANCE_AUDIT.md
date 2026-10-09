@@ -175,3 +175,32 @@ tsc --noEmit      → clean
 vitest run        → 2 files / 5 tests passed
 next build        → 41/41 routes generated
 ```
+
+---
+
+## 6. October 2026 re-measurement (merge line)
+
+Harness: production build served on :3100, MCP Lighthouse 13.5, mobile with
+throttling (same simulated Moto G4 profile as §2).
+
+| Metric | §2 After | Now | Δ |
+| --- | ---: | ---: | --- |
+| Performance | 92 | **91–92** | — |
+| Accessibility / Best Practices / SEO | 100 / 100 / 100 | 100 / 100 / 100 | — |
+| FCP | 1.22 s | **0.9–1.1 s** | faster |
+| Speed Index | 1.2 s | **0.9–1.6 s** | — |
+| TBT | 120 ms | **60–90 ms** | faster |
+| LCP | 3.29 s | **3.3–3.5 s** | — |
+| CLS | 0 | 0 | — |
+
+What moved LCP since §2: the hero entrance `Reveal`s (0.1–0.5 s of delay on
+the LCP element) were removed — above-fold hero paints statically — and
+below-fold landing sections got `content-visibility: auto` with an 800 px
+intrinsic size. Measured effect: FCP/SI/TBT all improved; LCP itself did not,
+because the remaining 3.3 s is the **Persian webfont swap under throttling**
+(Estedad 57 KB over simulated 4G): the LCP element is hero text, painted by a
+trace at 138 ms unthrottled. `display: swap` was kept deliberately — `optional`
+would score higher but show the system font to slow-network users, and the
+typeface is the product's face. Verdict: 91–92 is the honest ceiling for this
+stack on this profile; further LCP gains need font subsetting (P2 item 2),
+not code changes.

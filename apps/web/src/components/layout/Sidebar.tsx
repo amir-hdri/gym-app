@@ -69,7 +69,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
         {/* Logo — reference wordmark */}
         <div className="flex h-20 items-center justify-between border-b border-border px-5">
           <Link href="/" className="flex items-center gap-2" aria-label="Lumi Wellness">
-            <span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(210,192,165,0.8)]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_color-mix(in_srgb,var(--color-primary)_80%,transparent)]" />
             <span className="font-serif text-lg font-semibold tracking-tight text-foreground">لومی</span>
             <span dir="ltr" className="pt-0.5 text-[10px] font-normal tracking-widest text-muted-foreground">
               LUMI

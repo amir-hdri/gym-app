@@ -118,10 +118,10 @@ export default function ProgramsPage() {
             <GymBackdrop />
             <div className="absolute inset-0 z-10 flex flex-col justify-end p-6">
               <MicroLabel className="mb-1">Featured Program</MicroLabel>
-              <h3 className="font-serif text-[26px] font-medium text-logo-ink-inverse transition-colors group-hover:text-foreground">
+              <h3 className="font-serif text-[26px] font-medium text-logo-ink-inverse transition-colors group-hover:text-logo-ink-inverse">
                 {featured.name}
               </h3>
-              <p className="mt-1 text-[11px] text-muted-foreground">
+              <p className="mt-1 text-[11px] text-logo-ink-inverse/70 dark:text-muted-foreground">
                 {formatPersianNumber(featuredTotal)} حرکت · {formatPersianNumber(Math.round(featuredProgress))}٪ تکمیل · {formatDate(featured.startDate)} - {formatDate(featured.endDate)}
               </p>
             </div>

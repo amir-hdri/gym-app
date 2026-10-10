@@ -96,7 +96,7 @@ export function DockNav({ items, dotId }: { items: DockItem[]; dotId: string }) 
     <div className="pointer-events-none fixed inset-x-0 bottom-5 z-40 select-none lg:hidden">
       <nav
         aria-label="ناوبری اصلی موبایل"
-        className="pointer-events-auto mx-auto flex h-[65px] w-[330px] max-w-[calc(100vw-2rem)] items-center justify-around rounded-[36px] border border-border bg-popover/94 px-3 shadow-[0_18px_44px_rgba(0,0,0,0.75)] backdrop-blur-2xl"
+        className="pointer-events-auto mx-auto flex h-[65px] w-[330px] max-w-[calc(100vw-2rem)] items-center justify-around rounded-[36px] border border-border bg-popover/94 px-3 shadow-[0_18px_44px_color-mix(in_srgb,var(--color-scrim)_75%,transparent)] backdrop-blur-2xl"
       >
         {items.map((item) => {
           const isActive = matchesPath(pathname, item.href);
@@ -109,7 +109,7 @@ export function DockNav({ items, dotId }: { items: DockItem[]; dotId: string }) 
               aria-label={item.label}
               title={item.label}
               onClick={handleHaptic}
-              className="group relative flex h-12 w-12 cursor-pointer flex-col items-center justify-center focus:outline-none"
+              className="group relative flex h-12 w-12 cursor-pointer flex-col items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover rounded-2xl"
             >
               <motion.span
                 animate={{ scale: isActive ? 1.12 : 1, y: isActive ? -1.5 : 0 }}
@@ -117,8 +117,8 @@ export function DockNav({ items, dotId }: { items: DockItem[]; dotId: string }) 
                 className={cn(
                   "relative z-10 transition-colors duration-200",
                   isActive
-                    ? "text-primary drop-shadow-[0_0_8px_rgba(222,209,188,0.4)]"
-                    : "text-muted-foreground group-hover:text-muted-foreground"
+                    ? "text-primary drop-shadow-[0_0_8px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]"
+                    : "text-muted-foreground group-hover:text-foreground"
                 )}
               >
                 {renderIcon(isActive)}
@@ -127,7 +127,7 @@ export function DockNav({ items, dotId }: { items: DockItem[]; dotId: string }) 
                 {isActive && (
                   <motion.span
                     layoutId={dotId}
-                    className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(222,209,188,0.95)]"
+                    className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_color-mix(in_srgb,var(--color-primary)_95%,transparent)]"
                     transition={{ type: "spring", stiffness: 500, damping: 32 }}
                   />
                 )}

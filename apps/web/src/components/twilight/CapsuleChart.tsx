@@ -117,7 +117,7 @@ export function WeeklyCapsuleChart({ checkIns }: { checkIns: CapsuleCheckIn[] })
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${pct}%` }}
-                    transition={{ delay: idx * 0.05 + 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ delay: idx * 0.05 + 0.1, duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
                     className="relative w-full rounded-full bg-primary shadow-xs"
                   >
                     {isSelected && (

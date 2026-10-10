@@ -77,7 +77,7 @@ export const LumiLogo: React.FC<LumiLogoProps> = ({
       {glow && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -m-4 rounded-full bg-gradient-to-r from-primary/25 via-brand/20 to-blush/25 opacity-70 blur-2xl transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+          className="pointer-events-none absolute inset-0 -m-4 rounded-full bg-gradient-to-r from-primary/25 via-brand/20 to-blush/25 opacity-70 blur-2xl transition-opacity duration-200 group-hover:opacity-100 motion-reduce:transition-none"
         />
       )}
       <svg

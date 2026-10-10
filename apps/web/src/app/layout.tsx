@@ -35,7 +35,11 @@ const vazirmatn = localFont({
 });
 
 const bodoni = localFont({ src: "./fonts/BodoniModa-latin.woff2", weight: "400 900", variable: "--font-bodoni", display: "swap" });
-const montserrat = localFont({ src: "./fonts/Montserrat-latin.woff2", weight: "100 900", variable: "--font-montserrat", display: "swap" });
+// Montserrat sets only the LUMI wordmark's WELLNESS subtitle (hidden on the
+// landing nav via showSubtitle={false}). It must NOT preload: it is unused on
+// `/` and preloading it steals bandwidth from the LCP font (Estedad). Routes
+// that render the subtitle pick it up lazily with display:swap.
+const montserrat = localFont({ src: "./fonts/Montserrat-latin.woff2", weight: "100 900", variable: "--font-montserrat", display: "swap", preload: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://gymapp.ir"),
@@ -89,7 +93,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c0e12",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f3ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c0e12" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,

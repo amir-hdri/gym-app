@@ -9,13 +9,7 @@ import { RevenueChart } from "@/components/analytics/Charts";
 import { PageShell, SectionTitle, MicroLabel } from "@/components/twilight/Page";
 import { StatCard } from "@/components/twilight/controls";
 import { GymBackdrop } from "@/components/twilight/GymBackdrop";
-
-const paymentStatusConfig: Record<string, { label: string; variant: "success" | "warning" | "destructive" | "default" }> = {
-  completed: { label: "موفق", variant: "success" },
-  pending: { label: "معلق", variant: "warning" },
-  failed: { label: "ناموفق", variant: "destructive" },
-  refunded: { label: "بازگشت داده شده", variant: "default" },
-};
+import { PAYMENT_METHOD, PAYMENT_STATUS } from "./_components/admin-data";
 
 export default function AdminDashboard() {
   const { data: statsRes, isLoading, isError } = useDashboardStats();
@@ -76,21 +70,21 @@ export default function AdminDashboard() {
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">کاربر</th>
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">مبلغ</th>
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">روش پرداخت</th>
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">وضعیت</th>
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">تاریخ</th>
+                  <th scope="col" className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">کاربر</th>
+                  <th scope="col" className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">مبلغ</th>
+                  <th scope="col" className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">روش پرداخت</th>
+                  <th scope="col" className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">وضعیت</th>
+                  <th scope="col" className="px-4 py-3 text-right text-[10px] font-semibold text-muted-foreground">تاریخ</th>
                 </tr>
               </thead>
               <tbody>
                 {recentPayments.map((payment) => {
-                  const ps = paymentStatusConfig[payment.status] || { label: payment.status, variant: "default" as const };
+                  const ps = PAYMENT_STATUS[payment.status] ?? { label: payment.status, variant: "default" as const };
                   return (
                     <tr key={payment.id} className="border-t border-border transition-colors hover:bg-secondary">
                       <td className="px-4 py-3 font-medium text-foreground">{payment.user ? `${payment.user.firstName} ${payment.user.lastName}` : payment.userId}</td>
                       <td className="px-4 py-3 text-foreground">{formatCurrency(payment.amount)}</td>
-                      <td className="px-4 py-3 text-foreground">{payment.method}</td>
+                      <td className="px-4 py-3 text-foreground">{PAYMENT_METHOD[payment.method] ?? payment.method}</td>
                       <td className="px-4 py-3">
                         <Badge variant={ps.variant}>{ps.label}</Badge>
                       </td>

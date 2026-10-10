@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { cloneElement, isValidElement, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -49,13 +49,21 @@ function Field({
   error?: string;
   children: React.ReactNode;
 }) {
+  const errorId = `${id}-error`;
+  // WCAG 3.3.1: expose the error state + message on the control itself.
+  const control = isValidElement<{ "aria-invalid"?: string; "aria-describedby"?: string }>(children)
+    ? cloneElement(children, {
+        "aria-invalid": error ? "true" : "false",
+        ...(error ? { "aria-describedby": errorId } : null),
+      })
+    : children;
   return (
     <div>
       <label htmlFor={id} className={labelClassName}>
         {label}
       </label>
-      {children}
-      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+      {control}
+      {error && <p id={errorId} role="alert" className="mt-1 text-xs text-destructive">{error}</p>}
     </div>
   );
 }
@@ -111,10 +119,10 @@ export default function RegisterPage() {
   return (
     <AuthLayout>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-5 text-foreground shadow-2xl shadow-black/50 sm:p-8"
+        transition={{ duration: 0.28, ease: "easeOut" }}
+        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-5 text-foreground shadow-2xl shadow-scrim/50 sm:p-8"
       >
         {/* Top pastel accent — thin blush-to-cream gradient hairline */}
         <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-blush-solid to-cream" />
@@ -189,12 +197,12 @@ export default function RegisterPage() {
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
             <label className="group flex cursor-pointer items-start gap-2">
-              <input type="checkbox" className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-card accent-primary" {...register("acceptTerms")} />
+              <input type="checkbox" className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-card accent-primary" aria-invalid={errors.acceptTerms ? "true" : "false"} aria-describedby={errors.acceptTerms ? "acceptTerms-error" : undefined} {...register("acceptTerms")} />
               <span className="text-sm leading-relaxed text-muted-foreground transition-colors group-hover:text-foreground">
                 <Link href="/terms" className="text-primary hover:underline">قوانین و مقررات</Link> را می‌پذیرم
               </span>
             </label>
-            {errors.acceptTerms && <p className="mt-1 text-xs text-destructive">{errors.acceptTerms.message}</p>}
+            {errors.acceptTerms && <p id="acceptTerms-error" role="alert" className="mt-1 text-xs text-destructive">{errors.acceptTerms.message}</p>}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>

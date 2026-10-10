@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MicroLabel } from "@/components/twilight/Page";
+import { MicroLabel } from "@/components/twilight/Type";
 import { GymBackdrop } from "@/components/twilight/GymBackdrop";
 
 export default function NotFound() {
@@ -16,7 +16,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="mt-8 inline-flex w-full max-w-[240px] items-center justify-center rounded-xl bg-primary px-4 py-3 text-xs font-bold tracking-wide text-primary-foreground shadow-lg shadow-black/40 transition-colors hover:bg-primary"
+          className="mt-8 inline-flex w-full max-w-[240px] items-center justify-center rounded-xl bg-primary px-4 py-3 text-xs font-bold tracking-wide text-primary-foreground shadow-lg shadow-scrim/40 transition-colors hover:bg-primary"
         >
           بازگشت به صفحه اصلی
         </Link>

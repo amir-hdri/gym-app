@@ -143,7 +143,7 @@ export function GymWorkoutPlayerModal({ isOpen, routine, onClose, onFinishWorkou
           {isWorkoutCompleted ? (
             /* Workout Complete Celebration Screen */
             <div className="flex flex-col items-center justify-center text-center py-6 gap-4">
-              <div className="w-20 h-20 rounded-full bg-secondary border-2 border-primary flex items-center justify-center text-primary shadow-[0_0_24px_rgba(210,192,165,0.4)]">
+                <div className="w-20 h-20 rounded-full bg-secondary border-2 border-primary flex items-center justify-center text-primary shadow-[0_0_24px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]">
                 <Trophy className="w-10 h-10 stroke-[1.5]" />
               </div>
               <div>
@@ -271,7 +271,7 @@ export function GymWorkoutPlayerModal({ isOpen, routine, onClose, onFinishWorkou
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.96 }}
                     onClick={handleCompleteSet}
-                    className="w-full py-4 rounded-xl bg-primary text-primary-foreground text-xs font-bold tracking-wide hover:bg-primary transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_16px_rgba(210,192,165,0.25)]"
+                    className="w-full py-4 rounded-xl bg-primary text-primary-foreground text-xs font-bold tracking-wide hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_16px_color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
                   >
                     <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
                     <span>

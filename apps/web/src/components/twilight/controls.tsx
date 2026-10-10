@@ -1,9 +1,13 @@
 "use client";
 
-import { type ReactNode, type ButtonHTMLAttributes } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// CtaButton lives in its own motion-free module: it is on the landing page's
+// critical path and must not pull framer-motion into that bundle.
+export { CtaButton, type CtaProps } from "./CtaButton";
 
 /**
  * Twilight Meditation shared controls — literal ports of the reference
@@ -57,12 +61,40 @@ export function RowCard({
   onClick?: () => void;
   className?: string;
 }) {
+  // Keyboard access (WCAG 2.1.1): an actionable card is a real <button>
+  // (full-width, start-aligned); otherwise a plain non-focusable region.
+  if (onClick) {
+    return (
+      <motion.button
+        type="button"
+        onClick={onClick}
+        whileTap={{ scale: 0.98 }}
+        className={cn(
+          "group flex w-full cursor-pointer items-center justify-between rounded-2xl border border-border bg-card p-3.5 text-start transition-colors hover:border-border",
+          className
+        )}
+      >
+        <div className="flex min-w-0 items-center gap-3.5">
+          {icon ? (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-primary transition-colors group-hover:border-primary/50">
+              {icon}
+            </div>
+          ) : null}
+          <div className="min-w-0">
+            <h3 className="truncate font-sans text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+              {title}
+            </h3>
+            {subtitle ? <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{subtitle}</p> : null}
+          </div>
+        </div>
+        {trailing ? <div className="shrink-0">{trailing}</div> : null}
+      </motion.button>
+    );
+  }
   return (
-    <motion.div
-      onClick={onClick}
-      whileTap={onClick ? { scale: 0.98 } : undefined}
+    <div
       className={cn(
-        "group flex cursor-pointer items-center justify-between rounded-2xl border border-border bg-card p-3.5 transition-colors hover:border-border",
+        "group flex items-center justify-between rounded-2xl border border-border bg-card p-3.5",
         className
       )}
     >
@@ -80,48 +112,15 @@ export function RowCard({
         </div>
       </div>
       {trailing ? <div className="shrink-0">{trailing}</div> : null}
-    </motion.div>
+    </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Buttons                                                             */
+/* Buttons (CtaButton: see ./CtaButton — motion-free for the landing path) */
 /* ------------------------------------------------------------------ */
 
-type CtaProps = Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
-  "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart" | "onAnimationEnd"
-> & {
-  variant?: "cream" | "orange" | "ghost" | "outline";
-};
-
-/**
- * CTA: cream `bg-primary text-primary-foreground hover:bg-primary rounded-xl`;
- * orange (promo) `bg-cta hover:bg-cta text-logo-ink-inverse` (reference
- * RemixModal/ShowcaseHeader); ghost/outline for secondary actions.
- */
-export function CtaButton({ variant = "cream", className, children, ...rest }: CtaProps) {
-  return (
-    <motion.button
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.96 }}
-      className={cn(
-        "flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-bold tracking-wide shadow-lg shadow-scrim/40 transition-colors",
-        variant === "cream" && "bg-primary text-primary-foreground hover:bg-primary",
-        variant === "orange" && "bg-cta text-logo-ink-inverse shadow-cta/20 hover:bg-cta",
-        variant === "ghost" && "bg-card text-foreground shadow-none hover:bg-secondary",
-        variant === "outline" &&
-          "border border-primary/50 bg-card text-primary shadow-none hover:bg-secondary",
-        className
-      )}
-      {...rest}
-    >
-      {children}
-    </motion.button>
-  );
-}
-
-/** Circular icon action button (play etc.): `w-9 h-9 rounded-full bg-secondary border-border` */
+/** Circular icon action button (play etc.): `h-11 w-11 rounded-full bg-secondary border-border` (44px target) */
 export function CircleIconButton({
   children,
   className,
@@ -140,7 +139,7 @@ export function CircleIconButton({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-secondary text-foreground shadow-sm",
+        "flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-secondary text-foreground shadow-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         className
       )}
     >
@@ -167,21 +166,24 @@ export function SearchInput({
 }) {
   return (
     <div className={cn("relative", className)}>
-      <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-11 w-full rounded-full border border-border bg-card py-0 pl-4 pr-11 text-right text-xs text-foreground shadow-xs transition-all placeholder:text-muted-foreground focus:border-primary/50 focus:bg-secondary focus:outline-none"
+        // Placeholder is not a label (WCAG 3.3.2): expose it as the name.
+        aria-label={placeholder}
+        className="h-11 w-full rounded-full border border-border bg-card py-0 pl-11 pr-11 text-right text-xs text-foreground shadow-xs transition-all placeholder:text-muted-foreground hover:border-input focus:border-primary/50 focus:bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
       />
       {value && (
         <button
+          type="button"
           onClick={() => onChange("")}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+          className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="پاک کردن جستجو"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       )}
     </div>
@@ -213,10 +215,12 @@ export function FilterChips<T extends string>({
         return (
           <motion.button
             key={opt}
+            type="button"
             onClick={() => onChange(opt)}
             whileTap={{ scale: 0.94 }}
+            aria-pressed={isActive}
             className={cn(
-              "relative cursor-pointer whitespace-nowrap rounded-full px-4 py-2 font-sans text-xs font-medium transition-colors",
+              "relative min-h-11 cursor-pointer whitespace-nowrap rounded-full px-4 py-2 font-sans text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               isActive ? "font-semibold text-primary-foreground" : "border border-border bg-card text-muted-foreground hover:text-foreground"
             )}
           >
@@ -283,7 +287,7 @@ export function StatCard({
 /* Toggle (reference profile pattern)                                  */
 /* ------------------------------------------------------------------ */
 
-/** `w-10 h-5 rounded-full`, on: `bg-primary`, knob `bg-primary-foreground` */
+/** `w-11 h-6 rounded-full` (44×24 target), on: `bg-primary`, knob `bg-primary-foreground` */
 export function Toggle({
   checked,
   onChange,
@@ -300,14 +304,14 @@ export function Toggle({
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={cn(
-        "relative h-5 w-10 cursor-pointer rounded-full p-0.5 transition-colors",
+        "relative h-6 w-11 cursor-pointer rounded-full p-0.5 transition-colors",
         checked ? "bg-primary" : "bg-border"
       )}
     >
       <motion.span
         layout
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-        className={cn("block h-4 w-4 rounded-full bg-primary-foreground", checked ? "-translate-x-5" : "translate-x-0")}
+        className={cn("block h-5 w-5 rounded-full bg-primary-foreground", checked ? "-translate-x-5" : "translate-x-0")}
       />
     </button>
   );
@@ -326,34 +330,71 @@ export function TwilightModal({
   onClose,
   children,
   className,
+  label = "پنجره گفتگو",
 }: {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
   className?: string;
+  /** Accessible name for the dialog (WCAG 4.1.2). Defaults to «پنجره گفتگو». */
+  label?: string;
 }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<Element | null>(null);
+
+  // Dialog keyboard contract (WCAG 2.1.1 / 2.4.3): Escape closes, focus moves
+  // into the panel on open and returns to the invoker on close.
+  useEffect(() => {
+    if (!open) return;
+    returnFocusRef.current = document.activeElement;
+    const panel = panelRef.current;
+    // Wait a frame so the AnimatePresence exit/enter settles before focusing.
+    const raf = requestAnimationFrame(() => {
+      const target = panel?.querySelector<HTMLElement>(
+        "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
+      );
+      (target ?? panel)?.focus?.();
+    });
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener("keydown", onKeyDown);
+      if (returnFocusRef.current instanceof HTMLElement) returnFocusRef.current.focus();
+    };
+  }, [open, onClose]);
+
   return (
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 flex select-none items-center justify-center bg-scrim/85 p-3 backdrop-blur-xl">
           <motion.div
+            ref={panelRef}
+            tabIndex={-1}
             initial={{ opacity: 0, scale: 0.94, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
             transition={{ type: "spring", stiffness: 450, damping: 32 }}
             role="dialog"
             aria-modal="true"
+            aria-label={label}
             className={cn(
-              "relative flex max-h-[92vh] w-full max-w-sm flex-col gap-5 overflow-hidden overflow-y-auto rounded-[32px] border border-border bg-popover p-6 text-foreground shadow-2xl",
+              "relative flex max-h-[92vh] w-full max-w-sm flex-col gap-5 overflow-hidden overflow-y-auto rounded-[32px] border border-border bg-popover p-6 text-foreground shadow-2xl outline-none",
               className
             )}
           >
             <button
+              type="button"
               onClick={onClose}
               aria-label="بستن"
-              className="absolute left-4 top-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-border bg-secondary text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute left-4 top-4 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-border bg-secondary text-muted-foreground transition-colors hover:text-foreground"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
             {children}
           </motion.div>
@@ -415,6 +456,7 @@ export function Toast({ message }: { message: string | null }) {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
+          role="status"
           className="fixed top-5 z-50 flex items-center gap-2 rounded-full border border-primary/40 bg-secondary px-4 py-2 text-xs text-foreground shadow-2xl"
         >
           <span className="h-2 w-2 rounded-full bg-primary" />

@@ -48,7 +48,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuToggle}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
             aria-label="باز کردن منو"
             aria-controls="portal-sidebar"
           >
@@ -66,7 +66,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
           <ThemeToggle className="h-11 w-11 rounded-xl" />
           <Link
             href={notificationHref}
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={`اعلان‌ها${unreadCount > 0 ? `، ${unreadCount} خوانده‌نشده` : ""}`}
           >
             <Bell className="h-[20px] w-[20px]" strokeWidth={1.75} />
@@ -79,7 +79,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-secondary p-1 pl-2 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <button className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-secondary p-1 pl-2 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <Avatar className="h-8 w-8 ring-1 ring-border">
                   <AvatarFallback className="bg-gradient-to-br from-secondary to-card font-serif text-xs font-bold text-primary">
                     {initials}

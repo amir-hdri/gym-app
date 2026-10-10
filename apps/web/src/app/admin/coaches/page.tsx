@@ -95,7 +95,7 @@ export default function CoachesPage() {
                     </Badge>
                   </td>
                   <td className={tdClass}>
-                    <Button asChild variant="outline" size="sm"><Link href={`/admin/coaches/${coach.id}`}>ویرایش</Link></Button>
+                    <Button asChild variant="outline" size="sm"><Link href={`/admin/coaches/${coach.id}`} aria-label={`ویرایش ${coach.firstName} ${coach.lastName}`}>ویرایش</Link></Button>
                   </td>
                 </tr>
               ))}

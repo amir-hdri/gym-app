@@ -88,10 +88,10 @@ export default function ForgotPasswordPage() {
   return (
     <AuthLayout>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-black/50"
+        transition={{ duration: 0.28 }}
+        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-scrim/50"
       >
         {/* Top pastel accent — thin blush-to-cream gradient hairline */}
         <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-blush-solid to-cream" />
@@ -175,10 +175,12 @@ export default function ForgotPasswordPage() {
                 placeholder="your@email.com"
                 autoComplete="email"
                 inputMode="email"
+                aria-invalid={errors.email ? "true" : "false"}
+                aria-describedby={errors.email ? "email-error" : undefined}
                 className={inputClassName}
                 {...register("email")}
               />
-              {errors.email?.message && <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>}
+              {errors.email?.message && <p id="email-error" role="alert" className="mt-1 text-xs text-destructive">{errors.email.message}</p>}
             </motion.div>
 
             {submitError && (

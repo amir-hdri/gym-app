@@ -20,6 +20,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     <button
       type="button"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      aria-label="تغییر حالت نمایش"
       className={cn(
         "flex h-11 w-11 items-center justify-center rounded-xl border border-border/60 bg-secondary/70 text-foreground/90 backdrop-blur-md transition-colors hover:bg-accent active:bg-secondary ring-focus",
         className
@@ -27,8 +28,6 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     >
       <Moon aria-hidden className="h-5 w-5 dark:hidden" strokeWidth={1.75} />
       <Sun aria-hidden className="hidden h-5 w-5 dark:block" strokeWidth={1.75} />
-      <span className="sr-only dark:hidden">حالت تاریک</span>
-      <span className="sr-only hidden dark:inline">حالت روشن</span>
     </button>
   );
 }

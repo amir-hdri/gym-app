@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
-import { CtaButton } from "@/components/twilight/controls";
+import { CtaButton } from "@/components/twilight/CtaButton";
 import { GymBackdrop } from "@/components/twilight/GymBackdrop";
 
 export default function RootError({

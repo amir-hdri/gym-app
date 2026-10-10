@@ -4,6 +4,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { installFocusTracker, takeRestoreTarget } from "./focus-restore";
 
 export interface SheetProps {
   open: boolean;
@@ -61,6 +62,11 @@ export function Sheet({
   // `sm:` responsive classes only make sense for the bottom variant; an
   // explicit start/end stays on that side at every breakpoint.
   const isResponsiveBottom = side === "bottom";
+  // WCAG 2.4.3: deterministic focus return to the sheet invoker on close.
+  const invokerRef = React.useRef<HTMLElement | null>(null);
+  React.useEffect(() => {
+    installFocusTracker();
+  }, []);
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -68,6 +74,16 @@ export function Sheet({
         <DialogPrimitive.Overlay className="sheet-overlay fixed inset-0 z-50 bg-scrim/50 backdrop-blur-sm" />
         <DialogPrimitive.Content
           data-side={isResponsiveBottom ? "bottom" : side}
+          onOpenAutoFocus={() => {
+            if (document.activeElement instanceof HTMLElement) invokerRef.current = document.activeElement;
+          }}
+          onCloseAutoFocus={(event) => {
+            const target = takeRestoreTarget(invokerRef.current);
+            if (target) {
+              event.preventDefault();
+              target.focus();
+            }
+          }}
           className={cn(
             "sheet-panel fixed z-50 flex flex-col overflow-hidden border-border bg-card text-card-foreground shadow-[var(--shadow-card-hover)]",
             "outline-none",

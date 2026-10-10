@@ -9,6 +9,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   retry: () => void;
 }) {
+  // DELIBERATE (§9.5): last-resort boundary — inline dark-canonical values so
+  // this paints even when CSS fails to load. Not a token call site.
   return (
     <html lang="fa" dir="rtl">
       <body

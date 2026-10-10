@@ -223,7 +223,7 @@ export function BreathingModal({ isOpen, onClose }: Props) {
               duration: isActive ? phaseDurations[phase] : 0.5,
               ease: "easeInOut",
             }}
-            className="relative w-40 h-40 rounded-full border-2 border-primary/60 bg-gradient-to-br from-secondary via-secondary to-card shadow-[0_0_32px_rgba(210,192,165,0.25)] flex flex-col items-center justify-center p-4 text-center z-10"
+            className="relative w-40 h-40 rounded-full border-2 border-primary/60 bg-gradient-to-br from-secondary via-secondary to-card shadow-[0_0_32px_color-mix(in_srgb,var(--color-primary)_25%,transparent)] flex flex-col items-center justify-center p-4 text-center z-10"
           >
             <span className="text-3xl font-serif font-normal text-foreground tabular-nums">
               {formatPersianNumber(secondsInPhase)}
@@ -250,7 +250,7 @@ export function BreathingModal({ isOpen, onClose }: Props) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
             onClick={toggleSession}
-            className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold tracking-wide hover:bg-primary transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_16px_rgba(210,192,165,0.25)]"
+            className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold tracking-wide hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_16px_color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
           >
             {isActive ? (
               <>

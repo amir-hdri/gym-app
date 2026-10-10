@@ -32,12 +32,13 @@ const inputClass =
   "h-11 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none";
 
 function Field({ label, error, htmlFor, children }: { label: string; error?: string; htmlFor?: string; children: ReactNode }) {
+  const errorId = htmlFor ? `${htmlFor}-error` : undefined;
   return (
     <div className="w-full space-y-2">
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
       {error ? (
-        <p className="flex items-center gap-1 text-xs text-destructive" role="alert">
+        <p id={errorId} className="flex items-center gap-1 text-xs text-destructive" role="alert">
           <span className="inline-block h-1 w-1 shrink-0 rounded-full bg-destructive" />
           {error}
         </p>
@@ -94,6 +95,7 @@ export default function NewMemberPage() {
                 type="text"
                 placeholder="نگار"
                 aria-invalid={errors.firstName ? "true" : "false"}
+                aria-describedby={errors.firstName ? "new-member-firstName-error" : undefined}
                 className={inputClass}
                 {...register("firstName")}
               />
@@ -104,6 +106,7 @@ export default function NewMemberPage() {
                 type="text"
                 placeholder="محمدی"
                 aria-invalid={errors.lastName ? "true" : "false"}
+                aria-describedby={errors.lastName ? "new-member-lastName-error" : undefined}
                 className={inputClass}
                 {...register("lastName")}
               />
@@ -116,6 +119,7 @@ export default function NewMemberPage() {
                 type="email"
                 placeholder="ali@example.com"
                 aria-invalid={errors.email ? "true" : "false"}
+                aria-describedby={errors.email ? "new-member-email-error" : undefined}
                 className={inputClass}
                 {...register("email")}
               />
@@ -126,6 +130,7 @@ export default function NewMemberPage() {
                 type="tel"
                 placeholder="۰۹۱۲۱۱۱۲۲۳۳"
                 aria-invalid={errors.phone ? "true" : "false"}
+                aria-describedby={errors.phone ? "new-member-phone-error" : undefined}
                 className={inputClass}
                 {...register("phone")}
               />
@@ -133,34 +138,35 @@ export default function NewMemberPage() {
           </div>
           <Field label="رمز عبور" htmlFor="new-member-password" error={errors.password?.message}>
             <input
-              id="new-member-password"
-              type="password"
-              placeholder="••••••••"
-              aria-invalid={errors.password ? "true" : "false"}
-              className={inputClass}
-              {...register("password")}
-            />
+                id="new-member-password"
+                type="password"
+                placeholder="••••••••"
+                aria-invalid={errors.password ? "true" : "false"}
+                aria-describedby={errors.password ? "new-member-password-error" : undefined}
+                className={inputClass}
+                {...register("password")}
+              />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>طرح اشتراک</Label>
+              <Label id="new-member-plan-label">طرح اشتراک</Label>
               <Select value={selectedPlan} onValueChange={(v) => setValue("plan", v)}>
-                <SelectTrigger className="h-11 rounded-xl border-border bg-card text-sm text-foreground">
+                <SelectTrigger aria-labelledby="new-member-plan-label" className="h-11 rounded-xl border-border bg-card text-sm text-foreground">
                   <SelectValue placeholder="انتخاب کنید" />
                 </SelectTrigger>
                 <SelectContent>{plans.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}</SelectContent>
               </Select>
-              {errors.plan && <p className="text-sm text-destructive">{errors.plan.message}</p>}
+              {errors.plan && <p className="text-sm text-destructive" role="alert">{errors.plan.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label>مربی</Label>
+              <Label id="new-member-coach-label">مربی</Label>
               <Select value={selectedCoach} onValueChange={(v) => setValue("coach", v)}>
-                <SelectTrigger className="h-11 rounded-xl border-border bg-card text-sm text-foreground">
+                <SelectTrigger aria-labelledby="new-member-coach-label" className="h-11 rounded-xl border-border bg-card text-sm text-foreground">
                   <SelectValue placeholder="انتخاب کنید" />
                 </SelectTrigger>
                 <SelectContent>{coaches.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}</SelectContent>
               </Select>
-              {errors.coach && <p className="text-sm text-destructive">{errors.coach.message}</p>}
+              {errors.coach && <p className="text-sm text-destructive" role="alert">{errors.coach.message}</p>}
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-4">

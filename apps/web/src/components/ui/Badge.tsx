@@ -15,10 +15,10 @@ function Badge({ className, variant = "default", ...props }: BadgeProps) {
   // completion); `cream` marks warm highlights. Never for errors/finance.
   const variants = {
     default: "border-transparent bg-primary text-primary-foreground",
-    secondary: "border-border bg-border text-muted-foreground",
+    secondary: "border-border bg-secondary text-secondary-foreground",
     destructive: "border-destructive/40 bg-destructive/10 text-destructive",
     outline: "border-border text-muted-foreground",
-    success: "border-primary/40 bg-primary/10 text-primary",
+    success: "border-success/40 bg-success/10 text-success",
     warning: "border-warning/40 bg-warning/10 text-warning",
     info: "border-border bg-secondary text-muted-foreground",
     blush: "border-transparent bg-blush-solid text-blush-foreground",

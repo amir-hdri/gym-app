@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
-import { SectionTitle } from "@/components/twilight/Page";
+import { SectionTitle } from "@/components/twilight/Type";
 import { FadeIn } from "@/components/animations/FadeIn";
 
 const sections = [
@@ -34,7 +34,7 @@ export default function TermsPage() {
           بازگشت به ثبت‌نام
         </Link>
         <FadeIn>
-          <div className="rounded-[32px] border border-border bg-popover p-6 shadow-2xl shadow-black/50 sm:p-10">
+          <div className="rounded-[32px] border border-border bg-popover p-6 shadow-2xl shadow-scrim/50 sm:p-10">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/40 bg-secondary text-primary">
                 <ShieldCheck className="h-6 w-6" strokeWidth={1.75} />

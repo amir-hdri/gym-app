@@ -5,6 +5,10 @@ interface Props {
 }
 
 export const GymBackdrop: React.FC<Props> = ({ className = "" }) => {
+  // DELIBERATE (§9.5): fixed-dark artwork — the gradients below are the art
+  // itself and stay dark in both themes, so they are not theme tokens.
+  // Content over this surface must use the theme-invariant
+  // `text-logo-ink-inverse` ink, never theme text.
   return (
     <div
       className={`relative w-full h-full overflow-hidden select-none pointer-events-none ${className}`}

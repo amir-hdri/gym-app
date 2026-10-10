@@ -2,7 +2,7 @@
 
 import { Heart, Sparkles } from "lucide-react";
 import { GymBackdrop } from "@/components/twilight/GymBackdrop";
-import { MicroLabel } from "@/components/twilight/Page";
+import { MicroLabel } from "@/components/twilight/Type";
 import { LumiLogo } from "@/components/ui/LumiLogo";
 
 /**
@@ -25,7 +25,7 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children, showLogo = true }: AuthLayoutProps) {
   return (
-    <div className="relative flex min-h-svh flex-col overflow-hidden bg-background lg:flex-row lg:items-center lg:justify-end lg:p-10">
+    <main id="main" className="relative flex min-h-svh flex-col overflow-hidden bg-background lg:flex-row lg:items-center lg:justify-end lg:p-10">
       {/* Side scenic panel — GymBackdrop + copy (desktop) */}
       <div className="absolute inset-y-0 left-0 hidden w-[56%] overflow-hidden lg:block">
         <GymBackdrop className="absolute inset-0" />
@@ -35,11 +35,12 @@ export function AuthLayout({ children, showLogo = true }: AuthLayoutProps) {
             MOVE WITH LOVE
           </MicroLabel>
           <div className="max-w-lg">
-            <h1 className="font-serif text-5xl font-medium leading-tight text-logo-ink-inverse">
+            {/* Marketing headline, not the page title (the form owns the h1) */}
+            <p className="font-serif text-5xl font-medium leading-tight text-logo-ink-inverse">
               قوی‌تر از
               <br />
               <span className="text-primary">دیروزت</span> باش.
-            </h1>
+            </p>
             <p className="mt-5 max-w-sm text-sm leading-7 text-logo-ink-inverse/70">
               تمرین، انگیزه و پیشرفت روزانه در فضایی ساخته‌شده برای بانوانی که انتخاب می‌کنند بدرخشند.
             </p>
@@ -71,6 +72,6 @@ export function AuthLayout({ children, showLogo = true }: AuthLayoutProps) {
         )}
         {children}
       </div>
-    </div>
+    </main>
   );
 }

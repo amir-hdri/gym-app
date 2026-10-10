@@ -386,7 +386,7 @@ export default function MembershipPage() {
           <div>
             <MicroLabelFa className="mb-1.5 block">روش پرداخت</MicroLabelFa>
             <Select value={payMethod} onValueChange={(v) => setPayMethod(v as Payment["method"])}>
-              <SelectTrigger className="min-h-11 w-full">
+              <SelectTrigger aria-label="روش پرداخت" className="min-h-11 w-full">
                 <SelectValue placeholder="انتخاب روش پرداخت" />
               </SelectTrigger>
               <SelectContent>

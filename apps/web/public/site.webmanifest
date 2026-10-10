@@ -11,8 +11,8 @@
     "browser"
   ],
   "orientation": "portrait-primary",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#0c0e12",
+  "theme_color": "#0c0e12",
   "lang": "fa",
   "dir": "rtl",
   "categories": [

@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 const ctaCream =
-  "inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-lg shadow-black/40 transition-colors hover:bg-primary";
+  "inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-lg shadow-scrim/40 transition-colors hover:bg-primary";
 const ctaGhost =
   "inline-flex h-11 items-center justify-center rounded-xl border border-border bg-secondary px-6 text-sm font-semibold text-foreground transition-colors hover:bg-secondary";
 

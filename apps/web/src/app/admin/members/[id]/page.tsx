@@ -13,6 +13,7 @@ import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { useUser, useMemberships, useMembershipPlans, useTrainingPrograms, useUsers, useGoals, usePayments } from "@/hooks/use-api";
 import { PageShell, SectionTitle } from "@/components/twilight/Page";
 import { StatCard, TwilightCard } from "@/components/twilight/controls";
+import { PAYMENT_METHOD } from "../../_components/admin-data";
 
 const statusMap: Record<string, { label: string; variant: "success" | "secondary" | "destructive" }> = {
   active: { label: "فعال", variant: "success" }, inactive: { label: "غیرفعال", variant: "secondary" }, suspended: { label: "تعلیق شده", variant: "destructive" },
@@ -84,7 +85,7 @@ export default function MemberProfilePage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm"><Edit className="h-4 w-4" strokeWidth={1.75} /> ویرایش</Button>
-          <Button variant="destructive" size="sm"><Trash2 className="h-4 w-4" strokeWidth={1.75} /></Button>
+          <Button variant="destructive" size="sm" aria-label={`حذف ${member.firstName} ${member.lastName}`}><Trash2 className="h-4 w-4" strokeWidth={1.75} /></Button>
         </div>
       </div>
 
@@ -147,7 +148,7 @@ export default function MemberProfilePage() {
                 {payments.map((p) => (
                   <tr key={p.id} className="border-t border-border hover:bg-secondary">
                     <td className={`${tdClass} font-medium text-foreground`}>{formatCurrency(p.amount)}</td>
-                    <td className={tdClass}>{p.method}</td>
+                    <td className={tdClass}>{PAYMENT_METHOD[p.method] ?? p.method}</td>
                     <td className={tdClass}><Badge variant={p.status === "completed" ? "success" : "warning"}>{p.status === "completed" ? "موفق" : "معلق"}</Badge></td>
                     <td className={tdClass}>{formatDateTime(p.createdAt)}</td>
                   </tr>

@@ -102,7 +102,7 @@ function CoachMessagesInner() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">{conv.athlete}</span>
-                    {conv.unread && <span className="h-2 w-2 rounded-full bg-blush-solid" />}
+                    {conv.unread && <span role="img" aria-label="خوانده نشده" className="h-2 w-2 rounded-full bg-blush-solid" />}
                   </div>
                   <p className="mt-1 truncate text-xs text-muted-foreground">{conv.lastMessage}</p>
                   <p className="mt-0.5 text-[11px] text-muted-foreground">{conv.time}</p>
@@ -117,7 +117,7 @@ function CoachMessagesInner() {
             <div className="flex items-center gap-3 border-b border-border p-4 md:p-5">
               <button
                 onClick={() => { setActiveConversation(null); setSelectedAthlete(""); }}
-                className="rounded-xl p-2 text-muted-foreground active:bg-secondary lg:hidden"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-muted-foreground active:bg-secondary lg:hidden"
                 aria-label="بازگشت به فهرست مکالمات"
               >
                 <ArrowRight className="h-5 w-5" strokeWidth={1.75} />
@@ -135,14 +135,14 @@ function CoachMessagesInner() {
                 </div>
               ) : (
                 <>
-                  <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-background p-4 md:p-6">
+                  <div role="log" aria-live="polite" aria-label="تاریخچه گفت‌وگو" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-background p-4 md:p-6">
                     <div className="max-w-[85%] self-start rounded-2xl rounded-tr-md border border-border bg-secondary p-3 shadow-sm">
                       <p className="text-sm text-foreground">سلام {selectedAthlete.split(" ")[0]} جان. تمرینات امروز رو چطور انجام دادی؟</p>
                       <p className="mt-1 text-[11px] text-muted-foreground">۱۰:۳۰</p>
                     </div>
                     <div className="max-w-[85%] self-end rounded-2xl rounded-tl-md bg-primary p-3 shadow-sm">
                       <p className="text-sm text-primary-foreground">عالی بود استاد. همه حرکت‌ها رو انجام دادم.</p>
-                      <p className="mt-1 text-[11px] text-primary-foreground/60">۱۱:۱۵</p>
+                      <p className="mt-1 text-[11px] text-primary-foreground">۱۱:۱۵</p>
                     </div>
                   </div>
                   <div className="sticky bottom-0 border-t border-border bg-popover/95 p-3 backdrop-blur-xl md:p-4">

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { formatPersianNumber, formatDate, calculateProgress } from "@/lib/utils";
 import { useTrainingPrograms } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
-import { PageShell, PageHeader, SectionTitle, MicroLabel } from "@/components/twilight/Page";
+import { PageShell, PageHeader, SectionTitle, MicroLabelFa } from "@/components/twilight/Page";
 import {
   SearchInput,
   FilterChips,
@@ -116,8 +116,10 @@ export default function ProgramsPage() {
         <Link href={`/athlete/programs/${featured.id}`} className="group block">
           <div className="relative h-48 cursor-pointer overflow-hidden rounded-[26px] border border-logo-ink-inverse/10 shadow-xl">
             <GymBackdrop />
+            {/* Legibility scrim: inverse-ink captions sit on photography (WCAG 1.4.3) */}
+            <div aria-hidden className="absolute inset-0 z-[5] bg-gradient-to-t from-scrim/85 via-scrim/35 to-transparent" />
             <div className="absolute inset-0 z-10 flex flex-col justify-end p-6">
-              <MicroLabel className="mb-1">Featured Program</MicroLabel>
+              <MicroLabelFa className="mb-1 text-logo-ink-inverse/90">برنامه ویژه</MicroLabelFa>
               <h3 className="font-serif text-[26px] font-medium text-logo-ink-inverse transition-colors group-hover:text-logo-ink-inverse">
                 {featured.name}
               </h3>

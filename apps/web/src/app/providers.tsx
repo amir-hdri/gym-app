@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, ReactNode, lazy, Suspense } from "react";
+import { MotionConfig } from "framer-motion";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
@@ -31,6 +32,9 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+      {/* Reduced-motion users get no transform/layout animation from any
+          framer-motion component (WCAG 2.3.3); CSS is covered by globals.css. */}
+      <MotionConfig reducedMotion="user">
       <QueryClientProvider client={queryClient}>
           <AuthProvider>{children}</AuthProvider>
           <Toaster
@@ -40,7 +44,7 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
             toastOptions={{
               classNames: {
                 toast:
-                  "rounded-2xl border border-border bg-popover/95 text-foreground shadow-2xl shadow-black/50 backdrop-blur-md",
+                  "rounded-2xl border border-border bg-popover/95 text-foreground shadow-2xl shadow-scrim/50 backdrop-blur-md",
                 description: "text-muted-foreground",
                 actionButton: "bg-primary-solid text-primary-foreground",
                 cancelButton: "bg-muted text-foreground",
@@ -52,6 +56,7 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
             <ReactQueryDevtools initialIsOpen={false} />
           </Suspense>
         </QueryClientProvider>
+      </MotionConfig>
     </ThemeProvider>
   );
 }

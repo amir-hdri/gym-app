@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   useRef,
   ReactNode,
 } from "react";
@@ -250,21 +251,27 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
 
   const isAuthenticated = !!user && !!tokens;
 
+  // Memoized so consumers don't re-render on every provider render when
+  // nothing they read changed (the object identity was previously new each
+  // render, invalidating the whole app subtree on any auth state touch).
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      tokens,
+      isLoading,
+      isAuthenticated,
+      login,
+      register,
+      logout,
+      refreshAccessToken,
+      updateUser,
+      hasRole,
+    }),
+    [user, tokens, isLoading, isAuthenticated, login, register, logout, refreshAccessToken, updateUser, hasRole]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        tokens,
-        isLoading,
-        isAuthenticated,
-        login,
-        register,
-        logout,
-        refreshAccessToken,
-        updateUser,
-        hasRole,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

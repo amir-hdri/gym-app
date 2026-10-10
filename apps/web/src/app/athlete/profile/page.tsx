@@ -1,21 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatPersianNumber, formatDate, getInitials } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useAthleteDashboard, useCheckIns } from "@/hooks/use-api";
+import { useAthleteDashboard, useBranches, useCheckIns } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { PageShell, PageHeader, SectionTitle } from "@/components/twilight/Page";
 import { CtaButton } from "@/components/twilight/controls";
 import { User, Mail, Phone, CheckCircle2, Sparkles, CalendarDays, Clock } from "lucide-react";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { user } = useAuth();
   const athleteId = user?.id;
   const { data: dashData, isLoading: dashLoading } = useAthleteDashboard(athleteId);
   const { data: checkinsData } = useCheckIns(athleteId);
+  const { data: branchesData } = useBranches();
+  const branchList: { id: string; name: string }[] = (() => {
+    const d = branchesData as unknown;
+    if (d && typeof d === "object" && "data" in (d as Record<string, unknown>))
+      return (d as { data: { id: string; name: string }[] }).data || [];
+    if (Array.isArray(d)) return d as { id: string; name: string }[];
+    return [];
+  })();
+  const branchName =
+    user?.branchName || branchList.find((b) => b.id === user?.branchId)?.name;
 
   if (!user) return <ErrorDisplay message="کاربری یافت نشد — لطفا دوباره وارد شوید." />;
   if (dashLoading) return <Loading />;
@@ -55,12 +67,12 @@ export default function ProfilePage() {
             <Sparkles className="h-3.5 w-3.5 fill-current" />
           </div>
         </div>
-        <h1 className="mt-3.5 font-serif text-2xl font-normal tracking-tight text-foreground">{fullName}</h1>
+        <h2 className="mt-3.5 font-serif text-2xl font-normal tracking-tight text-foreground">{fullName}</h2>
         <Badge className="mt-2" variant="secondary">{user.role === "athlete" ? "ورزشکار" : user.role}</Badge>
         <p className="mt-2 text-xs text-muted-foreground">
           <span dir="ltr">{user.email}</span> · {user.phone || "بدون تلفن"}
         </p>
-        {user.branchId && <p className="mt-1 text-xs text-muted-foreground">شعبه: {user.branchId}</p>}
+        {user.branchId && <p className="mt-1 text-xs text-muted-foreground">شعبه: {branchName || user.branchId}</p>}
       </div>
 
       {/* Stats row with dividers */}
@@ -77,7 +89,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Membership card */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/20">
+      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-scrim/20">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-blush/30 bg-blush/10 text-blush">
             <Sparkles className="h-5 w-5" strokeWidth={1.75} />
@@ -91,9 +103,9 @@ export default function ProfilePage() {
             </p>
           </div>
         </div>
-        <Link href="/athlete/membership" className="w-full">
-          <CtaButton>مدیریت و تمدید اشتراک باشگاه</CtaButton>
-        </Link>
+        {/* Nested interactive elements (Link > button) break keyboard/SR
+            semantics — a single button navigating programmatically. */}
+        <CtaButton onClick={() => router.push("/athlete/membership")}>مدیریت و تمدید اشتراک باشگاه</CtaButton>
       </div>
 
       {/* Personal info — settings list pattern */}
@@ -109,7 +121,9 @@ export default function ProfilePage() {
             <span className="text-sm text-foreground" dir="ltr">{user.phone || "—"}</span>
           </ProfileRow>
           <ProfileRow icon={<CheckCircle2 className="h-4 w-4" strokeWidth={1.75} />} label="وضعیت">
-            <Badge variant={user.status === "active" ? "success" : "secondary"}>{user.status}</Badge>
+            <Badge variant={user.status === "active" ? "success" : "secondary"}>
+              {user.status === "active" ? "فعال" : user.status === "inactive" ? "غیرفعال" : user.status === "suspended" ? "تعلیق شده" : user.status === "pending" ? "در انتظار تأیید" : user.status}
+            </Badge>
           </ProfileRow>
         </div>
       </div>

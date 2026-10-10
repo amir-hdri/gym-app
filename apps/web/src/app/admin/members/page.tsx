@@ -96,7 +96,7 @@ export default function MembersPage() {
                   <div><dt className="text-muted-foreground">طرح اشتراک</dt><dd className="mt-1 font-medium text-foreground">{member.plan || "بدون طرح"}</dd></div>
                   <div className="col-span-2"><dt className="text-muted-foreground">تاریخ ثبت‌نام</dt><dd className="mt-1 font-medium text-foreground">{formatDate(member.createdAt)}</dd></div>
                 </dl>
-                <CtaButton variant="outline" onClick={() => router.push(`/admin/members/${member.id}`)} className="mt-3 w-full">
+                <CtaButton variant="outline" onClick={() => router.push(`/admin/members/${member.id}`)} aria-label={`مشاهده و ویرایش ${member.firstName} ${member.lastName}`} className="mt-3 w-full">
                   مشاهده و ویرایش
                 </CtaButton>
               </article>
@@ -131,7 +131,7 @@ export default function MembersPage() {
                     <td className={tdClass}>{member.plan}</td>
                     <td className={tdClass}>{formatDate(member.createdAt)}</td>
                     <td className={tdClass}>
-                      <Button asChild variant="outline" size="sm"><Link href={`/admin/members/${member.id}`}>ویرایش</Link></Button>
+                      <Button asChild variant="outline" size="sm"><Link href={`/admin/members/${member.id}`} aria-label={`ویرایش ${member.firstName} ${member.lastName}`}>ویرایش</Link></Button>
                     </td>
                   </tr>
                 ))}

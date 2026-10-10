@@ -74,10 +74,10 @@ export default function AthleteMessagesPage() {
                 <div key={msg.id} className={`flex ${msg.sender === "athlete" ? "justify-start" : "justify-end"}`}>
                   <div className={`max-w-[86%] rounded-2xl px-4 py-3 sm:max-w-[72%] ${msg.sender === "athlete" ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md border border-border bg-secondary text-foreground"}`}>
                     <p className="text-sm leading-7">{msg.text}</p>
-                    <div className={`mt-1.5 flex items-center gap-1.5 text-xs ${msg.sender === "athlete" ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
+                    <div className={`mt-1.5 flex items-center gap-1.5 text-xs ${msg.sender === "athlete" ? "text-primary-foreground" : "text-muted-foreground"}`}>
                       <time dateTime={msg.createdAt}>{formatRelativeTime(msg.createdAt)}</time>
                       {msg.sender === "athlete" && <CheckCheck className="h-3.5 w-3.5" strokeWidth={1.75} aria-label="ارسال شده" />}
-                      {msg.unread && <span className="h-1.5 w-1.5 rounded-full bg-blush-solid" aria-label="خوانده نشده" />}
+                      {msg.unread && <span role="img" aria-label="خوانده نشده" className="h-1.5 w-1.5 rounded-full bg-blush-solid" />}
                     </div>
                   </div>
                 </div>

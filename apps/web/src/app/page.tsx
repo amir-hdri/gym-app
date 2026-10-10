@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { CtaButton } from "@/components/twilight/controls";
+import { CtaButton } from "@/components/twilight/CtaButton";
 import { GymBackdrop } from "@/components/twilight/GymBackdrop";
-import { MicroLabel } from "@/components/twilight/Page";
+import { MicroLabel } from "@/components/twilight/Type";
 import { LumiWordmark } from "@/components/auth/AuthLayout";
 import { Activity, Users, MessageCircle, Calendar, Heart, Sparkles, ChevronDown, ArrowLeft, Star, CheckCircle2 } from "lucide-react";
 import { Reveal } from "@/components/animations/ScrollReveal";
@@ -240,7 +240,7 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
           {/* Soft blush radial glow behind the dark-signature hero card (both themes) */}
           <div aria-hidden="true" className="pointer-events-none absolute -inset-10 rounded-full bg-blush-fixed/15 blur-3xl" />
           {/* Reference hero card: GymBackdrop + content overlay */}
-          <div className="relative overflow-hidden rounded-[26px] border border-logo-ink-inverse/10 shadow-2xl shadow-black/50">
+          <div className="relative overflow-hidden rounded-[26px] border border-logo-ink-inverse/10 shadow-2xl shadow-scrim/50">
             <div className="h-[380px] w-full">
               <GymBackdrop />
             </div>
@@ -267,7 +267,7 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
               </div>
             </div>
           </div>
-          <div className="absolute -bottom-6 -right-4 rounded-2xl border border-border bg-card px-4 py-3 text-right shadow-2xl shadow-black/50">
+          <div className="absolute -bottom-6 -right-4 rounded-2xl border border-border bg-card px-4 py-3 text-right shadow-2xl shadow-scrim/50">
             <p className="text-xs text-muted-foreground">همراه با مربی</p>
             <p className="mt-1 text-xs font-bold text-foreground">برنامه اختصاصی تو</p>
           </div>
@@ -308,7 +308,7 @@ export default function HomePage() {
     return (
       <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-10 text-foreground">
         <GymBackdrop className="absolute inset-0" />
-        <div className="relative z-10 w-full max-w-md rounded-[32px] border border-border bg-popover p-8 text-center shadow-2xl shadow-black/50">
+        <div className="relative z-10 w-full max-w-md rounded-[32px] border border-border bg-popover p-8 text-center shadow-2xl shadow-scrim/50">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/40 bg-secondary text-primary"><CheckCircle2 className="h-6 w-6" strokeWidth={1.75} /></div>
           <h1 className="mt-4 font-serif text-2xl font-medium text-foreground">خوش آمدی، {user.firstName || user.email}!</h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">حساب شما فعال است. می‌توانی مستقیم به پنل بروی یا با حساب دیگری وارد شوی.</p>

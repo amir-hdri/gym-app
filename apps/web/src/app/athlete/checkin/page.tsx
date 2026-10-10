@@ -171,7 +171,7 @@ export default function CheckinPage() {
         </div>
 
         <div className="text-center">
-          <h3 className="text-sm font-semibold text-foreground">{fullName || "ورزشکار"}</h3>
+          <h2 className="text-sm font-semibold text-foreground">{fullName || "ورزشکار"}</h2>
           <p className="mt-0.5 font-sans text-[11px] text-muted-foreground">
             {effectiveBranchName || todayPersian}
           </p>
@@ -274,7 +274,7 @@ export default function CheckinPage() {
           <div>
             <MicroLabelFa className="mb-1.5 block">شعبه</MicroLabelFa>
             <Select value={effectiveBranchId} onValueChange={setBranchId}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger aria-label="شعبه" className="w-full">
                 <SelectValue placeholder="انتخاب شعبه" />
               </SelectTrigger>
               <SelectContent>

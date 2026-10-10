@@ -105,6 +105,8 @@ function SignInContent() {
             dir="ltr"
             placeholder="your@email.com"
             disabled={isSubmitting}
+            aria-invalid={errors.email ? "true" : "false"}
+            aria-describedby={errors.email ? "email-error" : undefined}
             className={`${inputClassName} text-left`}
             {...register("email", {
               required: "ایمیل ضروری است",
@@ -118,7 +120,7 @@ function SignInContent() {
             <Mail className="h-4 w-4" strokeWidth={1.75} />
           </span>
         </div>
-        {errors.email?.message && <p role="alert" className="mt-1.5 text-xs text-destructive">{errors.email.message}</p>}
+        {errors.email?.message && <p id="email-error" role="alert" className="mt-1.5 text-xs text-destructive">{errors.email.message}</p>}
       </div>
 
       <div>
@@ -132,6 +134,8 @@ function SignInContent() {
             autoComplete="current-password"
             placeholder="••••••••"
             disabled={isSubmitting}
+            aria-invalid={errors.password ? "true" : "false"}
+            aria-describedby={errors.password ? "password-error" : undefined}
             className={`${inputClassName} pl-11`}
             {...register("password", {
               required: "رمز عبور ضروری است",
@@ -143,7 +147,7 @@ function SignInContent() {
           </span>
           <button
             type="button"
-            className="absolute left-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="absolute left-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? "پنهان کردن رمز عبور" : "نمایش رمز عبور"}
             aria-pressed={showPassword}
@@ -152,7 +156,7 @@ function SignInContent() {
             {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={1.75} /> : <Eye className="h-4 w-4" strokeWidth={1.75} />}
           </button>
         </div>
-        {errors.password?.message && <p role="alert" className="mt-1.5 text-xs text-destructive">{errors.password.message}</p>}
+        {errors.password?.message && <p id="password-error" role="alert" className="mt-1.5 text-xs text-destructive">{errors.password.message}</p>}
       </div>
 
       {submitError && (
@@ -237,7 +241,7 @@ function SignInContent() {
 
 export default function LoginPage() {
   return (
-    <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-8 text-foreground">
+    <main id="main" className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4 py-8 text-foreground">
       {/* Subtle atmospheric scenic background */}
       <div className="pointer-events-none absolute inset-0 opacity-25">
         <GymBackdrop />
@@ -282,7 +286,7 @@ export default function LoginPage() {
         <div className="relative w-full">
           {/* Pastel aura behind the card — blush glow, calm in dark, warm in light */}
           <div aria-hidden className="pointer-events-none absolute -inset-6 rounded-[36px] bg-blush/10 blur-3xl" />
-          <div className="relative overflow-hidden rounded-[28px] border border-border bg-popover/95 p-6 shadow-2xl shadow-black/70 backdrop-blur-xl sm:p-8">
+          <div className="relative overflow-hidden rounded-[28px] border border-border bg-popover/95 p-6 shadow-2xl shadow-scrim/70 backdrop-blur-xl sm:p-8">
             {/* Top pastel accent — thin blush-to-cream gradient hairline */}
             <div aria-hidden className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-blush-solid to-cream" />
             <SignInContent />
@@ -301,6 +305,6 @@ export default function LoginPage() {
           را می‌پذیری
         </p>
       </motion.div>
-    </div>
+    </main>
   );
 }

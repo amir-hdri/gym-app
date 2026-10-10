@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { CtaButton } from "@/components/twilight/controls";
+import { Check } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useBranches, useUpdateUser } from "@/hooks/use-api";
 
@@ -93,16 +94,16 @@ export default function OnboardingPage() {
 
   const radioClass = (selected: boolean) =>
     `flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border p-3 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2 ${
-      selected ? "border-primary bg-primary/5" : "border-border hover:border-border"
+      selected ? "border-primary bg-primary/5" : "border-border hover:border-input"
     }`;
 
   return (
     <AuthLayout>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-black/50"
+        transition={{ duration: 0.28 }}
+        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-scrim/50"
       >
         {/* Top pastel accent — thin blush-to-cream gradient hairline */}
         <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-blush-solid to-cream" />
@@ -120,23 +121,23 @@ export default function OnboardingPage() {
               <div>
                 <label htmlFor="height" className="mb-2 block text-xs text-muted-foreground">قد</label>
                 <div className="relative">
-                  <input id="height" type="number" inputMode="numeric" placeholder="175" dir="ltr" className={`${inputClassName} pl-12`} {...register("height")} />
-                  <span dir="ltr" className="pointer-events-none absolute left-4 top-4 text-xs text-muted-foreground">cm</span>
+                  <input id="height" type="number" inputMode="numeric" placeholder="175" dir="ltr" aria-invalid={errors.height ? "true" : "false"} aria-describedby={errors.height ? "height-error" : undefined} className={`${inputClassName} pl-12`} {...register("height")} />
+                  <span dir="ltr" aria-hidden className="pointer-events-none absolute left-4 top-4 text-xs text-muted-foreground">cm</span>
                 </div>
-                {errors.height?.message && <p className="mt-1 text-xs text-destructive">{errors.height.message}</p>}
+                {errors.height?.message && <p id="height-error" role="alert" className="mt-1 text-xs text-destructive">{errors.height.message}</p>}
               </div>
               <div>
                 <label htmlFor="weight" className="mb-2 block text-xs text-muted-foreground">وزن</label>
                 <div className="relative">
-                  <input id="weight" type="number" inputMode="numeric" placeholder="75" dir="ltr" className={`${inputClassName} pl-12`} {...register("weight")} />
-                  <span dir="ltr" className="pointer-events-none absolute left-4 top-4 text-xs text-muted-foreground">kg</span>
+                  <input id="weight" type="number" inputMode="numeric" placeholder="75" dir="ltr" aria-invalid={errors.weight ? "true" : "false"} aria-describedby={errors.weight ? "weight-error" : undefined} className={`${inputClassName} pl-12`} {...register("weight")} />
+                  <span dir="ltr" aria-hidden className="pointer-events-none absolute left-4 top-4 text-xs text-muted-foreground">kg</span>
                 </div>
-                {errors.weight?.message && <p className="mt-1 text-xs text-destructive">{errors.weight.message}</p>}
+                {errors.weight?.message && <p id="weight-error" role="alert" className="mt-1 text-xs text-destructive">{errors.weight.message}</p>}
               </div>
               <div>
                 <label htmlFor="age" className="mb-2 block text-xs text-muted-foreground">سن</label>
-                <input id="age" type="number" inputMode="numeric" placeholder="25" dir="ltr" className={inputClassName} {...register("age")} />
-                {errors.age?.message && <p className="mt-1 text-xs text-destructive">{errors.age.message}</p>}
+                <input id="age" type="number" inputMode="numeric" placeholder="25" dir="ltr" aria-invalid={errors.age ? "true" : "false"} aria-describedby={errors.age ? "age-error" : undefined} className={inputClassName} {...register("age")} />
+                {errors.age?.message && <p id="age-error" role="alert" className="mt-1 text-xs text-destructive">{errors.age.message}</p>}
               </div>
             </div>
           </motion.div>
@@ -152,30 +153,40 @@ export default function OnboardingPage() {
 
           {/* Goal */}
           <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-            <span className="mb-2 block text-xs text-muted-foreground">هدف تمرینی</span>
-            <div className="grid grid-cols-2 gap-2">
-              {Object.entries(goalLabels).map(([value, label]) => (
-                <label key={value} className={radioClass(selectedGoal === value)}>
-                  <input type="radio" value={value} className="sr-only" {...register("goal")} />
-                  <span className={`text-sm font-medium ${selectedGoal === value ? "text-primary" : "text-muted-foreground"}`}>{label}</span>
-                </label>
-              ))}
-            </div>
-            {errors.goal && <p className="mt-1 text-xs text-destructive">{errors.goal.message}</p>}
+            <fieldset>
+              <legend className="mb-2 block text-xs text-muted-foreground">هدف تمرینی</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(goalLabels).map(([value, label]) => (
+                  <label key={value} className={radioClass(selectedGoal === value)}>
+                    <input type="radio" value={value} className="sr-only" {...register("goal")} />
+                    <span className={`flex items-center gap-1.5 text-sm font-medium ${selectedGoal === value ? "text-primary" : "text-muted-foreground"}`}>
+                      {selectedGoal === value && <Check aria-hidden className="h-4 w-4 shrink-0" strokeWidth={2.5} />}
+                      {label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            {errors.goal && <p role="alert" className="mt-1 text-xs text-destructive">{errors.goal.message}</p>}
           </motion.div>
 
           {/* Experience */}
           <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
-            <span className="mb-2 block text-xs text-muted-foreground">سطح تجربه</span>
-            <div className="grid grid-cols-3 gap-2">
-              {Object.entries(experienceLabels).map(([value, label]) => (
-                <label key={value} className={radioClass(selectedExperience === value)}>
-                  <input type="radio" value={value} className="sr-only" {...register("experience")} />
-                  <span className={`text-sm font-medium ${selectedExperience === value ? "text-primary" : "text-muted-foreground"}`}>{label}</span>
-                </label>
-              ))}
-            </div>
-            {errors.experience && <p className="mt-1 text-xs text-destructive">{errors.experience.message}</p>}
+            <fieldset>
+              <legend className="mb-2 block text-xs text-muted-foreground">سطح تجربه</legend>
+              <div className="grid grid-cols-3 gap-2">
+                {Object.entries(experienceLabels).map(([value, label]) => (
+                  <label key={value} className={radioClass(selectedExperience === value)}>
+                    <input type="radio" value={value} className="sr-only" {...register("experience")} />
+                    <span className={`flex items-center gap-1.5 text-sm font-medium ${selectedExperience === value ? "text-primary" : "text-muted-foreground"}`}>
+                      {selectedExperience === value && <Check aria-hidden className="h-4 w-4 shrink-0" strokeWidth={2.5} />}
+                      {label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            {errors.experience && <p role="alert" className="mt-1 text-xs text-destructive">{errors.experience.message}</p>}
           </motion.div>
 
           {/* Branch (optional) */}

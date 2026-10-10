@@ -206,10 +206,10 @@ export default function HistoryPage() {
                 key={item.id}
                 onClick={() => handleSelectReadiness(item)}
                 className={cn(
-                  "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all cursor-pointer min-w-[70px] flex-1",
+                  "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-colors cursor-pointer min-w-[70px] flex-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   isSelected
-                    ? "bg-secondary border-primary text-primary shadow-[0_0_12px_rgba(210,192,165,0.2)]"
-                    : "bg-card border-border text-muted-foreground hover:border-border hover:text-foreground"
+                    ? "bg-secondary border-primary text-primary shadow-[0_0_12px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
+                    : "bg-card border-border text-muted-foreground hover:border-input hover:text-foreground"
                 )}
               >
                 <Icon className="w-4 h-4" strokeWidth={1.75} />
@@ -254,10 +254,10 @@ export default function HistoryPage() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                          <th className="whitespace-nowrap py-3 pr-4 text-right font-medium">تاریخ</th>
-                          <th className="whitespace-nowrap py-3 text-right font-medium">ورود</th>
-                          <th className="whitespace-nowrap py-3 text-right font-medium">خروج</th>
-                          <th className="whitespace-nowrap py-3 pl-4 text-right font-medium">مدت زمان</th>
+                          <th scope="col" className="whitespace-nowrap py-3 pr-4 text-right font-medium">تاریخ</th>
+                          <th scope="col" className="whitespace-nowrap py-3 text-right font-medium">ورود</th>
+                          <th scope="col" className="whitespace-nowrap py-3 text-right font-medium">خروج</th>
+                          <th scope="col" className="whitespace-nowrap py-3 pl-4 text-right font-medium">مدت زمان</th>
                         </tr>
                       </thead>
                       <tbody>

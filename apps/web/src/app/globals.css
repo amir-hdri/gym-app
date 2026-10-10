@@ -24,8 +24,8 @@
   --color-card-foreground: #211a13;
   --color-popover: #ffffff;
   --color-popover-foreground: #211a13;
-  --color-primary: #8a6b3f;
-  --color-primary-solid: #8a6b3f;
+  --color-primary: #83653c;
+  --color-primary-solid: #83653c;
   --color-primary-foreground: #ffffff;
   --color-secondary: #ece5d6;
   --color-secondary-foreground: #2b2118;
@@ -36,10 +36,15 @@
   --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
   --color-destructive-solid: #dc2626;
-  --color-success: #16a34a;
+  --color-success: #15803d;
   --color-success-foreground: #ffffff;
+  --color-success-solid: #15803d;
   --color-warning: #b45309;
   --color-warning-foreground: #ffffff;
+  --color-warning-solid: #b45309;
+  --color-info: #2f6f9e;
+  --color-info-foreground: #ffffff;
+  --color-info-solid: #2f6f9e;
   --color-border: #e3d9c6;
   --color-input: #cfc3ae;
   --color-ring: #8a6b3f;
@@ -102,8 +107,13 @@
     --color-destructive-solid: #dc2626;
     --color-success: #4ade80;
     --color-success-foreground: #121417;
+    --color-success-solid: #4ade80;
     --color-warning: #fbbf24;
     --color-warning-foreground: #121417;
+    --color-warning-solid: #fbbf24;
+    --color-info: #7dd3fc;
+    --color-info-foreground: #121417;
+    --color-info-solid: #7dd3fc;
     --color-border: #232934;
     --color-input: #2c3444;
     --color-ring: #d2c0a5;
@@ -208,10 +218,12 @@
     scrollbar-width: none;
   }
 
-  /* Accessible focus ring for interactive elements */
+  /* Accessible focus ring for interactive elements. Token-driven so the
+     ring stays visible in both themes (sand-on-ink in dark, bronze haze in
+     light) — never hardcode the ring colour here. */
   .ring-focus:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px rgb(210 192 165 / 0.5), 0 0 0 4px #07090c;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-ring) 55%, transparent), 0 0 0 4px color-mix(in srgb, var(--color-background) 85%, transparent);
   }
 }
 

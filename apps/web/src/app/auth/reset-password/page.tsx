@@ -71,10 +71,10 @@ function ResetPasswordContent() {
   return (
     <AuthLayout>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-black/50"
+        transition={{ duration: 0.28 }}
+        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-scrim/50"
       >
         {/* Top pastel accent — thin blush-to-cream gradient hairline */}
         <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-blush-solid to-cream" />
@@ -114,10 +114,12 @@ function ResetPasswordContent() {
                 type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
+                aria-invalid={errors.password ? "true" : "false"}
+                aria-describedby={errors.password ? "password-error" : undefined}
                 className={inputClassName}
                 {...register("password")}
               />
-              {errors.password?.message && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
+              {errors.password?.message && <p id="password-error" role="alert" className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
@@ -129,10 +131,12 @@ function ResetPasswordContent() {
                 type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
+                aria-invalid={errors.confirmPassword ? "true" : "false"}
+                aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
                 className={inputClassName}
                 {...register("confirmPassword")}
               />
-              {errors.confirmPassword?.message && <p className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p>}
+              {errors.confirmPassword?.message && <p id="confirmPassword-error" role="alert" className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p>}
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>

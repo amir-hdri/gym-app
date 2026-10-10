@@ -19,6 +19,9 @@ interface Props {
  *
  * `useId()` output is sanitised to `[A-Za-z0-9]`: React's ids contain colons,
  * and a colon inside an SVG `url(#…)` reference is a selector, not a name.
+ *
+ * DELIBERATE (§9.5): fixed-dark artwork — the stop colours below are the art
+ * itself and stay dark in both themes, so they are not theme tokens.
  */
 export const ScenicBackground: React.FC<Props> = ({ className = "" }) => {
   const uid = React.useId().replace(/[^A-Za-z0-9]/g, "");

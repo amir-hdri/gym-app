@@ -63,7 +63,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
       <aside
         id="portal-sidebar"
         className={cn(
-          "fixed inset-y-3 right-3 z-50 flex w-[264px] flex-col overflow-hidden rounded-[2rem] border border-border bg-background shadow-[0_24px_80px_-28px_rgba(0,0,0,0.8)] transition-transform duration-300 ease-out lg:translate-x-0",
+          "fixed inset-y-3 right-3 z-50 flex w-[264px] flex-col overflow-hidden rounded-[2rem] border border-border bg-background shadow-[0_24px_80px_-28px_color-mix(in_srgb,var(--color-scrim)_80%,transparent)] transition-transform duration-300 ease-out lg:translate-x-0",
           // Closed = fully off-canvas: translate-x-full alone leaves a 12px
           // sliver (the right-3 gap) visible at the viewport edge.
           isOpen ? "translate-x-0" : "translate-x-[calc(100%+0.75rem)]"
@@ -77,7 +77,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
           </Link>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
             aria-label="بستن منو"
           >
             <X className="h-5 w-5" />
@@ -94,7 +94,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
               const submenuId = `sidebar-sub-${index}`;
 
               const rowClass = cn(
-                "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-sans text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "relative flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 font-sans text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 active
                   ? "border border-primary/25 bg-secondary text-foreground"
                   : "border border-transparent text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -141,7 +141,7 @@ export function Sidebar({ items, isOpen, onClose }: SidebarProps) {
                                     href={sub.href}
                                     onClick={onClose}
                                     className={cn(
-                                      "relative flex items-center gap-3 rounded-lg px-3 py-2 font-sans text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                      "relative flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 font-sans text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                                       subActive
                                         ? "text-primary"
                                         : "text-muted-foreground hover:bg-secondary hover:text-foreground"

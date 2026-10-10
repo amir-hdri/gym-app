@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { PortalLayout } from "@/components/layout/PortalLayout";
 import { coachNavItems, coachDockItems } from "./constants";

@@ -86,13 +86,13 @@ export default function PaymentsPage() {
               <table className="w-full min-w-[640px] text-sm leading-6">
                 <thead>
                   <tr>
-                    <th className={tableHeadCell}>ردیف</th>
-                    <th className={tableHeadCell}>کاربر</th>
-                    <th className={tableHeadCell}>مبلغ</th>
-                    <th className={tableHeadCell}>روش پرداخت</th>
-                    <th className={tableHeadCell}>وضعیت</th>
-                    <th className={tableHeadCell}>تاریخ</th>
-                    <th className={tableHeadCell}>عملیات</th>
+                    <th scope="col" className={tableHeadCell}>ردیف</th>
+                    <th scope="col" className={tableHeadCell}>کاربر</th>
+                    <th scope="col" className={tableHeadCell}>مبلغ</th>
+                    <th scope="col" className={tableHeadCell}>روش پرداخت</th>
+                    <th scope="col" className={tableHeadCell}>وضعیت</th>
+                    <th scope="col" className={tableHeadCell}>تاریخ</th>
+                    <th scope="col" className={tableHeadCell}>عملیات</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -114,7 +114,7 @@ export default function PaymentsPage() {
                       <td className={`${tableCell} whitespace-nowrap text-muted-foreground`}>{formatDateTime(payment.paidAt || payment.createdAt)}</td>
                       <td className={tableCell}>
                         <div className="flex items-center gap-1">
-                          <Link href={`/admin/payments/${payment.id}`} className="min-h-11 inline-flex items-center px-2 text-sm font-medium text-primary hover:underline">جزئیات</Link>
+                          <Link href={`/admin/payments/${payment.id}`} aria-label={`جزئیات تراکنش ${formatCurrency(payment.amount)} — ${payment.user ? `${payment.user.firstName} ${payment.user.lastName}` : payment.userId}`} className="min-h-11 inline-flex items-center px-2 text-sm font-medium text-primary hover:underline">جزئیات</Link>
                           <PaymentRowActions payment={payment} />
                         </div>
                       </td>

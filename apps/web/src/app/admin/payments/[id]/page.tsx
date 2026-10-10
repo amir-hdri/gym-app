@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { usePayment } from "@/hooks/use-api";
+import { PAYMENT_METHOD } from "../../_components/admin-data";
 
 const statusConfig: Record<string, { label: string; variant: "success" | "warning" | "destructive" }> = {
   completed: { label: "موفق", variant: "success" }, pending: { label: "معلق", variant: "warning" }, failed: { label: "ناموفق", variant: "destructive" },
@@ -68,7 +69,7 @@ export default function TransactionDetailPage() {
         </div>
         <div className={infoRow}>
           <span className={infoLabel}>روش پرداخت</span>
-          <span className={infoValue}>{payment.method}</span>
+          <span className={infoValue}>{PAYMENT_METHOD[payment.method] ?? payment.method}</span>
         </div>
         <div className={infoRow}>
           <span className={infoLabel}>تاریخ</span>

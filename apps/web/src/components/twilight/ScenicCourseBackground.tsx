@@ -8,6 +8,9 @@ interface Props {
 /**
  * Scenic course background card art with soft gradient and geometric sun/moon motifs.
  * Ported from Twilight Meditation source.
+ *
+ * DELIBERATE (§9.5): fixed-dark artwork — the hex gradients below are the art
+ * itself and stay dark in both themes, so they are not theme tokens.
  */
 export const ScenicCourseBackground: React.FC<Props> = ({ className = '', theme = 'dusk' }) => {
   const getGradient = () => {

@@ -420,6 +420,7 @@ export default function BroadcastPage() {
         <SectionTitle>پیام‌های ارسال شده</SectionTitle>
         {history.length === 0 ? (
           <EmptyState
+            tone="blush"
             icon={<Bell strokeWidth={1.75} className="h-5 w-5" />}
             title="پیام ارسال‌شده‌ای نیست"
             description="هنوز هیچ اطلاع‌رسانی همگانی ارسال نشده است"

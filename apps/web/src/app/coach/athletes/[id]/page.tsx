@@ -25,6 +25,7 @@ import { useUser, useGoals, useTrainingPrograms, useCheckIns, useConversations, 
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { SessionDurationChart } from "@/components/analytics/Charts";
 import { ConfirmDialog } from "../../_components/ConfirmDialog";
+import { MEMBER_PROGRESS_FILL } from "../../_accents";
 import { SelectField } from "../../_components/SelectField";
 import { goalCategoryLabels } from "../../_goals";
 import { fromDateInputValue, jalaliLong, shiftDateInput, todayDateInput } from "../../_dates";
@@ -249,7 +250,7 @@ export default function AthleteDetailPage() {
           {programsLoading ? (
             <Loading message="در حال بارگذاری برنامه..." />
           ) : groupedPrograms.length === 0 ? (
-            <EmptyState title="برنامه‌ای ثبت نشده" description="هیچ برنامه تمرینی برای این شاگرد ثبت نشده است" />
+            <EmptyState tone="blush" title="برنامه‌ای ثبت نشده" description="هیچ برنامه تمرینی برای این شاگرد ثبت نشده است" />
           ) : (
             groupedPrograms.map((day) => (
               <div key={day.day}>
@@ -258,7 +259,7 @@ export default function AthleteDetailPage() {
                   {day.exercises.map((ex, i) => (
                     <div key={i} className="flex items-center justify-between gap-3 px-4 py-3.5 first:pt-3.5 last:pb-3.5">
                       <div className="flex min-w-0 flex-1 items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-primary">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blush-solid/30 bg-blush/15 text-blush">
                           <Dumbbell className="h-5 w-5" strokeWidth={1.75} />
                         </div>
                         <div className="min-w-0">
@@ -293,6 +294,7 @@ export default function AthleteDetailPage() {
             <Loading message="در حال بارگذاری اهداف..." />
           ) : athleteGoals.length === 0 ? (
             <EmptyState
+              tone="blush"
               title="هدفی ثبت نشده"
               description="هیچ هدفی برای این شاگرد ثبت نشده است"
               action={
@@ -322,7 +324,7 @@ export default function AthleteDetailPage() {
                     </button>
                   </span>
                 </div>
-                <Progress value={calculateProgress(goal.currentValue, goal.targetValue)} indicatorClassName="bg-none bg-primary" className="bg-border" />
+                <Progress value={calculateProgress(goal.currentValue, goal.targetValue)} indicatorClassName={`bg-none ${MEMBER_PROGRESS_FILL}`} className="bg-border" />
                 <p className="mt-1.5 text-[11px] text-muted-foreground">
                   {formatPersianNumber(Math.round(calculateProgress(goal.currentValue, goal.targetValue)))}٪ تکمیل شده
                 </p>
@@ -335,7 +337,7 @@ export default function AthleteDetailPage() {
           {checkinsLoading ? (
             <Loading message="در حال بارگذاری تاریخچه..." />
           ) : athleteHistory.length === 0 ? (
-            <EmptyState title="چک‌اینی ثبت نشده" description="هیچ چک‌اینی برای این شاگرد ثبت نشده است" />
+            <EmptyState tone="blush" title="چک‌اینی ثبت نشده" description="هیچ چک‌اینی برای این شاگرد ثبت نشده است" />
           ) : (
             <>
               <div>
@@ -377,6 +379,7 @@ export default function AthleteDetailPage() {
           <ErrorDisplay message="اشتراک بارگذاری نشد" onRetry={() => void membershipsQuery.refetch()} />
         ) : !currentMembership ? (
           <EmptyState
+            tone="blush"
             icon={<CreditCard className="h-5 w-5" strokeWidth={1.75} />}
             title="اشتراکی ثبت نشده"
             description="برای این شاگرد هنوز پلنی تخصیص داده نشده است"
@@ -408,6 +411,7 @@ export default function AthleteDetailPage() {
                   <Progress
                     value={calculateProgress(currentMembership.sessionsUsed, currentMembership.sessionsTotal)}
                     className="h-1.5"
+                    indicatorClassName={`bg-none ${MEMBER_PROGRESS_FILL}`}
                   />
                   <span className="shrink-0 text-xs font-medium tabular-nums text-foreground">
                     {formatPersianNumber(currentMembership.sessionsRemaining)} جلسه باقی‌مانده
@@ -446,6 +450,7 @@ export default function AthleteDetailPage() {
           <ErrorDisplay message="پرداخت‌ها بارگذاری نشد" onRetry={() => void paymentsQuery.refetch()} />
         ) : recentPayments.length === 0 ? (
           <EmptyState
+            tone="blush"
             icon={<CreditCard className="h-5 w-5" strokeWidth={1.75} />}
             title="پرداختی ثبت نشده"
             description="پرداخت‌های این شاگرد به‌محض ثبت اینجا دیده می‌شوند"

@@ -290,11 +290,14 @@ export default function HistoryPage() {
               <EmptyState title="وضعیتی ثبت نشده" description="وضعیت آمادگی خود را از داشبورد ثبت کنید" />
             ) : (
               <ol aria-live="polite" className="flex items-stretch gap-1.5 overflow-x-auto">
-                {energyHistory.map((row) => (
+                {energyHistory.map((row, idx) => (
                   <li
                     key={row.day}
                     title={`${formatDate(row.day)}: ${READINESS_LABELS[row.state] ?? row.state}`}
-                    className="flex min-w-[44px] flex-1 flex-col items-center gap-1.5 rounded-lg border border-border bg-card px-1 py-2"
+                    className={cn(
+                      "flex min-w-[44px] flex-1 flex-col items-center gap-1.5 rounded-lg border px-1 py-2",
+                      idx === 0 ? "border-blush/40 bg-blush/10" : "border-border bg-card"
+                    )}
                   >
                     <span aria-hidden="true" className={cn("h-2.5 w-2.5 rounded-full", READINESS_DOT[row.state] ?? "bg-muted-foreground")} />
                     <span className="text-[10px] text-muted-foreground">
@@ -394,7 +397,10 @@ export default function HistoryPage() {
               className="p-3.5 rounded-2xl bg-card border border-border flex items-center justify-between"
             >
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center text-primary shrink-0">
+                <div className={cn(
+                  "w-10 h-10 rounded-full border flex items-center justify-center shrink-0",
+                  m.achieved ? "border-transparent bg-blush-solid text-blush-foreground" : "bg-secondary border-border text-primary"
+                )}>
                   <Award className="w-5 h-5 stroke-[1.75]" />
                 </div>
                 <div>
@@ -403,7 +409,7 @@ export default function HistoryPage() {
                 </div>
               </div>
               {m.achieved ? (
-                <div className="flex items-center gap-1 text-[11px] font-medium text-primary bg-border px-2.5 py-1 rounded-full border border-primary/30">
+                <div className="flex items-center gap-1 text-[11px] font-medium text-blush-foreground bg-blush-solid px-2.5 py-1 rounded-full border border-transparent">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>{m.achievedDate}</span>
                 </div>

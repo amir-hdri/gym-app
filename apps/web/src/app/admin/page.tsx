@@ -23,13 +23,15 @@ export default function AdminDashboard() {
   if (isLoading) return <Loading />;
   if (isError) return <ErrorDisplay />;
   const s = statsRes?.data;
+  // `member` flags the MEMBER's own living data for the blush wash — staff
+  // aggregates, finance and alert counts stay neutral.
   const stats = s ? [
-    { label: "کل اعضا", value: s.totalMembers ?? s.totalUsers ?? 0, icon: Users, color: "text-primary" },
-    { label: "اعضای فعال", value: s.activeMembers ?? 0, icon: UserCheck, color: "text-primary" },
-    { label: "مربیان", value: s.totalCoaches ?? 0, icon: UserCircle, color: "text-primary" },
-    { label: "درآمد ماهانه", value: s.monthlyRevenue ?? s.totalRevenue ?? 0, icon: DollarSign, color: "text-primary", isCurrency: true },
-    { label: "چک‌این امروز", value: s.todayCheckIns ?? s.todayCheckins ?? 0, icon: LogIn, color: "text-warning" },
-    { label: "اشتراک‌های در حال انقضا", value: s.expiringMemberships ?? 0, icon: AlertTriangle, color: "text-destructive" },
+    { label: "کل اعضا", value: s.totalMembers ?? s.totalUsers ?? 0, icon: Users, color: "text-primary", member: true },
+    { label: "اعضای فعال", value: s.activeMembers ?? 0, icon: UserCheck, color: "text-primary", member: true },
+    { label: "مربیان", value: s.totalCoaches ?? 0, icon: UserCircle, color: "text-primary", member: false },
+    { label: "درآمد ماهانه", value: s.monthlyRevenue ?? s.totalRevenue ?? 0, icon: DollarSign, color: "text-primary", isCurrency: true, member: false },
+    { label: "چک‌این امروز", value: s.todayCheckIns ?? s.todayCheckins ?? 0, icon: LogIn, color: "text-warning", member: true },
+    { label: "اشتراک‌های در حال انقضا", value: s.expiringMemberships ?? 0, icon: AlertTriangle, color: "text-destructive", member: false },
   ] : [];
   const recentPayments = (paymentsRes?.data || []).slice(-6);
   return (
@@ -54,6 +56,7 @@ export default function AdminDashboard() {
             key={stat.label}
             label={stat.label}
             value={stat.isCurrency ? formatCurrency(stat.value) : formatPersianNumber(stat.value)}
+            tone={stat.member ? "blush" : "default"}
           />
         ))}
       </div>

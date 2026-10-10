@@ -53,12 +53,22 @@
   --color-brand: #8a6b3f;
   --color-brand-2: #b0516e;
   /*
-   * Member-data accent (blush) + wordmark inks + scrim. Inks/scrim are
-   * theme-invariant by design (chosen by surface, not theme).
+   * Member-data accent (blush) + warmth accent (cream) + wordmark inks +
+   * scrim. Inks/scrim are theme-invariant by design (chosen by surface,
+   * not theme). Pastels are washes and medallions, never body text without
+   * their *-foreground ink.
    */
   --color-blush: #9d2c4a;
   --color-blush-solid: #f3c6d3;
   --color-blush-foreground: #4a1522;
+  --color-cream: #f6e8d2;
+  --color-cream-foreground: #6b4e2a;
+  /*
+   * Theme-invariant pastels for fixed-dark artwork (hero/scenic cards stay
+   * dark in both themes, so theme-flipping blush/cream would fail there).
+   */
+  --color-blush-fixed: #f0b8c8;
+  --color-cream-fixed: #e9d3ac;
   --color-logo-ink: #1c1611;
   --color-logo-ink-inverse: #f5f3ef;
   --color-scrim: #1c1611;
@@ -109,6 +119,10 @@
     --color-blush: #f0b8c8;
     --color-blush-solid: #d98aa5;
     --color-blush-foreground: #2a1218;
+    --color-cream: #e9d3ac;
+    --color-cream-foreground: #2e2110;
+    --color-blush-fixed: #f0b8c8;
+    --color-cream-fixed: #e9d3ac;
   }
 }
 
@@ -213,7 +227,12 @@
     animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .animate-scale-in {
-    animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  /* Single-subtle error nudge (transform-only; the reduced-motion
+     kill-switch in @layer base silences it when requested). */
+  .animate-shake {
+    animation: shake-x 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes fade-in {
@@ -227,6 +246,12 @@
   @keyframes scale-in {
     from { opacity: 0; transform: scale(0.97); }
     to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes shake-x {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    55% { transform: translateX(4px); }
+    80% { transform: translateX(-2px); }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

@@ -237,7 +237,7 @@ export function WorkoutPlayer({
               </div>
               <div className="text-end">
                 <p className="text-[10px] text-muted-foreground">تکرار هدف</p>
-                <p className="mt-0.5 text-xl text-primary">{exercise.reps}</p>
+                <p className="mt-0.5 text-xl text-blush">{exercise.reps}</p>
               </div>
             </div>
             {rest > 0 && (
@@ -280,8 +280,10 @@ export function WorkoutPlayer({
               </div>
             )}
             {finishedSession ? (
-              <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-primary/40 bg-card p-5 text-center">
-                <CheckCircle2 className="h-10 w-10 text-primary" />
+              <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-blush-solid/40 bg-card p-5 text-center">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-blush-solid text-blush-foreground" aria-hidden="true">
+                  <CheckCircle2 className="h-7 w-7" />
+                </span>
                 <h3 className="text-lg">جلسه تمرین تکمیل شد</h3>
                 <p className="text-xs text-muted-foreground">
                   تمام حرکت‌ها در برنامه شما ذخیره شده‌اند.

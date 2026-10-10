@@ -127,10 +127,10 @@ export default function AthleteDashboard() {
         </div>
         <Link
           href="/athlete/history"
-          className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-primary"
+          className="flex shrink-0 items-center gap-1.5 rounded-full border border-blush/30 bg-blush/10 px-3 py-1.5 text-xs text-blush"
           title="مشاهده تاریخچه و استریک"
         >
-          <Flame className="h-3.5 w-3.5 fill-primary/25 text-primary" strokeWidth={1.75} />
+          <Flame className="h-3.5 w-3.5 fill-blush/25 text-blush" strokeWidth={1.75} />
           <span className="font-sans text-[11px] font-semibold tracking-wider">
             {stats ? formatPersianNumber(stats.currentStreak) : "—"} روز
           </span>
@@ -144,7 +144,7 @@ export default function AthleteDashboard() {
         </div>
         <div className="absolute inset-0 z-10 flex flex-col justify-between p-6">
           <div>
-            <MicroLabelFa className="mb-2 text-primary">برنامه تمرینی پیشنهادی امروز</MicroLabelFa>
+            <MicroLabelFa className="mb-2 text-cream-fixed">برنامه تمرینی پیشنهادی امروز</MicroLabelFa>
             <h2 className="max-w-[290px] font-serif text-[26px] font-medium leading-snug tracking-tight text-logo-ink-inverse">
               {dashboardData?.currentProgram?.name ?? "قدرت و هایپرتروفی بالاتنه"}
             </h2>
@@ -156,7 +156,7 @@ export default function AthleteDashboard() {
           </div>
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-1.5 text-xs font-medium text-logo-ink-inverse">
-              <Clock className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
+              <Clock className="h-3.5 w-3.5 text-cream-fixed" strokeWidth={1.75} aria-hidden />
               <span>
                 {formatPersianNumber(Math.round(completionPercent))}٪ تکمیل
               </span>
@@ -173,10 +173,16 @@ export default function AthleteDashboard() {
         </div>
       </div>
 
-      {/* Category circles */}
+      {/* Category circles — pastel washes cycling blush / cream / primary with matching ink */}
       <div className="no-scrollbar flex items-center justify-between gap-3 overflow-x-auto py-1">
-        {categories.map((cat) => {
+        {categories.map((cat, ci) => {
           const Icon = cat.icon;
+          const tone = [
+            "border-blush/30 bg-blush/10 text-blush",
+            "border-cream/40 bg-cream/20 text-primary",
+            "border-primary/30 bg-primary/10 text-primary",
+          ][ci % 3];
+          const circleClassName = `flex h-[58px] w-[58px] items-center justify-center rounded-full border shadow-sm transition-colors group-hover:border-primary/50 ${tone}`;
           if (cat.isBreathing) {
             return (
               <button
@@ -184,7 +190,7 @@ export default function AthleteDashboard() {
                 onClick={() => setIsBreathingOpen(true)}
                 className="group flex shrink-0 flex-col items-center gap-2 cursor-pointer focus:outline-none"
               >
-                <div className="flex h-[58px] w-[58px] items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors group-hover:border-primary/50 group-hover:bg-secondary group-hover:text-primary">
+                <div className={circleClassName}>
                   <Icon className="h-5 w-5" strokeWidth={1.75} />
                 </div>
                 <span className="text-[11px] text-muted-foreground transition-colors group-hover:text-foreground">
@@ -195,7 +201,7 @@ export default function AthleteDashboard() {
           }
           return (
             <Link key={cat.id} href={cat.href || "/athlete"} className="group flex shrink-0 flex-col items-center gap-2">
-              <div className="flex h-[58px] w-[58px] items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors group-hover:border-primary/50 group-hover:bg-secondary group-hover:text-primary">
+              <div className={circleClassName}>
                 <Icon className="h-5 w-5" strokeWidth={1.75} />
               </div>
               <span className="text-[11px] text-muted-foreground transition-colors group-hover:text-foreground">
@@ -266,7 +272,7 @@ export default function AthleteDashboard() {
       {/* Weekly progress */}
       <TwilightCard>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-primary">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blush/30 bg-blush/10 text-blush">
             <TrendingUp className="h-5 w-5" strokeWidth={1.75} />
           </div>
           <div>
@@ -295,7 +301,7 @@ export default function AthleteDashboard() {
       {/* Goals */}
       <TwilightCard>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-primary">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blush/30 bg-blush/10 text-blush">
             <Trophy className="h-5 w-5" strokeWidth={1.75} />
           </div>
           <div>
@@ -312,7 +318,7 @@ export default function AthleteDashboard() {
                   {formatPersianNumber(goal.currentValue)}/{formatPersianNumber(goal.targetValue)} {goal.unit}
                 </span>
               </div>
-              <Progress value={calculateProgress(goal.currentValue, goal.targetValue)} className="h-1.5" />
+              <Progress value={calculateProgress(goal.currentValue, goal.targetValue)} className="h-1.5" indicatorClassName="bg-none bg-blush-solid" />
             </div>
           )) : (
             <div className="py-6 text-center text-muted-foreground">

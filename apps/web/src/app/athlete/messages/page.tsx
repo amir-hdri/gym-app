@@ -77,7 +77,7 @@ export default function AthleteMessagesPage() {
                     <div className={`mt-1.5 flex items-center gap-1.5 text-xs ${msg.sender === "athlete" ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
                       <time dateTime={msg.createdAt}>{formatRelativeTime(msg.createdAt)}</time>
                       {msg.sender === "athlete" && <CheckCheck className="h-3.5 w-3.5" strokeWidth={1.75} aria-label="ارسال شده" />}
-                      {msg.unread && <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-label="خوانده نشده" />}
+                      {msg.unread && <span className="h-1.5 w-1.5 rounded-full bg-blush-solid" aria-label="خوانده نشده" />}
                     </div>
                   </div>
                 </div>

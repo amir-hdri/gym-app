@@ -383,7 +383,7 @@ export default function CoachProfilePage() {
                     <td className={tdClass}>
                       <div className="flex items-center gap-2">
                         <div className="h-2 flex-1 rounded-full bg-secondary">
-                          <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+                          <div className="h-full rounded-full bg-blush-solid" style={{ width: `${progress}%` }} />
                         </div>
                         <span className="text-sm">{formatPersianNumber(progress)}%</span>
                       </div>

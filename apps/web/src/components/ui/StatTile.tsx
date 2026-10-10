@@ -18,7 +18,7 @@ export interface StatTileProps {
    * best, progress toward their own goal. Everything else (counts the business
    * cares about, system totals) stays `default`. See DESIGN_SYSTEM §1.
    */
-  tone?: "default" | "blush" | "success" | "warning" | "destructive";
+  tone?: "default" | "blush" | "cream" | "success" | "warning" | "destructive";
   /** When set, the whole tile becomes a link. */
   href?: string;
   className?: string;
@@ -27,6 +27,10 @@ export interface StatTileProps {
 const toneMap: Record<NonNullable<StatTileProps["tone"]>, string> = {
   default: "bg-primary/10 text-primary",
   blush: "bg-blush/10 text-blush",
+  // Solid cream fill: a cream wash cannot carry one ink in both themes
+  // (text-cream vanishes in light, text-cream-foreground in dark), so the
+  // medallion is a fill with its matching foreground ink.
+  cream: "bg-cream text-cream-foreground",
   success: "bg-success/10 text-success",
   warning: "bg-warning/10 text-warning",
   destructive: "bg-destructive/10 text-destructive",

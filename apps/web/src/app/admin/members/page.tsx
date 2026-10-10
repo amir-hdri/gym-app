@@ -74,6 +74,7 @@ export default function MembersPage() {
 
       {filtered.length === 0 ? (
         <EmptyState
+          tone="blush"
           icon={<Users className="h-6 w-6" strokeWidth={1.75} />}
           title="هیچ عضوی یافت نشد"
           description={search || filter !== "all" ? "هیچ نتیجه‌ای با فیلترهای فعلی مطابقت ندارد" : "هنوز عضوی ثبت‌نام نکرده است"}

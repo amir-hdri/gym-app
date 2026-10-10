@@ -75,7 +75,7 @@ export default function NotificationsPage() {
           <div className="flex items-center gap-3">
             {unreadCount > 0 && (
               <>
-                <Badge variant="default" className="bg-primary/10 text-primary">{unreadCount} عدد خوانده نشده</Badge>
+                <Badge variant="default" className="border-transparent bg-blush-solid text-blush-foreground">{unreadCount} عدد خوانده نشده</Badge>
                 <Button variant="outline" size="sm" onClick={handleMarkAllRead}>
                   <CheckCheck className="ml-2 h-4 w-4" strokeWidth={1.75} />علامت همه به عنوان خوانده شده
                 </Button>
@@ -100,7 +100,7 @@ export default function NotificationsPage() {
                 onClick={() => handleMarkRead(n.id)}
                 className={cn(
                   "flex cursor-pointer items-start gap-4 px-4 py-3.5 transition-colors hover:bg-secondary",
-                  !n.isRead && "bg-primary/5"
+                  !n.isRead && "bg-blush/10"
                 )}
               >
                 <div className="mt-1 shrink-0">{typeIcons[n.type] || typeIcons.info}</div>
@@ -109,7 +109,7 @@ export default function NotificationsPage() {
                     <p className={cn("text-sm font-medium text-foreground", !n.isRead && "text-primary")}>{n.title}</p>
                     <div className="flex shrink-0 items-center gap-2">
                       <span className="text-xs text-muted-foreground">{timeAgo}</span>
-                      {!n.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                      {!n.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-blush-solid" />}
                     </div>
                   </div>
                   <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{n.message}</p>

@@ -8,6 +8,12 @@ export interface EmptyStateProps {
   description?: string;
   action?: React.ReactNode;
   className?: string;
+  /**
+   * Pastel medallion for warmth moments (member-data empty states,
+   * celebrations). Solid fills with matching foreground ink so contrast
+   * holds in both themes. Defaults to the neutral medallion.
+   */
+  tone?: "default" | "blush" | "cream";
 }
 
 /**
@@ -17,13 +23,19 @@ export interface EmptyStateProps {
  * `components/ui/DataState.tsx` re-exports this so the pages already importing
  * `EmptyState` from there keep working unchanged.
  */
-export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
+const medallionTone: Record<NonNullable<EmptyStateProps["tone"]>, string> = {
+  default: "bg-muted text-muted-foreground",
+  blush: "bg-blush-solid text-blush-foreground",
+  cream: "bg-cream text-cream-foreground",
+};
+
+export function EmptyState({ icon, title, description, action, className, tone = "default" }: EmptyStateProps) {
   return (
     <div
       className={cn("flex flex-col items-center justify-center px-6 py-16 text-center", className)}
     >
       <div
-        className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground"
+        className={cn("flex h-16 w-16 items-center justify-center rounded-full", medallionTone[tone])}
         aria-hidden="true"
       >
         {icon ?? <Inbox className="h-7 w-7" />}

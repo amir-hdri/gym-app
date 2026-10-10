@@ -91,8 +91,10 @@ export default function ForgotPasswordPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-black/50"
+        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-black/50"
       >
+        {/* Top pastel accent — thin blush-to-cream gradient hairline */}
+        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-blush-solid to-cream" />
         <div className="mb-8 text-center">
           <h1 className="font-serif text-2xl font-medium tracking-tight text-foreground">بازیابی رمز عبور</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -102,8 +104,8 @@ export default function ForgotPasswordPage() {
 
         {isSent ? (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4 py-4 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-success/30 bg-success/10">
-              <CheckCircle2 className="h-7 w-7 text-success" strokeWidth={1.75} />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-blush-solid/40 bg-blush-solid text-blush-foreground">
+              <CheckCircle2 className="h-7 w-7" strokeWidth={1.75} />
             </div>
             <p className="text-sm leading-7 text-muted-foreground" aria-live="polite">
               اگر <span dir="ltr" className="font-medium text-foreground">{sentEmail}</span> در سامانه ثبت شده

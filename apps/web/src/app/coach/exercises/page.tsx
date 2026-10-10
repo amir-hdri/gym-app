@@ -128,6 +128,7 @@ export default function ExerciseLibraryPage() {
         {filtered.length === 0 && (
           <div className="border-t border-border p-6">
             <EmptyState
+              tone="blush"
               title="هیچ حرکتی یافت نشد"
               description="حرکتی با فیلترهای انتخاب شده وجود ندارد"
             />

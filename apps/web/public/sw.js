@@ -1,5 +1,5 @@
 /* Lumi Wellness service worker — offline shell, network-first navigation */
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE = `lumi-shell-${VERSION}`;
 const OFFLINE_URL = "/offline";
 const PRECACHE = [

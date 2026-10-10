@@ -91,7 +91,7 @@ export default function ProgramDetailPage() {
         title={program.name}
         subtitle={`${program.coach?.firstName || ""} ${program.coach?.lastName || ""} | ${formatDate(program.startDate)} - ${formatDate(program.endDate)} | ${formatPersianNumber(program.frequencyPerWeek)} روز در هفته`}
         action={
-          <span className="rounded-full border border-border bg-card px-3 py-1.5 text-[11px] text-primary">
+          <span className="rounded-full border border-blush/30 bg-blush/10 px-3 py-1.5 text-[11px] text-blush">
             {formatPersianNumber(Math.round(overallProgress))}٪ تکمیل
           </span>
         }
@@ -107,7 +107,7 @@ export default function ProgramDetailPage() {
         <Progress
           value={overallProgress}
           className="bg-border"
-          indicatorClassName="bg-primary shadow-none"
+          indicatorClassName="bg-none bg-blush-solid shadow-none"
         />
       </TwilightCard>
 
@@ -156,6 +156,7 @@ export default function ProgramDetailPage() {
                     <Checkbox
                       checked={isCompleted}
                       onCheckedChange={() => toggleExercise(activeDayData.day, idx)}
+                      className="data-[state=checked]:border-blush-solid data-[state=checked]:bg-blush-solid data-[state=checked]:text-blush-foreground"
                     />
                     <div className={cn("flex-1", isCompleted && "line-through text-muted-foreground")}>
                       <p className="text-sm font-medium text-foreground">{exercise.exercise?.name || exercise.exerciseId}</p>

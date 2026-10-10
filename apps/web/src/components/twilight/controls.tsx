@@ -239,23 +239,36 @@ export function FilterChips<T extends string>({
 /* Stat card (journey pattern)                                         */
 /* ------------------------------------------------------------------ */
 
-/** `p-4 rounded-2xl bg-card border-border` with tracked micro label + tabular value */
+/**
+ * `p-4 rounded-2xl bg-card border-border` with tracked micro label + tabular value.
+ *
+ * `tone="blush"` marks a tile showing the MEMBER's own living data
+ * (per-athlete stats) with a faint blush wash — theme text stays untouched so
+ * contrast holds in both themes. Everything else (business counts, finance,
+ * staff aggregates) stays `default`.
+ */
 export function StatCard({
   label,
   value,
   suffix,
   className,
+  tone = "default",
 }: {
   label: string;
   value: ReactNode;
   suffix?: string;
   className?: string;
+  tone?: "default" | "blush";
 }) {
   return (
     <motion.div
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className={cn("flex flex-col justify-between rounded-2xl border border-border bg-card p-4 shadow-xs", className)}
+      className={cn(
+        "flex flex-col justify-between rounded-2xl border border-border bg-card p-4 shadow-xs",
+        tone === "blush" && "border-blush-solid/30 bg-blush/10",
+        className
+      )}
     >
       <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
       <div className="mt-3 flex items-baseline gap-1">
@@ -359,16 +372,27 @@ export function EmptyState({
   title,
   description,
   action,
+  tone = "default",
 }: {
   icon?: ReactNode;
   title: string;
   description?: string;
   action?: ReactNode;
+  /** Pastel medallion for member-data empty states. Solid pastel fill with
+   * matching foreground ink — contrast-safe in both themes. */
+  tone?: "default" | "blush" | "cream";
 }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card px-6 py-10 text-center">
       {icon ? (
-        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-secondary text-primary">
+        <div
+          className={cn(
+            "flex h-12 w-12 items-center justify-center rounded-full border",
+            tone === "default" && "border-primary/40 bg-secondary text-primary",
+            tone === "blush" && "border-blush-solid/40 bg-blush-solid text-blush-foreground",
+            tone === "cream" && "border-cream-foreground/25 bg-cream text-cream-foreground"
+          )}
+        >
           {icon}
         </div>
       ) : null}

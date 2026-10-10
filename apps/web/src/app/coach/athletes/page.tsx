@@ -130,6 +130,7 @@ export default function AthletesPage() {
         {filtered.length === 0 && (
           <div className="border-t border-border p-6">
             <EmptyState
+              tone="blush"
               title="هیچ شاگردی یافت نشد"
               description="شما هنوز هیچ شاگردی ندارید"
               action={

@@ -181,6 +181,7 @@ export default function CheckInsPage() {
               <ErrorDisplay message="حضورها بارگذاری نشد" onRetry={() => void checkIns.refetch()} />
             ) : rows.length === 0 ? (
               <EmptyState
+                tone="blush"
                 icon={<ClipboardCheck aria-hidden className="h-7 w-7" />}
                 title="حضوری برای امروز نیست"
                 description={

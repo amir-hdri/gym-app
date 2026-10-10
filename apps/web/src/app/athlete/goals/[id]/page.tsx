@@ -95,13 +95,16 @@ export default function GoalDetailPage() {
 
       <TwilightCard>
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-border bg-secondary text-primary">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-blush/30 bg-blush/10 text-blush">
             <Target className="h-8 w-8" strokeWidth={1.75} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-3">
               <h1 className="font-serif text-2xl font-normal tracking-tight text-foreground">{goal.title}</h1>
-              <Badge variant={goal.status === "achieved" ? "success" : "warning"}>
+              <Badge
+                variant={goal.status === "achieved" ? "success" : "warning"}
+                className={goal.status === "achieved" ? "border-transparent bg-blush-solid text-blush-foreground" : undefined}
+              >
                 {goal.status === "achieved" ? "تکمیل شده" : "در حال انجام"}
               </Badge>
             </div>
@@ -120,7 +123,7 @@ export default function GoalDetailPage() {
             <span className="text-sm text-muted-foreground">مقدار فعلی</span>
             <span className="font-sans text-2xl font-bold tabular-nums text-foreground">{formatPersianNumber(goal.currentValue)}</span>
           </div>
-          <Progress value={progress} className="bg-border" indicatorClassName="bg-none bg-primary" />
+          <Progress value={progress} className="bg-border" indicatorClassName="bg-none bg-blush-solid" />
           <div className="mt-2 flex items-center justify-between">
             <span className="text-sm text-muted-foreground">۰</span>
             <span className="text-sm font-medium text-foreground">{formatPersianNumber(Math.round(progress))}%</span>

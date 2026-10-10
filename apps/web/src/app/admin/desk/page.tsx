@@ -183,7 +183,7 @@ export default function DeskPage() {
               aria-live="polite"
             >
               <span
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-success"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blush-solid text-blush-foreground"
                 aria-hidden="true"
               >
                 <CircleCheck className="h-5 w-5" />
@@ -239,6 +239,7 @@ export default function DeskPage() {
             <ErrorDisplay message="جلسات بارگذاری نشد" onRetry={() => void checkIns.refetch()} />
           ) : openSessions.length === 0 ? (
             <EmptyState
+              tone="blush"
               icon={<ScanLine aria-hidden className="h-7 w-7" />}
               title="جلسه بازی نیست"
               description="به‌محض ثبت نخستین ورود امروز، جلسه‌ها اینجا نمایش داده می‌شوند."

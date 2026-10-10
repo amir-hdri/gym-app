@@ -44,6 +44,7 @@ export default function TemplatesPage() {
 
       {filtered.length === 0 ? (
         <EmptyState
+          tone="blush"
           icon={<LayoutTemplate className="h-6 w-6" strokeWidth={1.75} />}
           title="الگویی یافت نشد"
           description="الگویی با عبارت جست‌وجوی شما وجود ندارد"

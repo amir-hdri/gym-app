@@ -78,7 +78,7 @@ function FeaturesSection() {
     <section id="experience" className="cv-below-fold relative px-4 py-20">
       <div className="mx-auto max-w-6xl">
         <Reveal direction="none" className="mb-14 text-center">
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-blush/30 bg-blush/10 px-4 py-1.5 text-sm font-medium text-blush">
             <Sparkles className="h-4 w-4" strokeWidth={1.75} />
             تجربه‌ای ساخته‌شده برای تمرین
           </span>
@@ -94,7 +94,9 @@ function FeaturesSection() {
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 0.08}>
               <div className="group h-full rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-border">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary text-primary">
+                <div className={i % 2 === 0
+                  ? "mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-blush/30 bg-blush/10 text-blush"
+                  : "mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-cream/40 bg-cream/20 text-primary"}>
                   <f.icon className="h-[22px] w-[22px]" strokeWidth={1.75} />
                 </div>
                 <h3 className="mb-1.5 text-[15px] font-semibold tracking-tight text-foreground">{f.title}</h3>
@@ -123,14 +125,14 @@ function WeeklyExperienceSection() {
           <p className="mt-3 text-sm leading-7 text-muted-foreground">برنامه را ببین، حضور را ثبت کن و بازخورد مربی را همان‌جا دریافت کن.</p>
           <div className="mt-7 space-y-3">
             {sessions.map((session) => (
-              <div key={session.day} className={`flex items-center gap-4 rounded-xl border p-4 ${session.active ? "border-primary/50 bg-primary/5" : "border-border bg-card"}`}>
+              <div key={session.day} className={`flex items-center gap-4 rounded-xl border p-4 ${session.active ? "border-blush/30 bg-blush/10" : "border-border bg-card"}`}>
                 <div className="w-14 text-xs font-bold text-foreground">{session.day}</div>
                 <div className="h-9 w-px bg-border" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-foreground">{session.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground" dir="rtl">{session.meta}</p>
                 </div>
-                <CheckCircle2 className={`h-5 w-5 ${session.active ? "text-primary" : "text-muted-foreground"}`} strokeWidth={1.75} />
+                <CheckCircle2 className={`h-5 w-5 ${session.active ? "text-blush" : "text-muted-foreground"}`} strokeWidth={1.75} />
               </div>
             ))}
           </div>
@@ -180,7 +182,7 @@ function StatsSection() {
           {stats.map((stat, i) => (
             <Reveal key={stat.label} delay={i * 0.08}>
               <div className="flex flex-col items-center justify-between rounded-2xl border border-border bg-card p-4 text-center">
-                <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-secondary">
+                <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-cream/40 bg-cream/20">
                   <stat.icon className="h-5 w-5 text-primary" strokeWidth={1.75} />
                 </div>
                 <div className="font-sans text-2xl font-normal tabular-nums tracking-tight text-foreground md:text-3xl">
@@ -208,14 +210,14 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
            * the H1/CTA row is the LCP element and every millisecond of
            * animation delay lands directly on the score.
            */}
-          <p className="mb-6 inline-flex max-w-full items-center gap-2 whitespace-nowrap rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary sm:text-sm">
+          <p className="mb-6 inline-flex max-w-full items-center gap-2 whitespace-nowrap rounded-full border border-blush-fixed/30 bg-blush-fixed/10 px-4 py-1.5 text-xs font-medium text-blush-fixed sm:text-sm">
             <Sparkles className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
             بهترین پلتفرم مدیریت باشگاه بانوان
           </p>
 
           <h1 className="mb-5 font-serif text-[2.1rem] font-medium leading-[1.5] tracking-tight text-logo-ink-inverse sm:text-5xl md:text-6xl lg:text-7xl">
             <span className="block">حرکت، قدرت،</span>
-            <span className="block text-primary">نسخه بهتر تو</span>
+            <span className="block text-blush-fixed">نسخه بهتر تو</span>
           </h1>
 
           <p className="mb-8 max-w-xl text-[15px] leading-8 text-muted-foreground md:text-lg">
@@ -235,6 +237,8 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
         </div>
 
         <div className="relative mx-auto w-full max-w-[30rem]">
+          {/* Soft blush radial glow behind the dark-signature hero card (both themes) */}
+          <div aria-hidden="true" className="pointer-events-none absolute -inset-10 rounded-full bg-blush-fixed/15 blur-3xl" />
           {/* Reference hero card: GymBackdrop + content overlay */}
           <div className="relative overflow-hidden rounded-[26px] border border-logo-ink-inverse/10 shadow-2xl shadow-black/50">
             <div className="h-[380px] w-full">
@@ -242,7 +246,7 @@ function HeroSection({ onLogin, onRegister }: { onLogin: () => void; onRegister:
             </div>
             <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-8">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream-fixed">
                   امروز، یک قدم جلوتر
                 </p>
                 <p className="mt-2 font-serif text-4xl font-medium text-logo-ink-inverse" dir="ltr">78%</p>

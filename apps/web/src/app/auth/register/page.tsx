@@ -114,8 +114,10 @@ export default function RegisterPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="rounded-[32px] border border-border bg-popover p-5 text-foreground shadow-2xl shadow-black/50 sm:p-8"
+        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-5 text-foreground shadow-2xl shadow-black/50 sm:p-8"
       >
+        {/* Top pastel accent — thin blush-to-cream gradient hairline */}
+        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-blush-solid to-cream" />
         <div className="mb-8 text-center">
           <h1 className="font-serif text-2xl font-medium tracking-tight text-foreground">ثبت‌نام</h1>
           <p className="mt-2 text-sm text-muted-foreground">

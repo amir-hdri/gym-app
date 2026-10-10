@@ -15,9 +15,10 @@ import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 const statusOptions = ["all", "active", "draft", "completed", "archived"] as const;
 type StatusOption = (typeof statusOptions)[number];
 
-const statusConfig: Record<string, { label: string; variant: "secondary" | "success" | "info" | "outline" | "destructive" | "default" | "warning" }> = {
+const statusConfig: Record<string, { label: string; variant: "secondary" | "success" | "info" | "outline" | "destructive" | "default" | "warning" | "blush" }> = {
   draft: { label: "پیش‌نویس", variant: "secondary" as const },
-  active: { label: "فعال", variant: "success" as const },
+  // The live programme is the member's own data — blush marker, card stays neutral.
+  active: { label: "فعال", variant: "blush" as const },
   completed: { label: "تکمیل شده", variant: "info" as const },
   archived: { label: "بایگانی", variant: "outline" as const },
 };
@@ -115,6 +116,7 @@ export default function ProgramsPage() {
         {filtered.length === 0 && (
           <div className="border-t border-border p-6">
             <EmptyState
+              tone="blush"
               title="هیچ برنامه‌ای یافت نشد"
               description="برنامه‌ای با فیلتر انتخاب شده وجود ندارد"
               action={

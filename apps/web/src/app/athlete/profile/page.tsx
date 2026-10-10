@@ -79,7 +79,7 @@ export default function ProfilePage() {
       {/* Membership card */}
       <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-lg shadow-black/20">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-secondary text-primary">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-blush/30 bg-blush/10 text-blush">
             <Sparkles className="h-5 w-5" strokeWidth={1.75} />
           </div>
           <div>

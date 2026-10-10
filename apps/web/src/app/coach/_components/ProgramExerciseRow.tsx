@@ -55,7 +55,7 @@ export function ProgramExerciseRow({
             <Badge variant="outline">{entry.exercise.muscleGroup}</Badge>
           )}
           {entry.isCompleted && (
-            <Badge variant="success">
+            <Badge variant="blush">
               <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
               انجام شد
             </Badge>

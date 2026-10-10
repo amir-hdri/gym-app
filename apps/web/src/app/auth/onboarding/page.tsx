@@ -102,8 +102,10 @@ export default function OnboardingPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-black/50"
+        className="relative overflow-hidden rounded-[32px] border border-border bg-popover p-8 text-foreground shadow-2xl shadow-black/50"
       >
+        {/* Top pastel accent — thin blush-to-cream gradient hairline */}
+        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-blush-solid to-cream" />
         <div className="mb-8 text-center">
           <h1 className="font-serif text-2xl font-medium tracking-tight text-foreground">تکمیل پروفایل</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -142,8 +144,8 @@ export default function OnboardingPage() {
           {/* Women-only membership context */}
           <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
             <input type="hidden" value="female" {...register("gender")} />
-            <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
-              <p className="text-sm font-bold text-primary">فضای اختصاصی بانوان</p>
+            <div className="rounded-2xl border border-blush-solid/30 bg-blush/10 p-4">
+              <p className="text-sm font-bold text-blush">فضای اختصاصی بانوان</p>
               <p className="mt-1 text-xs leading-6 text-muted-foreground">پیشنهادهای تمرینی با تمرکز بر نیازها و اهداف ورزشی بانوان تنظیم می‌شوند.</p>
             </div>
           </motion.div>

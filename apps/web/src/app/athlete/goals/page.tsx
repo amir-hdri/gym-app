@@ -67,7 +67,10 @@ export default function GoalsPage() {
                   title={goal.title}
                   subtitle={`${categoryLabels[goal.category] || goal.category} · ${formatPersianNumber(goal.currentValue)}/${formatPersianNumber(goal.targetValue)} ${goal.unit} · ${formatPersianNumber(progress)}٪ پیشرفت · ${formatPersianNumber(calculateDaysRemaining(goal.targetDate))} روز باقی‌مانده`}
                   trailing={
-                    <Badge variant={statusVariant as "success" | "warning"}>
+                    <Badge
+                      variant={statusVariant as "success" | "warning"}
+                      className={goal.status === "achieved" ? "border-transparent bg-blush-solid text-blush-foreground" : undefined}
+                    >
                       {statusLabel}
                     </Badge>
                   }

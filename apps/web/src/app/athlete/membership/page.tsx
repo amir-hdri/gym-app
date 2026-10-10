@@ -157,13 +157,16 @@ export default function MembershipPage() {
       {/* Current subscription — SubscriptionModal header pattern */}
       <TwilightCard className="p-6">
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-secondary text-primary shadow-lg">
+          <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full border border-blush/30 bg-blush/10 text-blush shadow-lg">
             <Crown className="h-6 w-6" strokeWidth={1.75} />
           </div>
           <h2 className="font-serif text-2xl font-medium text-foreground">
             {membership.plan?.name || "اشتراک"}
           </h2>
-          <Badge variant={isActive ? "success" : "secondary"}>
+          <Badge
+            variant={isActive ? "success" : "secondary"}
+            className={isActive ? "border-transparent bg-blush-solid text-blush-foreground" : undefined}
+          >
             {isActive ? "فعال" : membership.status}
           </Badge>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
@@ -191,9 +194,9 @@ export default function MembershipPage() {
         <Progress
           value={progress}
           className="mt-3 bg-border"
-          indicatorClassName="bg-primary shadow-none"
+          indicatorClassName="bg-none bg-blush-solid shadow-none"
         />
-        <p className="mt-3 text-center font-sans text-2xl font-normal tabular-nums text-primary">
+        <p className="mt-3 text-center font-sans text-2xl font-normal tabular-nums text-blush">
           {formatPersianNumber(remaining)}
           <span className="mr-2 text-xs font-normal text-muted-foreground">جلسه باقی‌مانده</span>
         </p>

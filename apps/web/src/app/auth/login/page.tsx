@@ -9,7 +9,9 @@ import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, ShieldCheck, Loader2 } from "lucide-react";
 import { CtaButton } from "@/components/twilight/controls";
 import { GymBackdrop } from "@/components/twilight/GymBackdrop";
-import { LumiWordmark } from "@/components/auth/AuthLayout";
+import { LumiLogo } from "@/components/ui/LumiLogo";
+import { fadeIn, scaleIn } from "@/lib/motion";
+import { StaggerContainer, StaggerItem } from "@/components/animations/Stagger";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { homeForRole, panelLabelForRole } from "@/components/auth/auth-helpers";
 import { USE_MOCK } from "@/hooks/api-source";
@@ -85,7 +87,10 @@ function SignInContent() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+      {/* Fields paint statically: entrance animation on interactive controls
+          reads as latency, not polish. Motion answers actions here (error,
+          press, demo pick) instead. */}
+      <div>
         <label htmlFor="email" className="mb-2 block text-xs font-medium text-muted-foreground">
           ایمیل
         </label>
@@ -113,10 +118,10 @@ function SignInContent() {
             <Mail className="h-4 w-4" strokeWidth={1.75} />
           </span>
         </div>
-        {errors.email?.message && <p className="mt-1.5 text-xs text-destructive">{errors.email.message}</p>}
-      </motion.div>
+        {errors.email?.message && <p role="alert" className="mt-1.5 text-xs text-destructive">{errors.email.message}</p>}
+      </div>
 
-      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
+      <div>
         <label htmlFor="password" className="mb-2 block text-xs font-medium text-muted-foreground">
           رمز عبور
         </label>
@@ -147,26 +152,22 @@ function SignInContent() {
             {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={1.75} /> : <Eye className="h-4 w-4" strokeWidth={1.75} />}
           </button>
         </div>
-        {errors.password?.message && <p className="mt-1.5 text-xs text-destructive">{errors.password.message}</p>}
-      </motion.div>
+        {errors.password?.message && <p role="alert" className="mt-1.5 text-xs text-destructive">{errors.password.message}</p>}
+      </div>
 
       {submitError && (
         <motion.p
           role="alert"
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-center text-sm text-destructive"
+          variants={fadeIn}
+          initial="hidden"
+          animate="visible"
+          className="animate-shake rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-center text-sm text-destructive"
         >
           {submitError}
         </motion.p>
       )}
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.25 }}
-        className="flex flex-wrap items-center justify-between gap-2"
-      >
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <label className="group flex cursor-pointer items-center gap-2">
           <input
             type="checkbox"
@@ -180,9 +181,9 @@ function SignInContent() {
         <Link href="/auth/forgot-password" className="rounded-md text-sm font-medium text-primary transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
           فراموشی رمز؟
         </Link>
-      </motion.div>
+      </div>
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+      <div>
         <CtaButton type="submit" disabled={isSubmitting} className="w-full text-sm font-bold">
           {isSubmitting ? (
             <span className="inline-flex items-center gap-2">
@@ -193,30 +194,20 @@ function SignInContent() {
             "ورود به حساب"
           )}
         </CtaButton>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.35 }}
-        className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground"
-      >
-        <ShieldCheck className="h-3.5 w-3.5 text-primary/70" strokeWidth={1.75} />
+      <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+        <ShieldCheck className="h-3.5 w-3.5 text-primary/70" strokeWidth={1.75} aria-hidden />
         اطلاعات شما با رمزنگاری محافظت می‌شود
-      </motion.div>
+      </div>
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="text-center text-sm text-muted-foreground"
-      >
+      <p className="text-center text-sm text-muted-foreground">
         عضو نیستی؟{" "}
         <Link href="/auth/register" className="inline-flex items-center gap-1 font-semibold text-primary transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md">
           ثبت‌نام کن
-          <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
+          <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
         </Link>
-      </motion.p>
+      </p>
 
       {SHOW_DEMO_ACCOUNTS && (
         <div className="rounded-2xl border border-dashed border-border bg-card/60 p-4">
@@ -224,18 +215,20 @@ function SignInContent() {
           <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
             یکی را انتخاب کن تا فرم پر شود؛ بعد «ورود به حساب» را بزن.
           </p>
-          <div className="mt-3 flex flex-wrap gap-2" aria-live="polite">
+          {/* The single orchestrated micro-moment on this form: chips cascade once. */}
+          <StaggerContainer className="mt-3 flex flex-wrap gap-2" aria-live="polite">
             {DEMO_ACCOUNTS.map((account) => (
-              <button
-                key={account.email}
-                type="button"
-                onClick={() => fillDemoAccount(account)}
-                className="inline-flex min-h-11 items-center rounded-xl border border-border bg-popover px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-              >
-                {account.label}
-              </button>
+              <StaggerItem key={account.email}>
+                <button
+                  type="button"
+                  onClick={() => fillDemoAccount(account)}
+                  className="inline-flex min-h-11 items-center rounded-xl border border-cream-foreground/25 bg-cream/20 px-3 text-xs font-medium text-foreground transition-all duration-150 hover:-translate-y-px hover:border-primary/60 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:translate-y-0"
+                >
+                  {account.label}
+                </button>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       )}
     </form>
@@ -267,16 +260,16 @@ export default function LoginPage() {
         }}
       />
 
-      {/* Centered form card container */}
+      {/* Centered form card container — the ONE entrance on this screen */}
       <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        variants={scaleIn}
+        initial="hidden"
+        animate="visible"
         className="relative z-10 w-full max-w-[420px] flex flex-col items-center"
       >
         {/* Centered Brand Header */}
         <div className="mb-6 flex flex-col items-center text-center">
-          <LumiWordmark />
+          <LumiLogo size="md" variant="auto" glow ariaLabel="Lumi Wellness" />
           <h1 className="mt-4 font-serif text-3xl font-normal text-foreground sm:text-4xl">
             خوش برگشتی
           </h1>
@@ -286,10 +279,14 @@ export default function LoginPage() {
         </div>
 
         {/* Form Card */}
-        <div className="relative w-full overflow-hidden rounded-[28px] border border-border bg-popover/95 p-6 shadow-2xl shadow-black/70 backdrop-blur-xl sm:p-8">
-          {/* Top subtle highlight */}
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-primary/50 to-transparent" />
-          <SignInContent />
+        <div className="relative w-full">
+          {/* Pastel aura behind the card — blush glow, calm in dark, warm in light */}
+          <div aria-hidden className="pointer-events-none absolute -inset-6 rounded-[36px] bg-blush/10 blur-3xl" />
+          <div className="relative overflow-hidden rounded-[28px] border border-border bg-popover/95 p-6 shadow-2xl shadow-black/70 backdrop-blur-xl sm:p-8">
+            {/* Top pastel accent — thin blush-to-cream gradient hairline */}
+            <div aria-hidden className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-l from-transparent via-blush-solid to-cream" />
+            <SignInContent />
+          </div>
         </div>
 
         {/* Footer Terms Note */}

@@ -60,7 +60,7 @@ export default function ExerciseDetailPage() {
 
       <TwilightCard className="p-5">
         <div className="flex items-start gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-border bg-secondary text-primary">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-blush/30 bg-blush/10 text-blush">
             <Dumbbell className="h-8 w-8" strokeWidth={1.75} />
           </div>
           <div className="min-w-0 flex-1">

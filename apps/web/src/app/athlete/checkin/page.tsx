@@ -146,7 +146,7 @@ export default function CheckinPage() {
 
         <div className="flex w-full items-center justify-between text-xs">
           <MicroLabelFa className="text-primary">کارت عضویت دیجیتال</MicroLabelFa>
-          <span className="rounded-full border border-primary/40 bg-border px-2.5 py-0.5 text-[10px] font-semibold text-primary">
+          <span className="rounded-full border border-blush/40 bg-blush/10 px-2.5 py-0.5 text-[10px] font-semibold text-blush">
             {checkedIn ? "جلسه در حال انجام" : "آماده ثبت"}
           </span>
         </div>
@@ -211,7 +211,7 @@ export default function CheckinPage() {
       {/* Session timer box */}
       <TwilightCard className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-primary">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blush/30 bg-blush/10 text-blush">
             <Timer className="h-5 w-5" strokeWidth={1.75} />
           </div>
           <div>
@@ -221,7 +221,7 @@ export default function CheckinPage() {
             </p>
           </div>
         </div>
-        <span className="font-sans text-xl font-bold tabular-nums text-primary">{timeStr}</span>
+        <span className="font-sans text-xl font-bold tabular-nums text-blush">{timeStr}</span>
       </TwilightCard>
 
       {/* Checkout-time correction for the open session */}

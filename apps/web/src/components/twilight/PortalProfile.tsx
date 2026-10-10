@@ -323,7 +323,7 @@ export function PortalProfile({ navItems }: { navItems: NavItem[] }) {
             ) : null}
             <AvatarFallback className="bg-secondary text-2xl text-primary">{initial}</AvatarFallback>
           </Avatar>
-          <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary-solid text-primary-foreground">
+          <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-blush-solid text-blush-foreground">
             <Sparkles className="h-3.5 w-3.5" />
           </span>
         </div>
@@ -346,7 +346,7 @@ export function PortalProfile({ navItems }: { navItems: NavItem[] }) {
             key={s.label}
             className={`flex flex-1 flex-col items-center ${i ? "border-s border-border" : ""}`}
           >
-            <span className="text-xl">{formatPersianNumber(s.value)}</span>
+            <span className={`text-xl ${user.role === "athlete" ? "text-blush" : ""}`}>{formatPersianNumber(s.value)}</span>
             <span className="twilight-caption !text-[10px]">{s.label}</span>
           </div>
         ))}

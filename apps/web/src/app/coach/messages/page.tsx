@@ -102,7 +102,7 @@ function CoachMessagesInner() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">{conv.athlete}</span>
-                    {conv.unread && <span className="h-2 w-2 rounded-full bg-primary" />}
+                    {conv.unread && <span className="h-2 w-2 rounded-full bg-blush-solid" />}
                   </div>
                   <p className="mt-1 truncate text-xs text-muted-foreground">{conv.lastMessage}</p>
                   <p className="mt-0.5 text-[11px] text-muted-foreground">{conv.time}</p>

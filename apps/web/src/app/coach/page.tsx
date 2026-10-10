@@ -11,11 +11,14 @@ import { useCoachDashboard } from "@/hooks/use-api";
 import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AthleteProgressChart } from "@/components/analytics/Charts";
+import { MEMBER_PROGRESS_FILL } from "./_accents";
 
 function getProgressClass(progress: number) {
-  if (progress >= 80) return "bg-none bg-primary";
-  if (progress >= 50) return "bg-none bg-primary";
-  return "bg-none bg-muted";
+  // Roster bars show the ATHLETE's own completion — blush, not furniture.
+  // (see ./_accents.ts; `bg-none` drops the primitive's activity gradient.)
+  // Only a true-zero stays muted so an untouched programme reads as empty.
+  if (progress <= 0) return "bg-none bg-muted";
+  return `bg-none ${MEMBER_PROGRESS_FILL}`;
 }
 
 const quickActions = [

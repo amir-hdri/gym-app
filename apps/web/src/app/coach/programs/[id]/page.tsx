@@ -18,9 +18,10 @@ import { Loading, ErrorDisplay } from "@/components/ui/DataState";
 
 const persianDays = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"];
 
-const statusConfig: Record<string, { label: string; variant: "secondary" | "success" | "info" | "outline" }> = {
+const statusConfig: Record<string, { label: string; variant: "secondary" | "success" | "info" | "outline" | "blush" }> = {
   draft: { label: "پیش‌نویس", variant: "secondary" as const },
-  active: { label: "فعال", variant: "success" as const },
+  // The live programme is the member's own data — blush marker, card stays neutral.
+  active: { label: "فعال", variant: "blush" as const },
   completed: { label: "تکمیل شده", variant: "info" as const },
 };
 

@@ -96,9 +96,9 @@ export default function MemberProfilePage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="اشتراک" value={planName ?? "—"} suffix={formatDate(member.createdAt)} />
-        <StatCard label="مربی" value={coachName ?? "—"} />
-        <TwilightCard className="col-span-2">
+        <StatCard tone="blush" label="اشتراک" value={planName ?? "—"} suffix={formatDate(member.createdAt)} />
+        <StatCard tone="blush" label="مربی" value={coachName ?? "—"} />
+        <TwilightCard className="col-span-2 border-blush-solid/30 bg-blush/10">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">جلسات</span>
           <div className="mt-3">
             <span className="font-sans text-2xl font-normal tabular-nums tracking-tight text-foreground">
@@ -107,7 +107,7 @@ export default function MemberProfilePage() {
             <Progress
               value={((membership?.sessionsUsed || 0) / (membership?.sessionsTotal || 1)) * 100}
               className="mt-3"
-              indicatorClassName="bg-primary"
+              indicatorClassName="bg-none bg-blush-solid"
             />
           </div>
         </TwilightCard>
@@ -126,7 +126,7 @@ export default function MemberProfilePage() {
                 <span className="text-sm font-medium text-foreground">{goal.title}</span>
                 <span className="text-xs text-muted-foreground">{formatPersianNumber(goal.currentValue)}/{formatPersianNumber(goal.targetValue)} {goal.unit}</span>
               </div>
-              <Progress value={goal.targetValue > 0 ? (goal.currentValue / goal.targetValue) * 100 : 0} indicatorClassName="bg-primary" />
+              <Progress value={goal.targetValue > 0 ? (goal.currentValue / goal.targetValue) * 100 : 0} indicatorClassName="bg-none bg-blush-solid" />
             </TwilightCard>
           ))}
         </TabsContent>
